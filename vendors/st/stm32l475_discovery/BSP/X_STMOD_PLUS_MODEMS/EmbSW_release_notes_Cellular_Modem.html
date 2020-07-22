@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="_htmresc/rel_note.css">
+<title>RN for X-CUBE-CELLULAR supported modems</title>
+</head>
+<body>
+<script type="text/javascript">
+var toggle_hist_disp = true;
+function toggle_history()
+{
+if (toggle_hist_disp)
+{
+toggle_hist_disp = false;
+var filter_off_text = document.createTextNode("Hide History");
+document.getElementById('filter_hist').innerHTML = "";
+document.getElementById('filter_hist').appendChild(filter_off_text);
+document.getElementById("history").hidden = false;
+}
+else
+{
+toggle_hist_disp = true;
+var filter_on_text = document.createTextNode("Show History");
+document.getElementById('filter_hist').innerHTML = "";
+document.getElementById('filter_hist').appendChild(filter_on_text);
+document.getElementById("history").hidden = true;
+}
+}</script>
+<div class="Section1">
+
+<div id="header">
+<h1>Release Notes for X-CUBE-CELLULAR 5.0.0 supported modems</h1>
+<p>Copyright 2019 STMicroelectronics</p>
+<a href="#" class="logo"><img src="_htmresc/st_logo.png" alt="ST logo"></a>
+</div>
+<div id="license" class="topic1">
+<h2>License</h2>
+<p>Licensed under License SLA0048 (the "License"). You may not use this package except in compliance with
+the License. You may obtain a copy of the License at:</p>
+<p class="license_url"><a href="http://www.st.com/SLA0048" target="_blank">SLA0048 license</a></p>
+
+</div>
+<div class="topic1" id="purpose">
+<h2>Purpose</h2>
+<p>the X-CUBE-CELLULAR supported modems</p>
+<ul>
+<li>This version of X-CUBE-CELLULAR supports 3 modems</li>
+<li>Quectel module UG96 with Intel modem</li>
+<li>Quectel module BG96 with Qualcomm modem</li>
+<li>Sequans module GM01Q with Sequans modem</li>
+</ul>
+<p>SW Architecture and supported HWs</p>
+<p class="SW_desc"><img alt="SW Architecture" src="_htmresc/archi_diagram.png"></p>
+
+
+</div>
+<div id="release_container" class="topic1">
+<div class="topic2" id="identification">
+<h3>5.0.0 / W1921</h3>
+
+</div>
+<div class="topic3" id="changes">
+<h4>Main changes</h4>
+<p class="release_type">Maintenance release</p>
+<div>
+<p>This V5.0.0 delivery is a new release with new features and there is no new HW supported</p>
+</div>
+
+<table class="tickets">
+<caption>Additional features</caption>
+<thead>
+<tr><th>Headline</th></tr>
+</thead>
+<tbody>
+<tr><td>New Cellular FW delivery, see its RN for more details on the contents, The current RN concerns only supported modems</td></tr>
+</tbody>
+</table>
+<br>
+
+<table class="tickets">
+<caption>Fixed bugs list</caption>
+<thead>
+<tr><th>Ticket</th><th>Headline</th></tr>
+</thead>
+<tbody>
+<tr><td></td><td>See Cellular framework RN for details about Cellular features</td></tr>
+
+</tbody>
+</table>
+<br>
+
+</div>
+<div class="topic3" id="contents">
+<h4>Contents</h4>
+<table class="tickets">
+<caption>Components</caption>
+<thead>
+<tr><th>Name</th><th>Version</th><th>Comment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quectel UG96 FW</td>
+<td>Factory version is UG96LNAR02A06E1G aka 02A06 it is the same used for tests</td>
+<td>Your FW version should be this one so no need to update</td>
+</tr>
+<tr>
+<td>Quectel BG96 FW</td>
+<td>Factory version is BG96MAR02A06M1G, version used for tests is BG96MAR02A08M1G_01.012.01.012</td>
+<td>FW must be updated, see /Utilities/Modem_FW/BG96</td>
+</tr>
+<tr>
+<td>Sequans GM01Q FW</td>
+<td>Factory version are UE5.2.1.0 LR5.2.1.0-41159, version used for tests is UE5.2.1.0 LR5.2.1.0-41159</td>
+<td>Your FW version should be this one so no need to update</td>
+</tr>
+</tbody>
+</table>
+<br>
+
+</div>
+<div class="topic3" id="limitations">
+<h4>Known limitations</h4>
+
+<br>
+<table class="tickets">
+<caption>Requirements not met or planned in a forthcoming release</caption>
+<thead>
+<tr><th>Ticket<br></th><th>Headline<br></th></tr>
+</thead>
+<tbody>
+<tr><td></td><td>See Cellular framework RN for requirement not met/planned details about cellular feature</td></tr>
+</tbody>
+</table>
+<br>
+
+</div>
+<div class="topic3" id="boards">
+<h4>Supported STM32 boards</h4>
+<ul>
+<li>P-L496G-CELL01</li>
+<li>P-L496G-CELL02</li>
+<li>32L496GDISCOVERY</li>
+<li>B-L475-IOT01A</li>
+</ul>
+
+</div>
+<div class="topic3" id="compat">
+<h4>Backward compatibility</h4>
+<p>Compliant with previous deliveries</p>
+
+</div>
+<div class="topic3" id="other_compat">
+<h4>Dependencies</h4>
+<p>This software release is compatible with: See Cellular Package (top) RN</p>
+</div>
+</div>
+
+
+<div id="product_doc" class="topic1">
+<hr>
+<p class="footer_text">For complete documentation on STM32 Microcontrollers, visit: 
+<a href="http://www.st.com/STM32" target="_blank">http://www.st.com/</a></p>
+
+</div>
+</div>
+</body>
+</html>
