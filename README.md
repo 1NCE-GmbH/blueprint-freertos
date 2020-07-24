@@ -6,7 +6,7 @@ FreeRTOS is known as one of the most utilized RTOS in practice. This is becausei
 #### Required Hardware: 
 To install our project you will need:
   - B-L475E-IOT01A2 STM32 Discovery kit IoT node connected to BG96 (LTE Cat M1/Cat NB1/EGPRS modem) through X-NUCLEO-STMODA1 expansion board.
- ![Required Hardware](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/material.png) 
+ ![Required Hardware](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/material.png) 
 #### Required Software:
    - STM32CubeIDE from https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-ides/stm32cubeide.html
   - You will need to register/ login to access downloads.
@@ -19,11 +19,11 @@ To install our project you will need:
   - Upgrade the modem BG96 to the latest firmware. (https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/Utilities/Modem_FW)
 #### STM32 Setup
   - Import the project.
-   ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/import1.png) 
+   ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import1.png) 
   - Choose the Existing project into Workspace and click Next.
-  ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/import2.png)
+  ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import2.png)
   - Click browse and select the folder FreeRTOS cellular, a project with the title “aws_demos“ should be listed, then click Finish.
-    ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/import3.png)
+    ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import3.png)
   -  Edit the following parameter in config_files/demo_config.h : 
 
      -  clientcredentialMQTT_BROKER_ENDPOINT[] = "url of end point";
@@ -33,11 +33,11 @@ To install our project you will need:
      -  clientcredentialMQTT_BROKER_PORT “MQTT Port”
      -  SUB_TOPIC "name of your topic iccid/sub_topic"
   -  debug the code. 
-  ![debug project](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/debug1.png)
+  ![debug project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/debug1.png)
   - Open a console on MPU Serial Device.
 # Thecnical Guide :
 #### System overview:
- ![Architecture](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/architecture.png)
+ ![Architecture](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/architecture.png)
   -  **Cellular library** with SSL offload uses the certificates stored in the modem file system to establish a secure connection between the board and AWS Cloud.
 
   - **Secure socket** library is a standard from Amazon FreeRTOS and only supports TCP.
@@ -134,6 +134,6 @@ In order to set up the MQTT client to use a secure connection.
   -  AT+QSSLCLOSE=<sslctxID> to make sure the socket which we need to open is close.
 #### MQTT configuration: 
 To facilitate the understanding of our solution we try to give you some scenario.
- ![mqtt scenario](https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/images/mqtt.png)
+ ![mqtt scenario](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/mqtt.png)
 #### Conclusion:
 When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection.
