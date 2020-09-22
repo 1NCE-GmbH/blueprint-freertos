@@ -343,10 +343,6 @@ at_action_rsp_t ATParser_parse_rsp(at_context_t *p_at_ctxt, IPC_RxMessage_t *p_m
   display_buffer(p_at_ctxt,
                  (uint8_t *)&p_message->buffer[0],
                  (uint16_t)p_message->size, 0U);
-if(strlen(p_message->buffer)<60)
-  memcpy(MODEM_MSG, p_message->buffer, strlen(p_message->buffer));
-//	PRINT_INFO("\n\n***********************************%s********************************************\n\n",MODEM_MSG)
-//}
   msg_end = atcc_extractElement(p_at_ctxt, p_message, &element_infos);
 
   /* Search for command name */

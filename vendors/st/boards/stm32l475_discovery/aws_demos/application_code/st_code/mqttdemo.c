@@ -777,8 +777,6 @@ int RunMqttDemo( bool awsIotMqttMode, const char *pIdentifier,
 		connectionEstablished = true;
 		PRINT_INFO("MQTT CONNECTED")
 
-//		waitforprocessing(100);
-
 		/* Add the topic filter subscriptions used in this demo. */
 		status = _modifySubscriptions(mqttConnection, IOT_MQTT_SUBSCRIBE,
 				pTopics, &publishesReceived);

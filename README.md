@@ -15,9 +15,12 @@ To install our project you will need:
 
   - Clone this repository
    
-####  Prerequisites
+####  Prerequisites:
   - Upgrade the modem BG96 to the latest firmware. (https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/Utilities/Modem_FW)
+   **Note:**  Download the modem FW flasher tool (QFlash) from this url:  https://github.com/1NCE-GmbH/blueprint-freertos/tree/master/Utilities/Modem_FW this tools taked from quectel from the web site listed in the official documentation.
+
 #### STM32 Setup
+
   - Import the project.
    ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import1.png) 
   - Choose the Existing project into Workspace and click Next.
@@ -77,15 +80,15 @@ We send an HTTPS request to our API to get the response :
 
 ```c
 char send_packet[] = "GET /device-api/onboarding HTTP/1.1\r\n"
-					"Host: device.dev.connectivity-suite.cloud\r\n"
-					"Accept: text/csv\r\n\r\n";
+          "Host: device.dev.connectivity-suite.cloud\r\n"
+          "Accept: text/csv\r\n\r\n";
 int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,strlen(send_packet), NULL);
 ```
 In the BG96 we receive the response splitted in partitions with size of 1500 bytes  :
 ```c
 rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
-		(int32_t) sizeof(PART),
-		COM_MSG_WAIT);
+    (int32_t) sizeof(PART),
+    COM_MSG_WAIT);
 ```
 ##### Prepare the certificate: 
 
@@ -100,8 +103,8 @@ char *token = strtok(all, ",");
 // in the token we have the first element which is the iccid
 while (token != NULL) {
 
-		token = strtok(NULL, ",");
-		//we have the second element
+    token = strtok(NULL, ",");
+    //we have the second element
 }
 ```
 Replace \n in response with the breakline. (before send it to the modem)
@@ -132,8 +135,57 @@ In order to set up the MQTT client to use a secure connection.
   -  AT+QSSLCFG="ciphersuite",<sslctxID>,<ciphersuites> :Configure the SSL cipher suites for the specified SSL context.
 
   -  AT+QSSLCLOSE=<sslctxID> to make sure the socket which we need to open is close.
+
 #### MQTT configuration: 
 To facilitate the understanding of our solution we try to give you some scenario.
  ![mqtt scenario](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/mqtt.png)
+
+#### Resources needed :
+| RAM           | Flash Memory  | 
+| ------------- |:-------------:|
+| 7.1 KB  ( 2.1 KB Static + 5 KB Dynamic)      | 44.7 KB (14.5 KB SDK + 30.2 KB  Secure Socket) |
+
+**Note:** The code is based on SSL offloading so the SSL related functionality is done on the BG96 modem,  without this option the RAM requirements will increase by around 32 KB. 
+
+
+#### Dependencies :
+The blueprint uses the following : 
+
+* Amazon FreeRTOS MQTT Library : integrated using the Secure socket layer
+
+* STMicroelectronics BG96 Cellular Driver: customized to support modem file transfer functionality and SSL offloading. 
+
+## UDP connection with our SDK:
+
+1NCE’s AWS FreeRTOS Version allows customers to communicate with the IoT core with MQTT (by default ) or UDP and use of all features as part of the 1NCE IoT Connectivity Suite.
+
+#### Configuration:
+The onboarding script configuration can be found in blueprint-freertos\vendors\st\boards\stm32l475_discovery\aws_demos\config_files\demo_config.h in the root folder of the blueprint or /aws_demos/config_files/demo_config.h in IDE.
+
+#### UDP Configuration:
+
+UDP_ENDPOINT: URL used to perform the onboarding call
+
+UDP_PORT: port to connect to the UDP endpoint. 
+
+IoT Core Configuration: 
+
+PUBLISH_PAYLOAD_FORMAT: the message you want to publish I'm IoT Core
+
+Active/Deactivate UDP:
+
+ #define USE_UDP our SDK work by Default with MQTT if you want to use it with UDP communication you need to define USE_UDP.
+
+
+#### Example:
+The bluePrint consists of an example to publish a message in IoT Core with UDP.
+
+
+
+#### Demo: 
+In IoT Core we subscribe in <ICCID>/messages and we run our solution : 
+![UDP Demo](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/udp.png)
+
+
 #### Conclusion:
 When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection.

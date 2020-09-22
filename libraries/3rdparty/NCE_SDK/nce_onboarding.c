@@ -6,7 +6,6 @@
  *  1NCE GmbH
  */
 
-
 #include <stdbool.h>
 #include "demo_config.h"
 #include "nce_onboarding.h"
@@ -17,7 +16,6 @@
   TRACE_PRINT(DBG_CHAN_MQTTDEMO, DBL_LVL_P0, "1NCE_Demo: " format "\n\r", ## args)
 #define PRINT_ERR(format, args...)  \
   TRACE_PRINT(DBG_CHAN_ATCMD, DBL_LVL_ERR, "1NCE_Demo ERROR: " format "\n\r", ## args)
-
 
 /* Onboarding Defines */
 uint8_t PART[1800];
@@ -37,33 +35,28 @@ int client_key_cmd_size = 0;
 int root_size = 0;
 int root_cmd_size = 0;
 char amazonRootCaUrl[80];
-char sim_iccid[30]  ;
-
-
+char sim_iccid[30];
 
 /* MQTT Defines */
 char IOT_DEMO_MQTT_TOPIC_PREFIX[19];
 char WILL_TOPIC_NAME[35];
 char ACKNOWLEDGEMENT_TOPIC_NAME[40];
 const char *pTopics[TOPIC_FILTER_COUNT];
-uint16_t WILL_TOPIC_NAME_LENGTH   = 0;
-uint16_t TOPIC_FILTER_LENGTH = 0 ;
+uint16_t WILL_TOPIC_NAME_LENGTH = 0;
+uint16_t TOPIC_FILTER_LENGTH = 0;
 
 /* Modem Defines */
-CS_Status_t cs_status ;
+CS_Status_t cs_status;
 
 at_status_t retval = ATSTATUS_OK;
-
-
 
 static void CST_cellular_direct_cmd_callback(CS_direct_cmd_rx_t direct_cmd_rx) {
 	UNUSED(direct_cmd_rx);
 }
 
-
 Onboarding_Status_t nce_onboard_device(void) {
 
-	Onboarding_Status_t onboarding_status = ONBOARDING_ERROR ;
+	Onboarding_Status_t onboarding_status = ONBOARDING_ERROR;
 	cs_status = nce_reset_modem_fs();
 
 	if (cs_status != CELLULAR_OK) {
@@ -79,59 +72,52 @@ Onboarding_Status_t nce_onboard_device(void) {
 		PRINT_ERR("Onboarding Error : Onboarding Socket Configuration ");
 		return (onboarding_status);
 	} else {
-		PRINT_INFO(" ************** Onboarding Socket Configuration Done ************** \n");
+		PRINT_INFO(
+				" ************** Onboarding Socket Configuration Done ************** \n");
 	}
 	/* Connect to onboarding endpoint */
 
 	Socket_t cert_socket = SOCKETS_Socket( SOCKETS_AF_INET,
 	SOCKETS_SOCK_STREAM, SOCKETS_IPPROTO_TCP);
 	uint32_t ROOT_IP = SOCKETS_GetHostByName(&ONBOARDING_ENDPOINT);
-	SocketsSockaddr_t root_address = { .ucLength =
-			sizeof(SocketsSockaddr_t),
-			.ucSocketDomain = SOCKETS_AF_INET, .usPort = SOCKETS_htons(
-					443), .ulAddress = ROOT_IP };
+	SocketsSockaddr_t root_address = { .ucLength = sizeof(SocketsSockaddr_t),
+			.ucSocketDomain = SOCKETS_AF_INET, .usPort = SOCKETS_htons(443),
+			.ulAddress = ROOT_IP };
 	uint32_t timeout = 30000;
 
 	int32_t set_timeout = SOCKETS_SetSockOpt(cert_socket,
-	COM_SOL_SOCKET, SOCKETS_SO_RCVTIMEO, &timeout,
-			(int32_t) sizeof(timeout));
+	COM_SOL_SOCKET, SOCKETS_SO_RCVTIMEO, &timeout, (int32_t) sizeof(timeout));
 	int32_t lRetVal = SOCKETS_Connect(cert_socket, &root_address,
 			sizeof(SocketsSockaddr_t));
 	char send_packet[100];
 
-	sprintf(send_packet,"GET /device-api/onboarding HTTP/1.1\r\n"
+	sprintf(send_packet, "GET /device-api/onboarding HTTP/1.1\r\n"
 			"Host: %s\r\n"
-			"Accept: text/csv\r\n\r\n",ONBOARDING_ENDPOINT);
+			"Accept: text/csv\r\n\r\n", ONBOARDING_ENDPOINT);
 	int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,
 			strlen(send_packet), NULL);
-	while(strstr(MODEM_MSG,"SEND OK")== NULL){
-		HAL_Delay(1000);
-	}
-
+	HAL_Delay(1000);
 
 	expected_bytes = sizeof(PART) - 500;
 
 	/* receive the onboarding data */
 
-	uint8_t *complete_response = (uint8_t*) pvPortMalloc(5000 * sizeof(uint8_t));
+	uint8_t *complete_response = (uint8_t*) pvPortMalloc(
+			5000 * sizeof(uint8_t));
 
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 
 	waitforprocessing(150);
 
-	int32_t rec = SOCKETS_Recv(cert_socket,
-	(com_char_t*) &PART[0], (int32_t) sizeof(PART),
-	COM_MSG_WAIT);
-	while(strstr(MODEM_MSG,"+QSSLRECV: 1500")== NULL){
-					HAL_Delay(1000);
-	}
-
+	int32_t rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
+			(int32_t) sizeof(PART),
+			COM_MSG_WAIT);
+	HAL_Delay(1000);
 
 	PRINT_INFO(" ************** Raw Response (1) **************   %d bytes \n",
 			strlen(PART))
 	strcat(complete_response,
-			strstr(PART, "Express\r\n\r\n\"")
-					+ strlen("Express\r\n\r\n\""));
+			strstr(PART, "Express\r\n\r\n\"") + strlen("Express\r\n\r\n\""));
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 
 	rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
@@ -160,7 +146,6 @@ Onboarding_Status_t nce_onboard_device(void) {
 
 	PRINT_INFO(" ************** Raw Response (4) **************   %d bytes \n",
 			strlen(PART))
-
 
 	strncat(complete_response, PART, strlen(PART));
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
@@ -209,13 +194,12 @@ char* str_replace(char *orig, char *rep, char *with) {
 	return result;
 }
 
-
- void waitforprocessing(int n) {
+void waitforprocessing(int n) {
 	CS_Status_t result;
-	for (int i = 0; i < n; i++){
+	for (int i = 0; i < n; i++) {
 		result = nce_send_modem_command("AT");
 	}
-		HAL_Delay(500);
+	HAL_Delay(500);
 
 }
 
@@ -230,7 +214,6 @@ static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 	int identifier_size = location - offset;
 	memcpy(identifier, sim_iccid, identifier_size);
 	memcpy(IOT_DEMO_MQTT_TOPIC_PREFIX, sim_iccid, identifier_size);
-
 
 	/* walk through other tokens */
 	while (token != NULL) {
@@ -262,9 +245,9 @@ static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 			cs_status = osCDS_direct_cmd(&crt_command_root,
 					CST_cellular_direct_cmd_callback);
 
-			(void)osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
+			(void) osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
 			retval = sendToIPC(0, (uint8_t*) &PART[0], root_size);
-			 (void)osMutexRelease(CellularServiceMutexHandle);
+			(void) osMutexRelease(CellularServiceMutexHandle);
 
 			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 			waitforprocessing(10);
@@ -290,9 +273,9 @@ static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 			cs_status = osCDS_direct_cmd(&crt_command_client_cert,
 					CST_cellular_direct_cmd_callback);
 
-			  (void)osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
+			(void) osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
 			retval = sendToIPC(0, (uint8_t*) &PART[0], client_cert_size);
-			(void)osMutexRelease(CellularServiceMutexHandle);
+			(void) osMutexRelease(CellularServiceMutexHandle);
 			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 		}
 		if (i == 4) {
@@ -316,25 +299,18 @@ static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 			cs_status = osCDS_direct_cmd(&crt_command_client_key,
 					CST_cellular_direct_cmd_callback);
 
-			(void)osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
+			(void) osMutexWait(CellularServiceMutexHandle, RTOS_WAIT_FOREVER);
 			retval = sendToIPC(0, (uint8_t*) &PART[0], client_key_size);
 			retval = sendToIPC(0, (uint8_t*) &PART[0], client_key_size);
-			(void)osMutexRelease(CellularServiceMutexHandle);
+			(void) osMutexRelease(CellularServiceMutexHandle);
 			HAL_Delay(10000);
 			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 			vPortFree(complete_response);
 		}
 		i++;
 	}
-				waitforprocessing(10);
-				PRINT_INFO(" ************** Certificates Uploaded Successfully  ************** \n");
+	waitforprocessing(10);
+	PRINT_INFO(
+			" ************** Certificates Uploaded Successfully  ************** \n");
 }
-
-
-
-
-
-
-
-
 

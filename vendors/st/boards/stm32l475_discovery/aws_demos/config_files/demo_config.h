@@ -17,6 +17,3 @@
 //#define USE_UDP 
 #define UDP_ENDPOINT "udp.connectivity-suite.cloud"
 #define UDP_PORT 4445
-
-char MODEM_MSG[100]; /* Buffer for storing last modem response */
-
