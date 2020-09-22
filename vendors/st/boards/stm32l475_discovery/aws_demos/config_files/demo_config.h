@@ -1,17 +1,22 @@
 /*
- * MQTT Broker endpoint.
+ * demo_config.h
+ *
+ *  Created on: Sep 7, 2020
+ *  Authors: Mohammed Abdelmaksoud & Hatim Jamali
+ *  1NCE GmbH
  */
-//static const char clientcredentialMQTT_BROKER_ENDPOINT[] = "a1to42vigz595n-ats.iot.eu-central-1.amazonaws.com";
-#define ONBOARDING_ENDPOINT  "device.dev.connectivity-suite.cloud"
-#define PUBLISH_PAYLOAD_FORMAT                   "Hello world !"
+
+/* MQTT Configuration */ 
+#define ONBOARDING_ENDPOINT  "device.connectivity-suite.cloud"
+#define PUBLISH_PAYLOAD_FORMAT                   "Welcome to 1NCE's Solution"
 #define SUB_TOPIC   "/1nce_test"
-
-
-/* Use of a "define" and not a "static const" here to be able to
-* use pre-compile concatenation on the string. */
-//#define clientcredentialIOT_THING_NAME "freertos_nbiot"
-
-/*
- * Port number the MQTT broker is using.
- */
 #define clientcredentialMQTT_BROKER_PORT 8883
+
+
+/* UDP Configuration */ 
+//#define USE_UDP 
+#define UDP_ENDPOINT "udp.connectivity-suite.cloud"
+#define UDP_PORT 4445
+
+char MODEM_MSG[100]; /* Buffer for storing last modem response */
+

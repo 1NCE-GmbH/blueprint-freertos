@@ -407,6 +407,16 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/MemMang/heap_4.c</locationURI>
 		</link>
 		<link>
+			<name>libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/NCE_SDK/nce_onboarding.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_onboarding.c</locationURI>
+		</link>
+		<link>
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/port.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/GCC/ARM_CM4F/port.c</locationURI>

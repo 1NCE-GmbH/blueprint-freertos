@@ -49,7 +49,7 @@
 #include "com_sockets_err_compat.h"
 #include "cellular_service.h"
 
-
+#include "demo_config.h"
 /* WiFi driver includes.
 #include "es_wifi.h"
 #include "es_wifi_io.h" */
@@ -413,8 +413,12 @@ Socket_t SOCKETS_Socket( int32_t lDomain, /* OK */
 
     /* Ensure that only supported values are supplied. */
     configASSERT( lDomain == SOCKETS_AF_INET );
-    configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
+#ifndef USE_UDP
 
+    configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
+#else
+    configASSERT( ( lType == SOCKETS_SOCK_DGRAM && lProtocol == COM_IPPROTO_UDP ) );
+#endif
     /* Try to get a free socket. */
     ulSocketNumber = prvGetFreeSocket();
 

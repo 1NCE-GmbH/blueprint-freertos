@@ -386,6 +386,8 @@ CS_Status_t osCDS_get_dev_IP_address(CS_PDN_conf_id_t cid,
   */
 CS_Status_t osCS_sim_select(CS_SimSlot_t simSelected);
 
+extern  osMutexId CellularServiceMutexHandle;
+
 /* shared resource allocation */
 /**
   * @brief get resource

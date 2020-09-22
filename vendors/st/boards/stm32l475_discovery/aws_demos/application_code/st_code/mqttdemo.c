@@ -28,8 +28,6 @@
 #include "cellular_mngt.h"
 #include "cellular_datacache.h"
 #include "dc_time.h"
-#include "cellular_runtime_custom.h"
-#include "cellular_service.h"
 #include "cellular_service_task.h"
 #include "cmsis_os_misrac2012.h"
 #include "error_handler.h"
@@ -50,6 +48,10 @@
 #include "aws_clientcredential_keys.h"
 #include "iot_default_root_certificates.h"
 
+#include "nce_onboarding.h"
+#include "nce_bg96_configuration.h"
+
+
 /* MQTT Demo Defines */
 //#define <fi  clientcredentialIOT_THING_NAME
 #define AWSIOT_NETWORK_TYPE_NONE     			 0x00000000
@@ -59,7 +61,6 @@
 #define CLIENT_IDENTIFIER_MAX_LENGTH             ( 24 )
 #define KEEP_ALIVE_SECONDS                       ( 180 )
 #define MQTT_TIMEOUT_MS                          ( 180000 )
-#define TOPIC_FILTER_COUNT                       ( 1 )
 #define PUBLISH_RETRY_LIMIT                      ( 10 )
 #define PUBLISH_RETRY_MS                         ( 20000 )
 #define ACKNOWLEDGEMENT_MESSAGE_FORMAT           "Client has received PUBLISH %.*s from server."
@@ -69,12 +70,10 @@
 #define mqttdemo_NFM_ERROR_LIMIT_SHORT_MAX  5U
 #define mqttdemo_SEND_PERIOD        20000U /* in ms. */
 #define mqttdemo_MESSAGE_SIZE_MAX 1500U
-char IOT_DEMO_MQTT_TOPIC_PREFIX[19];
-char WILL_TOPIC_NAME[35]  ;
-char WILL_MESSAGE[] =  "MQTT demo unexpectedly disconnected.";
-uint16_t WILL_MESSAGE_LENGTH = sizeof( WILL_MESSAGE ) - 1;
-char ACKNOWLEDGEMENT_TOPIC_NAME[40];
-uint16_t ACKNOWLEDGEMENT_TOPIC_NAME_LENGTH = sizeof( ACKNOWLEDGEMENT_TOPIC_NAME ) - 1 ;
+char WILL_MESSAGE[] = "MQTT demo unexpectedly disconnected.";
+uint16_t WILL_MESSAGE_LENGTH = sizeof(WILL_MESSAGE) - 1;
+uint16_t ACKNOWLEDGEMENT_TOPIC_NAME_LENGTH = sizeof(ACKNOWLEDGEMENT_TOPIC_NAME)
+		- 1;
 static IotSemaphore_t demoNetworkSemaphore;
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,9 +111,9 @@ typedef struct {
 
 /* Private defines -----------------------------------------------------------*/
 
-
 /*
  /* Private macro -------------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
 static osMessageQId mqttdemo_queue;
 
@@ -157,19 +156,10 @@ static uint32_t mqttdemo_period;
 /* Global variables ----------------------------------------------------------*/
 
 CS_Status_t cs_status;
-at_status_t retval = ATSTATUS_OK;
-int client_cert_size = 0;
-int client_cert_cmd_size = 0;
-int client_key_size = 0;
-int client_key_cmd_size = 0;
-int root_size = 0;
-int root_cmd_size = 0;
-char iccid[30], identifier[25], iotCoreEndpointUrl[50];
 static osThreadId mqttdemoTaskHandle;
-const char *pTopics[TOPIC_FILTER_COUNT];
 UBaseType_t uxHighWaterMark;
-uint16_t WILL_TOPIC_NAME_LENGTH   = 0;
-uint16_t TOPIC_FILTER_LENGTH = 0 ;
+char identifier[25];
+char	iotCoreEndpointUrl[50];
 
 /* Private function prototypes -----------------------------------------------*/
 /* Callback */
@@ -180,10 +170,6 @@ static void mqttdemo_notif_cb(dc_com_event_id_t dc_event_id,
 static bool mqttdemo_is_nfm_sleep_requested(void);
 static void mqttdemo_socket_thread(void const *argument);
 /* Private functions ---------------------------------------------------------*/
-
-static void CST_cellular_direct_cmd_callback(CS_direct_cmd_rx_t direct_cmd_rx) {
-	UNUSED(direct_cmd_rx);
-}
 
 //##########################################################################################################
 
@@ -430,7 +416,7 @@ static void _mqttSubscriptionCallback(void *param1,
 			acknowledgementInfo.qos = IOT_MQTT_QOS_1;
 			acknowledgementInfo.pTopicName = ACKNOWLEDGEMENT_TOPIC_NAME;
 			acknowledgementInfo.topicNameLength =
-			ACKNOWLEDGEMENT_TOPIC_NAME_LENGTH;
+					ACKNOWLEDGEMENT_TOPIC_NAME_LENGTH;
 			acknowledgementInfo.pPayload = pAcknowledgementMessage;
 			acknowledgementInfo.payloadLength = (size_t) acknowledgementLength;
 			acknowledgementInfo.retryMs = PUBLISH_RETRY_MS;
@@ -769,7 +755,6 @@ int RunMqttDemo( bool awsIotMqttMode, const char *pIdentifier,
 	 * application to wait on incoming PUBLISH messages). */
 	IotSemaphore_t publishesReceived;
 
-
 	/* Flags for tracking which cleanup functions must be called. */
 	bool librariesInitialized = false, connectionEstablished = false;
 
@@ -791,6 +776,9 @@ int RunMqttDemo( bool awsIotMqttMode, const char *pIdentifier,
 		/* Mark the MQTT connection as established. */
 		connectionEstablished = true;
 		PRINT_INFO("MQTT CONNECTED")
+
+//		waitforprocessing(100);
+
 		/* Add the topic filter subscriptions used in this demo. */
 		status = _modifySubscriptions(mqttConnection, IOT_MQTT_SUBSCRIBE,
 				pTopics, &publishesReceived);
@@ -801,7 +789,7 @@ int RunMqttDemo( bool awsIotMqttMode, const char *pIdentifier,
 		if (IotSemaphore_Create(&publishesReceived, 0,
 		IOT_DEMO_MQTT_PUBLISH_BURST_SIZE) == true) {
 			/* PUBLISH (and wait) for all messages. */
-			status = _publishAllMessages(mqttConnection,pTopics,
+			status = _publishAllMessages(mqttConnection, pTopics,
 					&publishesReceived);
 
 			/* Destroy the incoming PUBLISH counter. */
@@ -945,7 +933,7 @@ void mqttdemo_init(void) {
 		ERROR_Handler(DBG_CHAN_MQTTDEMO, 1, ERROR_FATAL);
 	}
 }
-
+#ifndef USE_UDP
 /**
  * @brief  Socket thread
  * @note   Infinite loop Mqtt Demo body
@@ -954,174 +942,16 @@ void mqttdemo_init(void) {
  * @retval -
  */
 
-char amazonRootCaUrl[80];
 
-uint8_t PART[1800];
-char rep[] = "\\n";
-char w[] = "\n";
-char end_key[] = "-----END RSA PRIVATE KEY-----";
-char end_cert[] = "-----END CERTIFICATE-----";
-char end_identifier[] = "\"";
-int end_key_len = sizeof(end_key);
-int end_cert_len = sizeof(end_cert);
-char *location;
-int offset = &PART[0];
-
-char* str_replace(char *orig, char *rep, char *with) {
-	char *result; // the return string
-	char *ins;    // the next insert point
-	char *tmp;    // varies
-	int len_rep;  // length of rep (the string to remove)
-	int len_with; // length of with (the string to replace rep with)
-	int len_front; // distance between rep and end of last rep
-	int count;    // number of replacements
-
-	// sanity checks and initialization
-	if (!orig || !rep)
-		return NULL;
-	len_rep = strlen(rep);
-	if (len_rep == 0)
-		return NULL; // empty rep causes infinite loop during count
-	if (!with)
-		with = "";
-	len_with = strlen(with);
-
-	// count the number of replacements needed
-	ins = orig;
-	for (count = 0; tmp = strstr(ins, rep); ++count) {
-		ins = tmp + len_rep;
-	}
-
-	tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
-
-	if (!result)
-		return NULL;
-
-	// first time through the loop, all the variable are set correctly
-	// from here on,
-	//    tmp points to the end of the result string
-	//    ins points to the next occurrence of rep in orig
-	//    orig points to the remainder of orig after "end of rep"
-	while (count--) {
-		ins = strstr(orig, rep);
-		len_front = ins - orig;
-		tmp = strncpy(tmp, orig, len_front) + len_front;
-		tmp = strcpy(tmp, with) + len_with;
-		orig += len_front + len_rep; // move to next "end of rep"
-	}
-	strcpy(tmp, orig);
-
-	return result;
-}
-
-static void waitforprocessing(int n){
-    CS_direct_cmd_tx_t crt_command_0 = { .cmd_str = "AT", .cmd_size =
-                                sizeof("AT") - 1, .cmd_timeout = 1000 };
-    for (int i = 0; i < n; i++)
-cs_status = osCDS_direct_cmd(&crt_command_0,
-    CST_cellular_direct_cmd_callback);
-}
-
-static void preparecertificate(uint8_t *all) {
-
-	/* get the first token */
-	char *token = strtok(all, ",");
-	memcpy(iccid, token, strlen(token));
-	int i = 0;
-
-	/* walk through other tokens */
-	while (token != NULL) {
-
-		token = strtok(NULL, ",");
-		if (i == 0) {
-			(void) memset(&iotCoreEndpointUrl, (int8_t) '\0', sizeof(iotCoreEndpointUrl));
-			memcpy(iotCoreEndpointUrl, token + 1, strlen(token) - 2);
-		}
-		if (i == 1) {
-			memcpy(amazonRootCaUrl, token, strlen(token));
-		}
-		if (i == 2) {
-			/*Process root.pem*/
-			memcpy(PART, token + 1, strlen(token) - 1);
-			memcpy(PART, str_replace(PART, rep, w), strlen(PART));
-			offset = &PART[0];
-			location = strstr(PART, end_cert);
-			root_size = location + end_cert_len - offset;
-			PART[root_size] = '\n';
-			char root_cmd[30] = "AT+QFUPL=\"root.pem\",";
-			sprintf(root_cmd, "%s%d,60", root_cmd, root_size);
-			root_cmd_size = strlen(root_cmd);
-			/*Upload root.pem*/
-			CS_direct_cmd_tx_t crt_command_root = { .cmd_str = root_cmd,
-					.cmd_size = root_cmd_size, .cmd_timeout = 10 };
-			memcpy(crt_command_root.cmd_str, root_cmd, root_cmd_size);
-			cs_status = osCDS_direct_cmd(&crt_command_root,
-					CST_cellular_direct_cmd_callback);
-			retval = sendToIPC(0, (uint8_t*) &PART[0], root_size);
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-			HAL_Delay(1000);
-		}
-		if (i == 3) {
-			/* Process client_cert.pem */
-			memcpy(PART, token + 1, strlen(token) - 1);
-			memcpy(PART, str_replace(PART, rep, w), strlen(PART));
-			offset = &PART[0];
-			location = strstr(PART, end_cert);
-			client_cert_size = location + end_cert_len - offset;
-			PART[client_cert_size] = '\n';
-			char client_cert_cmd[40] = "AT+QFUPL=\"clientcert.pem\",";
-			sprintf(client_cert_cmd, "%s%d,60", client_cert_cmd,
-					client_cert_size);
-			client_cert_cmd_size = strlen(client_cert_cmd);
-			/* Upload client_cert.pem */
-			CS_direct_cmd_tx_t crt_command_client_cert = { .cmd_str =
-					client_cert_cmd, .cmd_size = client_cert_cmd_size,
-					.cmd_timeout = 30 };
-			memcpy(crt_command_client_cert.cmd_str, client_cert_cmd,
-					client_cert_cmd_size);
-			cs_status = osCDS_direct_cmd(&crt_command_client_cert,
-					CST_cellular_direct_cmd_callback);
-			retval = sendToIPC(0, (uint8_t*) &PART[0], client_cert_size);
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-			waitforprocessing(10);
-		}
-		if (i == 4) {
-			/* Process client_key.pem */
-			memcpy(PART, token + 1, strlen(token) - 1);
-			memcpy(PART, str_replace(PART, rep, w), strlen(PART));
-			offset = &PART[0];
-			location = strstr(PART, end_key);
-			client_key_size = location + end_key_len - offset;
-			PART[client_key_size] = '\n';
-			char client_key_cmd[40] = "AT+QFUPL=\"clientkey.pem\",";
-			sprintf(client_key_cmd, "%s%d,60", client_key_cmd, client_key_size);
-			client_key_cmd_size = strlen(client_key_cmd);
-			/* Upload client_key.pem */
-			CS_direct_cmd_tx_t crt_command_client_key = { .cmd_str =
-					client_key_cmd, .cmd_size = client_key_cmd_size,
-					.cmd_timeout = 30 };
-			memcpy(crt_command_client_key.cmd_str, client_key_cmd,
-					client_key_cmd_size);
-			PRINT_INFO("Uploading client key ")
-			HAL_Delay(2000);
-			cs_status = osCDS_direct_cmd(&crt_command_client_key,
-					CST_cellular_direct_cmd_callback);
-			retval = sendToIPC(0, (uint8_t*) &PART[0], client_key_size);
-			PRINT_INFO("SSL Configuration Done")
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-			vPortFree(all);
-		}
-		i++;
-	}
-}
-
+#endif
 static void mqttdemo_socket_thread(void const *argument) {
+#ifndef USE_UDP
 	uint32_t nfmc_tempo;
 	int status;
-	(void) memset(&IOT_DEMO_MQTT_TOPIC_PREFIX, (int8_t) '\0', sizeof(IOT_DEMO_MQTT_TOPIC_PREFIX));
+	(void) memset(&IOT_DEMO_MQTT_TOPIC_PREFIX, (int8_t) '\0',
+			sizeof(IOT_DEMO_MQTT_TOPIC_PREFIX));
 
-	uint8_t *all = (uint8_t*) pvPortMalloc(5000 * sizeof(uint8_t));
-
+#endif
 	PRINT_FORCE("\n\r<<<  connecting  >>>\n\r")
 	(void) osMessageGet(mqttdemo_queue, RTOS_WAIT_FOREVER);
 	(void) osDelay(1000U);
@@ -1134,238 +964,84 @@ static void mqttdemo_socket_thread(void const *argument) {
 
 	if (mqttdemo_network_is_on == true) {
 		PRINT_INFO("  mqttdemo_network_is_on == true")
+#ifndef USE_UDP
 		PRINT_FORCE("\n\r<<< MQTT STARTED >>>\n\r")
 		mqttdemo_process_flag = true;
+		Onboarding_Status_t onboarding_status ;
+		CS_Status_t cs_status ;
+
 
 		if (DEVICE_ONBOARDED == false) {
 
-			/*Cleaning Memory*/
-			CS_direct_cmd_tx_t crt_command_1 = { .cmd_str = "AT+QFDEL=\"*\"",
-					.cmd_size = sizeof("AT+QFDEL=\"*\"") - 1, .cmd_timeout =
-							1000 };
-			cs_status = osCDS_direct_cmd(&crt_command_1,
-					CST_cellular_direct_cmd_callback);
 
-			/*Socket Configuration*/
-			CS_direct_cmd_tx_t command03 = { .cmd_str =
-					"AT+QSSLCFG=\"seclevel\",0,0", .cmd_size =
-					sizeof("AT+QSSLCFG=\"seclevel\",0,0") - 1, .cmd_timeout =
-					15000 };
-			HAL_Delay(1000);
-			cs_status = osCDS_direct_cmd(&command03,
-					CST_cellular_direct_cmd_callback);
-			CS_direct_cmd_tx_t command4 = { .cmd_str =
-					"AT+QSSLCFG=\"sslversion\",0,4", .cmd_size =
-					sizeof("AT+QSSLCFG=\"sslversion\",0,4") - 1, .cmd_timeout =
-					15000 };
-			cs_status = osCDS_direct_cmd(&command4,
-					CST_cellular_direct_cmd_callback);
-			CS_direct_cmd_tx_t command5 = { .cmd_str =
-					"AT+QSSLCFG=\"ciphersuite\",0,0xFFFF", .cmd_size =
-					sizeof("AT+QSSLCFG=\"ciphersuite\",0,0xFFFF") - 1,
-					.cmd_timeout = 15000 };
-			cs_status = osCDS_direct_cmd(&command5,
-					CST_cellular_direct_cmd_callback);
-			CS_direct_cmd_tx_t command06 = { .cmd_str =
-					"AT+QSSLCFG=\"ignorelocaltime\",0,1", .cmd_size =
-					sizeof("AT+QSSLCFG=\"ignorelocaltime\",0,1") - 1,
-					.cmd_timeout = 15000 };
-			cs_status = osCDS_direct_cmd(&command06,
-					CST_cellular_direct_cmd_callback);
+			onboarding_status = nce_onboard_device();
 
-			CS_direct_cmd_tx_t command07 = { .cmd_str = "AT+QSSLCLOSE=1",
-					.cmd_size = sizeof("AT+QSSLCLOSE=1") - 1, .cmd_timeout =
-							15000 };
-			cs_status = osCDS_direct_cmd(&command07,
-					CST_cellular_direct_cmd_callback);
+			if (onboarding_status != ONBOARDING_OK) {
+				PRINT_ERR("Onboarding Error");
+			} else {
+				PRINT_INFO(" ************** Onboarding Done ************** \n");
+			    char topic[29];
+			    sprintf(topic,"%s/1nce_test",IOT_DEMO_MQTT_TOPIC_PREFIX);
+				pTopics[0] = topic;
+				sprintf(ACKNOWLEDGEMENT_TOPIC_NAME,"%s/acknowledgements",IOT_DEMO_MQTT_TOPIC_PREFIX);
+				sprintf(WILL_TOPIC_NAME,"%s/will",IOT_DEMO_MQTT_TOPIC_PREFIX);
+				WILL_TOPIC_NAME_LENGTH   = sizeof( WILL_TOPIC_NAME ) - 1 ;
+				TOPIC_FILTER_LENGTH = sizeof( IOT_DEMO_MQTT_TOPIC_PREFIX  ) + sizeof( SUB_TOPIC  ) - 1;
+				DEVICE_ONBOARDED = true;
+			}
 
-			Socket_t cert_socket = SOCKETS_Socket( SOCKETS_AF_INET,
-			SOCKETS_SOCK_STREAM, SOCKETS_IPPROTO_TCP);
-			uint32_t ROOT_IP = SOCKETS_GetHostByName(&ONBOARDING_ENDPOINT);
-			SocketsSockaddr_t root_address = { .ucLength =
-					sizeof(SocketsSockaddr_t),
-					.ucSocketDomain = SOCKETS_AF_INET, .usPort = SOCKETS_htons(
-							443), .ulAddress = ROOT_IP };
-
-			uint32_t timeout = 30000;
-
-			int32_t set_timeout = SOCKETS_SetSockOpt(cert_socket,
-			COM_SOL_SOCKET, SOCKETS_SO_RCVTIMEO, &timeout,
-					(int32_t) sizeof(timeout));
-			int32_t lRetVal = SOCKETS_Connect(cert_socket, &root_address,
-					sizeof(SocketsSockaddr_t));
-
-			char send_packet[100];
-			sprintf(send_packet,"GET /device-api/onboarding HTTP/1.1\r\n"
-					"Host: %s\r\n"
-					"Accept: text/csv\r\n\r\n",ONBOARDING_ENDPOINT);
-			int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,
-					strlen(send_packet), NULL);
-
-			HAL_Delay(1000);
-			expected_bytes = sizeof(PART) - 500;
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-			HAL_Delay(5000);
-			int32_t rec = SOCKETS_Recv(cert_socket,
-			(com_char_t*) &PART[0], (int32_t) sizeof(PART),
-			COM_MSG_WAIT);
-
-			PRINT_INFO(" ************** Raw Response (1) **************   %d bytes \n",
-					strlen(PART))
-			strcat(all,
-					strstr(PART, "Express\r\n\r\n\"")
-							+ strlen("Express\r\n\r\n\""));
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-
-			rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
-					(int32_t) sizeof(PART),
-					COM_MSG_WAIT);
-
-			PRINT_INFO(" ************** Raw Response (2) **************   %d bytes \n",
-					strlen(PART))
-
-			strncat(all, PART, strlen(PART));
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-
-			rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
-					(int32_t) sizeof(PART),
-					COM_MSG_WAIT);
-
-			PRINT_INFO(" ************** Raw Response (3) **************   %d bytes \n",
-					strlen(PART))
-
-			strncat(all, PART, strlen(PART));
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-
-			rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
-					(int32_t) sizeof(PART),
-					COM_MSG_WAIT);
-
-			PRINT_INFO(" ************** Raw Response (4) **************   %d bytes \n",
-					strlen(PART))
-
-			strncat(all, PART, strlen(PART));
-			(void) memset(&PART, (int8_t) '\0', sizeof(PART));
-			preparecertificate(all);
-			offset = &iccid[0];
-			location = strstr(iccid, end_identifier);
-			int identifier_size = location - offset;
-			memcpy(identifier, iccid, identifier_size);
-			memcpy(IOT_DEMO_MQTT_TOPIC_PREFIX, iccid, identifier_size);
-
-		    char topic[28];
-		    sprintf(topic,"%s/1nce_test",IOT_DEMO_MQTT_TOPIC_PREFIX);
-			pTopics[0] = topic;
-			sprintf(ACKNOWLEDGEMENT_TOPIC_NAME,"%s/acknowledgements",IOT_DEMO_MQTT_TOPIC_PREFIX);
-			sprintf(WILL_TOPIC_NAME,"%s/will",IOT_DEMO_MQTT_TOPIC_PREFIX);
-			WILL_TOPIC_NAME_LENGTH   = sizeof( WILL_TOPIC_NAME ) - 1 ;
-			TOPIC_FILTER_LENGTH = sizeof( IOT_DEMO_MQTT_TOPIC_PREFIX  ) + sizeof( SUB_TOPIC  ) - 1;
-
-			PRINT_INFO("************** Uploaded files ************** root.pem %d clientcert.pem %d clientkey.pem %d \n",
-					root_size, client_cert_size, client_key_size)
-			cs_status = osCDS_direct_cmd(&command07,
-					CST_cellular_direct_cmd_callback);
-			DEVICE_ONBOARDED = true;
 		}
+
 
 		/* MODEM SSL CONFIGURATION */
 
 		HAL_Delay(6000);
+		cs_status = nce_configure_ssl_socket();
 
-		CS_direct_cmd_tx_t command = { .cmd_str =
-				"AT+QSSLCFG=\"cacert\",1,\"root.pem\"", .cmd_size =
-				sizeof("AT+QSSLCFG=\"cacert\",1,\"root.pem\"") - 1,
-				.cmd_timeout = 0 };
-		HAL_Delay(500);
+		if (cs_status != CELLULAR_OK) {
+			PRINT_ERR("Onboarding Error : Modem SSL Configuration ");
+			return (onboarding_status);
+		} else {
+			PRINT_INFO(" ************** SSL Configuration Done ************** \n");
+		}
 
-		/* send the AT command to the modem */
-		cs_status = osCDS_direct_cmd(&command,
-				CST_cellular_direct_cmd_callback);
-
-		HAL_Delay(500);
-
-		/* send the AT command to the modem */
-		cs_status = osCDS_direct_cmd(&command,
-				CST_cellular_direct_cmd_callback);
-
-		CS_direct_cmd_tx_t command1 = { .cmd_str =
-				"AT+QSSLCFG=\"clientcert\",1,\"clientcert.pem\"", .cmd_size =
-				sizeof("AT+QSSLCFG=\"clientcert\",1,\"clientcert.pem\"") - 1,
-				.cmd_timeout = 0 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command1,
-				CST_cellular_direct_cmd_callback);
-		CS_direct_cmd_tx_t command2 = { .cmd_str =
-				"AT+QSSLCFG=\"clientkey\",1,\"clientkey.pem\"", .cmd_size =
-				sizeof("AT+QSSLCFG=\"clientkey\",1,\"clientkey.pem\"") - 1,
-				.cmd_timeout = 0 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command2,
-				CST_cellular_direct_cmd_callback);
-		CS_direct_cmd_tx_t command3 = {
-				.cmd_str = "AT+QSSLCFG=\"seclevel\",1,2", .cmd_size =
-						sizeof("AT+QSSLCFG=\"seclevel\",1,2") - 1,
-				.cmd_timeout = 15000 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command3,
-				CST_cellular_direct_cmd_callback);
-		CS_direct_cmd_tx_t command4 = { .cmd_str =
-				"AT+QSSLCFG=\"sslversion\",1,4", .cmd_size =
-				sizeof("AT+QSSLCFG=\"sslversion\",1,4") - 1, .cmd_timeout =
-				15000 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command4,
-				CST_cellular_direct_cmd_callback);
-		CS_direct_cmd_tx_t command5 = { .cmd_str =
-				"AT+QSSLCFG=\"ciphersuite\",1,0xFFFF", .cmd_size =
-				sizeof("AT+QSSLCFG=\"ciphersuite\",1,0xFFFF") - 1,
-				.cmd_timeout = 15000 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command5,
-				CST_cellular_direct_cmd_callback);
-		CS_direct_cmd_tx_t command6 = { .cmd_str =
-				"AT+QSSLCFG=\"ignorelocaltime\",1,1", .cmd_size =
-				sizeof("AT+QSSLCFG=\"ignorelocaltime\",1,1") - 1, .cmd_timeout =
-				15000 };
-
-		HAL_Delay(500);
-
-		cs_status = osCDS_direct_cmd(&command6,
-				CST_cellular_direct_cmd_callback);
-
-		CS_direct_cmd_tx_t command7 = { .cmd_str = "AT+QSSLCLOSE=1", .cmd_size =
-				sizeof("AT+QSSLCLOSE=1") - 1, .cmd_timeout = 15000 };
-		cs_status = osCDS_direct_cmd(&command7,
-				CST_cellular_direct_cmd_callback);
-
-		HAL_Delay(500);
-
-		CS_direct_cmd_tx_t command8 = { .cmd_str = "AT+QSSLCLOSE=2", .cmd_size =
-				sizeof("AT+QSSLCLOSE=1") - 1, .cmd_timeout = 15000 };
-		cs_status = osCDS_direct_cmd(&command8,
-				CST_cellular_direct_cmd_callback);
-
-		HAL_Delay(500);
-
-		PRINT_INFO("SSL Configuration Done")
-
-		PRINT_INFO("Starting Demo ")
+		PRINT_INFO("Starting MQTT Demo ")
 		status = _initializeSystem();
 		prvMQTTConnect();
 
+
+#else
+		PRINT_FORCE("\n\r<<< UDP STARTED >>>\n\r")
+		Socket_t cert_socket = SOCKETS_Socket( SOCKETS_AF_INET,
+		SOCKETS_SOCK_DGRAM, COM_IPPROTO_UDP);
+		UBaseType_t uxHighWaterMark;
+		uxHighWaterMark = uxTaskGetStackHighWaterMark(mqttdemoTaskHandle);
+		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r",uxHighWaterMark)
+
+		uint32_t UDP_IP = SOCKETS_GetHostByName(&UDP_ENDPOINT);
+		SocketsSockaddr_t udp_address = {
+				.ucLength = sizeof(SocketsSockaddr_t), .ucSocketDomain =
+						SOCKETS_AF_INET, .usPort = SOCKETS_htons(UDP_PORT),
+				.ulAddress = UDP_IP };
+		uint32_t timeout = 30000;
+
+		int32_t set_timeout = SOCKETS_SetSockOpt(cert_socket,
+		COM_SOL_SOCKET, SOCKETS_SO_RCVTIMEO, &timeout,
+				(int32_t) sizeof(timeout));
+		int32_t lRetVal = SOCKETS_Connect(cert_socket, &udp_address,
+				sizeof(SocketsSockaddr_t));
+		PRINT_FORCE("\n\r<<< %d >>>\n\r",lRetVal)
+		char send_packet[100];
+		sprintf(send_packet,&PUBLISH_PAYLOAD_FORMAT,UDP_ENDPOINT);
+		int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,
+							strlen(send_packet), NULL);
+		uxHighWaterMark = uxTaskGetStackHighWaterMark(mqttdemoTaskHandle);
+		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r",uxHighWaterMark)
+		SOCKETS_Close(cert_socket);
+		PRINT_FORCE("\n\r<<< UDP FINISH >>>\n\r")
+#endif
 	}
 }
-
 
 /**
  * @brief  Start

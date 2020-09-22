@@ -18,6 +18,7 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
+
 #ifndef PLF_STACK_SIZE_H
 #define PLF_STACK_SIZE_H
 
@@ -26,7 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-
+#include"demo_config.h"
 #include "plf_features.h"
 
 /* Exported constants --------------------------------------------------------*/
@@ -57,8 +58,11 @@ extern "C" {
 #endif /* (USE_PING_CLIENT == 1) */
 #if (USE_MQTT_DEMO == 1)
 //#define mqttdemo_THREAD_STACK_SIZE        (384U)
+#ifndef USE_UDP
 #define mqttdemo_THREAD_STACK_SIZE        (7000U)
-
+#else
+#define mqttdemo_THREAD_STACK_SIZE        (500U)
+#endif
 #endif /* (USE_MQTT_DEMO == 1) */
 
 #if (USE_CMD_CONSOLE == 1)

@@ -162,14 +162,10 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Interface/Com/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Cmd/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/DataCache_Supplier/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Error_Handler/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Setup/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Stack_Analysis/Inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Time_Date/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Trace_Interface/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/NCE_SDK/Inc&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols.1242720538" name="Define symbols (-D)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="HWREF_B_CELL_BG96_V2"/>

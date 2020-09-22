@@ -33,7 +33,8 @@ extern "C" {
 #include "cellular_service.h"
 #include "cellular_service_int.h"
 #include "ipc_common.h"
-
+//////////////////////////////
+#include "demo_config.h"
 /* Exported constants --------------------------------------------------------*/
 /* device specific parameters */
 #define MODEM_MAX_SOCKET_TX_DATA_SIZE   CONFIG_MODEM_MAX_SOCKET_TX_DATA_SIZE /* cf AT+QISEND */

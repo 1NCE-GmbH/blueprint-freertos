@@ -31,7 +31,8 @@
 /* Private macros ------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static osMutexId CellularServiceMutexHandle;
+//static osMutexId CellularServiceMutexHandle;
+osMutexId CellularServiceMutexHandle = NULL;
 static osMutexId CellularServiceGeneralMutexHandle;
 
 /* Global variables ----------------------------------------------------------*/

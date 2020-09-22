@@ -144,9 +144,11 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
 	      * <contextID> is the PDP context ID
 	      */
 	      /* convert user cid (CS_PDN_conf_id_t) to PDP modem cid (value) */
+
 	      uint8_t pdp_modem_cid = atcm_get_affected_modem_cid(&p_modem_ctxt->persist,
 	                                                          p_modem_ctxt->socket_ctxt.socket_info->conf_id);
-	      PRINT_DBG("user cid = %d, PDP modem cid = %d",
+
+	    PRINT_DBG("user cid = %d, PDP modem cid = %d",
 	                (uint8_t)p_modem_ctxt->socket_ctxt.socket_info->conf_id, pdp_modem_cid)
 	      uint8_t access_mode = 0U; /* 0=buffer acces mode, 1=direct push mode, 2=transparent access mode */
 
@@ -166,11 +168,10 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
 	        else
 	        {
 	          /* "TCP" or "UDP" (client) */
-	          service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL) ?
-	                                QIOPENSERVICETYPE_TCP_CLIENT : QIOPENSERVICETYPE_UDP_CLIENT);
+	          service_type_index =  QIOPENSERVICETYPE_UDP_CLIENT;
 	        }
 
-
+#ifndef USE_UDP
 
 	        (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%d,%ld,\"%s\",%d,%d",
 	                       pdp_modem_cid,sslctxID,
@@ -179,7 +180,16 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
 	                       p_modem_ctxt->socket_ctxt.socket_info->remote_port,
 	                       access_mode);
 
-
+#else
+	    		(void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
+	    		                       pdp_modem_cid,
+	    		                       atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
+	    		                       bg96_array_QIOPEN_service_type[service_type_index],
+	    		                       p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
+	    		                       p_modem_ctxt->socket_ctxt.socket_info->remote_port,
+	    		                       p_modem_ctxt->socket_ctxt.socket_info->local_port,
+	    		                       access_mode);
+#endif
 
 
 	        /* waiting for +QIOPEN now */
