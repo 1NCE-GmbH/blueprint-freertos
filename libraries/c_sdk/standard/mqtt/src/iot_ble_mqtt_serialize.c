@@ -731,7 +731,7 @@ IotMqttError_t IotBleMqtt_SerializeConnect( const IotMqttConnectInfo_t * const p
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find length of serialized CONNECT message, error = %d", error );
+        PRINT_ERR( "Failed to find length of serialized CONNECT message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -742,7 +742,7 @@ IotMqttError_t IotBleMqtt_SerializeConnect( const IotMqttConnectInfo_t * const p
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for CONNECT packet." );
+            PRINT_ERR( "Failed to allocate memory for CONNECT packet." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -753,7 +753,7 @@ IotMqttError_t IotBleMqtt_SerializeConnect( const IotMqttConnectInfo_t * const p
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize CONNECT message, error = %d", error );
+            PRINT_ERR( "Failed to serialize CONNECT message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -789,7 +789,7 @@ IotMqttError_t IotBleMqtt_DeserializeConnack( _mqttPacket_t * pConnack )
     if( ( error != IOT_SERIALIZER_SUCCESS ) ||
         ( decoderObj.type != IOT_SERIALIZER_CONTAINER_MAP ) )
     {
-        IotLogError( "Malformed CONNACK, decoding the packet failed, decoder error = %d, type: %d", error, decoderObj.type );
+        PRINT_ERR( "Malformed CONNACK, decoding the packet failed, decoder error = %d, type: %d", error, decoderObj.type );
         ret = IOT_MQTT_BAD_RESPONSE;
     }
 
@@ -800,7 +800,7 @@ IotMqttError_t IotBleMqtt_DeserializeConnack( _mqttPacket_t * pConnack )
         if( ( error != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "Invalid CONNACK, response code decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "Invalid CONNACK, response code decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -843,7 +843,7 @@ IotMqttError_t IotBleMqtt_SerializePublish( const IotMqttPublishInfo_t * const p
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find size of serialized PUBLISH message, error = %d", error );
+        PRINT_ERR( "Failed to find size of serialized PUBLISH message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -854,7 +854,7 @@ IotMqttError_t IotBleMqtt_SerializePublish( const IotMqttPublishInfo_t * const p
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for PUBLISH packet." );
+            PRINT_ERR( "Failed to allocate memory for PUBLISH packet." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -865,7 +865,7 @@ IotMqttError_t IotBleMqtt_SerializePublish( const IotMqttPublishInfo_t * const p
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize PUBLISH message, error = %d", error );
+            PRINT_ERR( "Failed to serialize PUBLISH message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -908,7 +908,7 @@ IotMqttError_t IotBleMqtt_DeserializePublish( _mqttPacket_t * pPublish )
     if( ( xSerializerRet != IOT_SERIALIZER_SUCCESS ) ||
         ( decoderObj.type != IOT_SERIALIZER_CONTAINER_MAP ) )
     {
-        IotLogError( "Decoding PUBLISH packet failed, decoder error = %d, object type = %d", xSerializerRet, decoderObj.type );
+        PRINT_ERR( "Decoding PUBLISH packet failed, decoder error = %d, object type = %d", xSerializerRet, decoderObj.type );
         ret = IOT_MQTT_BAD_RESPONSE;
     }
 
@@ -919,7 +919,7 @@ IotMqttError_t IotBleMqtt_DeserializePublish( _mqttPacket_t * pPublish )
         if( ( xSerializerRet != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "QOS Value decode failed, error = %d, decoded value type = %d", xSerializerRet, decoderValue.type );
+            PRINT_ERR( "QOS Value decode failed, error = %d, decoded value type = %d", xSerializerRet, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -937,7 +937,7 @@ IotMqttError_t IotBleMqtt_DeserializePublish( _mqttPacket_t * pPublish )
         if( ( xSerializerRet != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_TEXT_STRING ) )
         {
-            IotLogError( "Topic value decode failed, error = %d", xSerializerRet );
+            PRINT_ERR( "Topic value decode failed, error = %d", xSerializerRet );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -956,7 +956,7 @@ IotMqttError_t IotBleMqtt_DeserializePublish( _mqttPacket_t * pPublish )
         if( ( xSerializerRet != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_BYTE_STRING ) )
         {
-            IotLogError( "Payload value decode failed, error = %d", xSerializerRet );
+            PRINT_ERR( "Payload value decode failed, error = %d", xSerializerRet );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -975,7 +975,7 @@ IotMqttError_t IotBleMqtt_DeserializePublish( _mqttPacket_t * pPublish )
             if( ( xSerializerRet != IOT_SERIALIZER_SUCCESS ) ||
                 ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
             {
-                IotLogError( "Message identifier decode failed, error = %d, decoded value type = %d", xSerializerRet, decoderValue.type );
+                PRINT_ERR( "Message identifier decode failed, error = %d, decoded value type = %d", xSerializerRet, decoderValue.type );
                 ret = IOT_MQTT_BAD_RESPONSE;
             }
             else
@@ -1008,7 +1008,7 @@ IotMqttError_t IotBleMqtt_SerializePuback( uint16_t packetIdentifier,
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find size of serialized PUBACK message, error = %d", error );
+        PRINT_ERR( "Failed to find size of serialized PUBACK message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -1019,7 +1019,7 @@ IotMqttError_t IotBleMqtt_SerializePuback( uint16_t packetIdentifier,
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for PUBACK packet, packet identifier = %d", packetIdentifier );
+            PRINT_ERR( "Failed to allocate memory for PUBACK packet, packet identifier = %d", packetIdentifier );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -1030,7 +1030,7 @@ IotMqttError_t IotBleMqtt_SerializePuback( uint16_t packetIdentifier,
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to find size of serialized PUBACK message, error = %d", error );
+            PRINT_ERR( "Failed to find size of serialized PUBACK message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -1065,7 +1065,7 @@ IotMqttError_t IotBleMqtt_DeserializePuback( _mqttPacket_t * pPuback )
     if( ( error != IOT_SERIALIZER_SUCCESS ) ||
         ( decoderObj.type != IOT_SERIALIZER_CONTAINER_MAP ) )
     {
-        IotLogError( "Malformed PUBACK, decoding the packet failed, decoder error = %d, object type: %d", error, decoderObj.type );
+        PRINT_ERR( "Malformed PUBACK, decoding the packet failed, decoder error = %d, object type: %d", error, decoderObj.type );
         ret = IOT_MQTT_BAD_RESPONSE;
     }
 
@@ -1076,7 +1076,7 @@ IotMqttError_t IotBleMqtt_DeserializePuback( _mqttPacket_t * pPuback )
         if( ( error != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "Message ID decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "Message ID decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -1108,7 +1108,7 @@ IotMqttError_t IotBleMqtt_SerializeSubscribe( const IotMqttSubscription_t * cons
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find serialized length of SUBSCRIBE message, error = %d", error );
+        PRINT_ERR( "Failed to find serialized length of SUBSCRIBE message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -1119,7 +1119,7 @@ IotMqttError_t IotBleMqtt_SerializeSubscribe( const IotMqttSubscription_t * cons
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for SUBSCRIBE message." );
+            PRINT_ERR( "Failed to allocate memory for SUBSCRIBE message." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -1130,7 +1130,7 @@ IotMqttError_t IotBleMqtt_SerializeSubscribe( const IotMqttSubscription_t * cons
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize SUBSCRIBE message, error = %d", error );
+            PRINT_ERR( "Failed to serialize SUBSCRIBE message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -1167,7 +1167,7 @@ IotMqttError_t IotBleMqtt_DeserializeSuback( _mqttPacket_t * pSuback )
     if( ( error != IOT_SERIALIZER_SUCCESS ) ||
         ( decoderObj.type != IOT_SERIALIZER_CONTAINER_MAP ) )
     {
-        IotLogError( "Malformed SUBACK, decoding the packet failed, decoder error = %d, type: %d", error, decoderObj.type );
+        PRINT_ERR( "Malformed SUBACK, decoding the packet failed, decoder error = %d, type: %d", error, decoderObj.type );
         ret = IOT_MQTT_BAD_RESPONSE;
     }
 
@@ -1178,7 +1178,7 @@ IotMqttError_t IotBleMqtt_DeserializeSuback( _mqttPacket_t * pSuback )
         if( ( error != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "Message ID decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "Message ID decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -1194,7 +1194,7 @@ IotMqttError_t IotBleMqtt_DeserializeSuback( _mqttPacket_t * pSuback )
         if( ( error != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "Status code decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "Status code decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -1259,7 +1259,7 @@ IotMqttError_t IotBleMqtt_SerializeUnsubscribe( const IotMqttSubscription_t * co
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find serialized length of UNSUBSCRIBE message, error = %d", error );
+        PRINT_ERR( "Failed to find serialized length of UNSUBSCRIBE message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -1270,7 +1270,7 @@ IotMqttError_t IotBleMqtt_SerializeUnsubscribe( const IotMqttSubscription_t * co
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for UNSUBSCRIBE message." );
+            PRINT_ERR( "Failed to allocate memory for UNSUBSCRIBE message." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -1281,7 +1281,7 @@ IotMqttError_t IotBleMqtt_SerializeUnsubscribe( const IotMqttSubscription_t * co
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize UNSUBSCRIBE message, error = %d", error );
+            PRINT_ERR( "Failed to serialize UNSUBSCRIBE message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -1317,7 +1317,7 @@ IotMqttError_t IotBleMqtt_DeserializeUnsuback( _mqttPacket_t * pUnsuback )
     if( ( error != IOT_SERIALIZER_SUCCESS ) ||
         ( decoderObj.type != IOT_SERIALIZER_CONTAINER_MAP ) )
     {
-        IotLogError( "Malformed UNSUBACK, decoding the packet failed, decoder error = %d, type:%d ", error, decoderObj.type );
+        PRINT_ERR( "Malformed UNSUBACK, decoding the packet failed, decoder error = %d, type:%d ", error, decoderObj.type );
         ret = IOT_MQTT_BAD_RESPONSE;
     }
 
@@ -1328,7 +1328,7 @@ IotMqttError_t IotBleMqtt_DeserializeUnsuback( _mqttPacket_t * pUnsuback )
         if( ( error != IOT_SERIALIZER_SUCCESS ) ||
             ( decoderValue.type != IOT_SERIALIZER_SCALAR_SIGNED_INT ) )
         {
-            IotLogError( "UNSUBACK Message identifier decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "UNSUBACK Message identifier decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
             ret = IOT_MQTT_BAD_RESPONSE;
         }
         else
@@ -1354,7 +1354,7 @@ IotMqttError_t IotBleMqtt_SerializeDisconnect( uint8_t ** const pDisconnectPacke
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find serialized length of DISCONNECT message, error = %d", error );
+        PRINT_ERR( "Failed to find serialized length of DISCONNECT message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -1365,7 +1365,7 @@ IotMqttError_t IotBleMqtt_SerializeDisconnect( uint8_t ** const pDisconnectPacke
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for DISCONNECT message." );
+            PRINT_ERR( "Failed to allocate memory for DISCONNECT message." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -1376,7 +1376,7 @@ IotMqttError_t IotBleMqtt_SerializeDisconnect( uint8_t ** const pDisconnectPacke
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize DISCONNECT message, error = %d", error );
+            PRINT_ERR( "Failed to serialize DISCONNECT message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }
@@ -1440,12 +1440,12 @@ uint8_t IotBleMqtt_GetPacketType( void * pNetworkConnection,
         }
         else
         {
-            IotLogError( "Packet type decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
+            PRINT_ERR( "Packet type decode failed, error = %d, decoded value type = %d", error, decoderValue.type );
         }
     }
     else
     {
-        IotLogError( "Decoding the packet failed, decoder error = %d, type = %d", error, decoderObj.type );
+        PRINT_ERR( "Decoding the packet failed, decoder error = %d, type = %d", error, decoderObj.type );
     }
 
     IOT_BLE_MESG_DECODER.destroy( &decoderObj );
@@ -1465,7 +1465,7 @@ IotMqttError_t IotBleMqtt_SerializePingreq( uint8_t ** const pPingreqPacket,
 
     if( error != IOT_SERIALIZER_SUCCESS )
     {
-        IotLogError( "Failed to find serialized length of DISCONNECT message, error = %d", error );
+        PRINT_ERR( "Failed to find serialized length of DISCONNECT message, error = %d", error );
         ret = IOT_MQTT_BAD_PARAMETER;
     }
 
@@ -1476,7 +1476,7 @@ IotMqttError_t IotBleMqtt_SerializePingreq( uint8_t ** const pPingreqPacket,
         /* If Memory cannot be allocated log an error and return */
         if( pBuffer == NULL )
         {
-            IotLogError( "Failed to allocate memory for DISCONNECT message." );
+            PRINT_ERR( "Failed to allocate memory for DISCONNECT message." );
             ret = IOT_MQTT_NO_MEMORY;
         }
     }
@@ -1487,7 +1487,7 @@ IotMqttError_t IotBleMqtt_SerializePingreq( uint8_t ** const pPingreqPacket,
 
         if( error != IOT_SERIALIZER_SUCCESS )
         {
-            IotLogError( "Failed to serialize DISCONNECT message, error = %d", error );
+            PRINT_ERR( "Failed to serialize DISCONNECT message, error = %d", error );
             ret = IOT_MQTT_BAD_PARAMETER;
         }
     }

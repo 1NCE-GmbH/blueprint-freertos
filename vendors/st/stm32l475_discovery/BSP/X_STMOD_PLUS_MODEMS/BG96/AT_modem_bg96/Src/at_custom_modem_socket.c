@@ -35,7 +35,11 @@
 #include "error_handler.h"
 
 /* Private typedef -----------------------------------------------------------*/
-
+#ifndef USE_UDP
+uint8_t WAIT_RESP_FRM_QSSLOPEN = 0;
+uint8_t sslctxID = 0U;
+bool DEVICE_ONBOARDED = false ;
+#endif
 /* Private macros ------------------------------------------------------------*/
 #if (USE_TRACE_ATCUSTOM_SPECIFIC == 1U)
 #if (USE_PRINTF == 0U)
@@ -112,6 +116,11 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
   /* Array to convert AT+QIOPEN service type parameter to a string
   *  need to be aligned with ATCustom_BG96_QIOPENservicetype_t
   */
+  #ifndef USE_UDP
+  	WAIT_RESP_FRM_QSSLOPEN=1;
+
+	sslctxID = (DEVICE_ONBOARDED == true) ?  1U :  0U;
+  #endif
   static const AT_CHAR_t *const bg96_array_QIOPEN_service_type[] =
   {
     ((uint8_t *)"TCP"),             /* start TCP connnection as client */
@@ -133,6 +142,7 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
       *           <local_port>[,<access_mode>]]
       *
       * <contextID> is the PDP context ID
+       *AT+QSSLOPEN=<pdpctxID>,<sslctxID>,<clientID>,<serveraddr>,<server_port>[,<access_mode>]
       */
       /* convert user cid (CS_PDN_conf_id_t) to PDP modem cid (value) */
       uint8_t pdp_modem_cid = atcm_get_affected_modem_cid(&p_modem_ctxt->persist,
@@ -158,7 +168,16 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
           service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL) ?
                                 QIOPENSERVICETYPE_TCP_CLIENT : QIOPENSERVICETYPE_UDP_CLIENT);
         }
+#ifndef USE_UDP
 
+	        (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%d,%ld,\"%s\",%d,%d",
+	                       pdp_modem_cid,sslctxID,
+	                       atcm_socket_get_modem_cid(p_modem_ctxt,p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
+	                       p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
+	                       p_modem_ctxt->socket_ctxt.socket_info->remote_port,
+	                       access_mode);
+
+#else
         (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
                        pdp_modem_cid,
                        atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
@@ -167,6 +186,7 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
                        p_modem_ctxt->socket_ctxt.socket_info->remote_port,
                        p_modem_ctxt->socket_ctxt.socket_info->local_port,
                        access_mode);
+#endif
 
         /* waiting for +QIOPEN now */
         bg96_shared.QIOPEN_waiting = AT_TRUE;
@@ -313,12 +333,25 @@ at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem_c
       requested_data_size = p_modem_ctxt->socket_ctxt.socket_rx_expected_buf_size;
 
       /* requesting socket data with correct size */
-      (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
-                     atcm_socket_get_modem_cid(p_modem_ctxt,
-                                               p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
-                     requested_data_size);
+#ifndef USE_UDP
+      if (DEVICE_ONBOARDED == true) {
+#endif
+    	 (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
+                 atcm_socket_get_modem_cid(p_modem_ctxt,
+                                           p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
+                 requested_data_size);
+#ifndef USE_UDP
+      }
 
-      /* ready to start receive socket buffer */
+      else {
+          (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld",
+                  atcm_socket_get_modem_cid(p_modem_ctxt,
+                                            p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
+                  requested_data_size);
+
+      }
+#endif
+            /* ready to start receive socket buffer */
       p_modem_ctxt->socket_ctxt.socket_RxData_state = SocketRxDataState_waiting_header;
     }
     else
@@ -740,7 +773,7 @@ at_action_rsp_t fRspAnalyze_QISTATE_BG96(at_context_t *p_at_ctxt, atcustom_modem
   *
   * where:
   *
-  * exple: +QISTATE: 0,“TCP”,“220.180.239.201”,8705,65514,2,1,0,0,“usbmodem”
+  * exple: +QISTATE: 0,ï¿½TCPï¿½,ï¿½220.180.239.201ï¿½,8705,65514,2,1,0,0,ï¿½usbmodemï¿½
   */
 
   START_PARAM_LOOP()

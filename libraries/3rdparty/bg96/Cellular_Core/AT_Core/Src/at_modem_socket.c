@@ -22,19 +22,21 @@
 #include <stdio.h>
 #include <string.h>
 #include "at_core.h"
+#include "at_modem_api.h"
 #include "at_modem_common.h"
 #include "at_modem_signalling.h"
 #include "at_modem_socket.h"
+#include "at_custom_modem_socket.h"
+#include "at_custom_modem_specific.h"
 #include "at_datapack.h"
 #include "at_util.h"
 #include "cellular_runtime_custom.h"
 #include "sysctrl.h"
 #include "plf_config.h"
-
+#include "plf_modem_config.h"
+#include "error_handler.h"
 /* Private typedef -----------------------------------------------------------*/
-
 /* Private defines -----------------------------------------------------------*/
-
 /* Private macros ------------------------------------------------------------*/
 #if (USE_TRACE_ATCUSTOM_MODEM == 1U)
 #if (USE_PRINTF == 0U)

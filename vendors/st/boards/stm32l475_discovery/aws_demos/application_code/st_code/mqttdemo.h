@@ -35,7 +35,7 @@ extern "C" {
 //#define PRINT_INFO( ... )     PRINT_INFO(format, args...)
 
 
-#define PRINT_DBG(format, args...)  __NOP();
+#define PRINT_DBG(format, args...) TRACE_PRINT(DBG_CHAN_MQTTDEMO, DBL_LVL_P0, "MqttDemo: " format "\n\r", ## args)
 //#define PRINT_DBG( ... )    PRINT_DBG(format, args...)
 #define PRINT_ERR(format, args...)  \
   TRACE_PRINT(DBG_CHAN_ATCMD, DBL_LVL_ERR, "MqttDemo ERROR: " format "\n\r", ## args)

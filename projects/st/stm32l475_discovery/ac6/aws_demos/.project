@@ -402,9 +402,109 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/include/timers.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/3rdparty/CoAp</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>freertos_kernel/portable/MemMang/heap_4.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/MemMang/heap_4.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_interaction.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_interaction.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_interaction.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_interaction.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_main.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_main.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_main.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_main.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_message.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_message.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_message.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_message.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_options.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_options.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_options.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_options.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_resource.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_resource.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_resource.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_resource.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_socket.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_socket.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/coap_socket.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_socket.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/diagnostic.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/diagnostic.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/diagnostic.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/diagnostic.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/liblobaro_coap.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/liblobaro_coap.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/liblobaro_coap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/liblobaro_coap.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</name>
@@ -425,6 +525,71 @@
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/coap_interface.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/coap_interface.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/mem</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_ETag.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_ETag.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_ETag.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_ETag.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_blockwise.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_blockwise.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_blockwise.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_blockwise.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_cf.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_cf.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_cf.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_cf.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_observe.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_observe.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_observe.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_observe.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_uri.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_uri.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/option-types/coap_option_uri.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_uri.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/abstractions/platform/freertos/iot_clock_freertos.c</name>
@@ -605,6 +770,46 @@
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_ll_fmc.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_ll_fmc.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/mem/coap_mem.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/mem/coap_mem.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/mem/coap_mem.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/mem/coap_mem.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Endpoint.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Endpoint.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Endpoint.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Endpoint.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Packet.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Packet.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Packet.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Packet.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Socket.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Socket.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp/interface/network/net_Socket.h</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Socket.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/cellular_runtime_custom.c</name>
@@ -1819,12 +2024,12 @@
 		<link>
 			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_socket.c</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/at_custom_modem_socket.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Src/at_custom_modem_socket.c</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_specific.c</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/at_custom_modem_specific.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Src/at_custom_modem_specific.c</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/CMSIS/Device/ST/STM32L4xx/Include/stm32l475xx.h</name>

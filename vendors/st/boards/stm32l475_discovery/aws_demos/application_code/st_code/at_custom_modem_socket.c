@@ -323,16 +323,12 @@ at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem_c
   {
     if (p_modem_ctxt->socket_ctxt.socket_receive_state == SocketRcvState_RequestSize)
     {
-      /* requesting socket data size (set length = 0)why this 0 here because if we send it without 0 we will lose
-       the data */
+      /* requesting socket data size (set length = 0) */
       (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,0",
                      atcm_socket_get_modem_cid(p_modem_ctxt,
                                                p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle));
-
     }
-//     if (p_modem_ctxt->socket_ctxt.socket_receive_state == SocketRcvState_RequestData_Header)
     else if (p_modem_ctxt->socket_ctxt.socket_receive_state == SocketRcvState_RequestData_Header)
-
     {
       uint32_t requested_data_size;
       /* the value socket_rx_expected_buf_size used to fill this field has been already
@@ -341,22 +337,10 @@ at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem_c
       requested_data_size = p_modem_ctxt->socket_ctxt.socket_rx_expected_buf_size;
 
       /* requesting socket data with correct size */
-
-      if (DEVICE_ONBOARDED == true) {
-    	 (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
-                 atcm_socket_get_modem_cid(p_modem_ctxt,
-                                           p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
-                 requested_data_size);
-
-      }
-
-      else {
-          (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld",
-                  atcm_socket_get_modem_cid(p_modem_ctxt,
-                                            p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
-                  requested_data_size);
-
-      }
+      (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
+                     atcm_socket_get_modem_cid(p_modem_ctxt,
+                                               p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
+                     requested_data_size);
 
       /* ready to start receive socket buffer */
       p_modem_ctxt->socket_ctxt.socket_RxData_state = SocketRxDataState_waiting_header;

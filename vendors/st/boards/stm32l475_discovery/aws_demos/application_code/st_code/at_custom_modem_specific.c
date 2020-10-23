@@ -345,7 +345,7 @@ void ATCustom_BG96_init(atparser_context_t *p_atp_ctxt)
 				   {CMD_AT_QICLOSE,     "+QICLOSE",     BG96_QICLOSE_TIMEOUT,  fCmdBuild_QICLOSE_BG96, fRspAnalyze_None},
 				    {CMD_AT_QISEND,      "+QISEND",      BG96_DEFAULT_TIMEOUT,  fCmdBuild_QISEND_BG96,  fRspAnalyze_None},
 				    {CMD_AT_QISEND_WRITE_DATA,  "",      BG96_DEFAULT_TIMEOUT,  fCmdBuild_QISEND_WRITE_DATA_BG96, fRspAnalyze_None},
-				    {CMD_AT_QIRD,        "+QIRECV",        BG96_DEFAULT_TIMEOUT,  fCmdBuild_QIRD_BG96,    fRspAnalyze_QIRD_BG96},
+				    {CMD_AT_QIRD,        "+QIRD",        BG96_DEFAULT_TIMEOUT,  fCmdBuild_QIRD_BG96,    fRspAnalyze_QIRD_BG96},
 				    {CMD_AT_QISTATE,     "+QISTATE",     BG96_DEFAULT_TIMEOUT,  fCmdBuild_QISTATE_BG96, fRspAnalyze_QISTATE_BG96},
 				    {CMD_AT_QPING,        "+QPING",      BG96_QPING_TIMEOUT,    fCmdBuild_QPING_BG96,   fRspAnalyze_QPING_BG96},
 	    /* MODEM SPECIFIC EVENTS */
@@ -1512,7 +1512,7 @@ at_status_t ATCustom_BG96_getCmd(at_context_t *p_at_ctxt, uint32_t *p_ATcmdTimeo
     {
       /* check that data size to receive is not null */
      BG96_ctxt.socket_ctxt.socket_rx_expected_buf_size = expected_bytes;
-      if (BG96_ctxt.socket_ctxt.socket_rx_expected_buf_size != 0U)
+       if (BG96_ctxt.socket_ctxt.socket_rx_expected_buf_size != 0U)
       {
         /* check that data size to receive does not exceed maximum size
           *  if it's the case, only request maximum size we can receive
@@ -1529,6 +1529,7 @@ at_status_t ATCustom_BG96_getCmd(at_context_t *p_at_ctxt, uint32_t *p_ATcmdTimeo
         /* receive datas */
         BG96_ctxt.socket_ctxt.socket_receive_state = SocketRcvState_RequestData_Header;
         atcm_program_AT_CMD(&BG96_ctxt, p_atp_ctxt, ATTYPE_WRITE_CMD, (CMD_ID_t) CMD_AT_QIRD, FINAL_CMD);
+
       }
       else
       {

@@ -107,7 +107,7 @@ Onboarding_Status_t nce_onboard_device(void) {
 
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 
-	waitforprocessing(150);
+	waitforprocessing(30);
 
 	int32_t rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
 			(int32_t) sizeof(PART),

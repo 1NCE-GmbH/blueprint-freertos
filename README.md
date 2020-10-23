@@ -6,7 +6,7 @@ FreeRTOS is known as one of the most utilized RTOS in practice. This is becausei
 #### Required Hardware: 
 To install our project you will need:
   - B-L475E-IOT01A2 STM32 Discovery kit IoT node connected to BG96 (LTE Cat M1/Cat NB1/EGPRS modem) through X-NUCLEO-STMODA1 expansion board.
- ![Required Hardware](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/material.png) 
+ ![Required Hardware](/images/material.png) 
 #### Required Software:
    - STM32CubeIDE from https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-ides/stm32cubeide.html
   - You will need to register/ login to access downloads.
@@ -22,11 +22,11 @@ To install our project you will need:
 #### STM32 Setup
 
   - Import the project.
-   ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import1.png) 
+   ![imoport project](/images/import1.png) 
   - Choose the Existing project into Workspace and click Next.
-  ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import2.png)
+  ![imoport project](/images/import2.png)
   - Click browse and select the folder FreeRTOS cellular, a project with the title “aws_demos“ should be listed, then click Finish.
-    ![imoport project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/import3.png)
+    ![imoport project](/images/import3.png)
   -  Edit the following parameter in config_files/demo_config.h : 
 
      -  clientcredentialMQTT_BROKER_ENDPOINT[] = "url of end point";
@@ -36,11 +36,11 @@ To install our project you will need:
      -  clientcredentialMQTT_BROKER_PORT “MQTT Port”
      -  SUB_TOPIC "name of your topic iccid/sub_topic"
   -  debug the code. 
-  ![debug project](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/debug1.png)
+  ![debug project](/images/debug1.png)
   - Open a console on MPU Serial Device.
 # Thecnical Guide :
 #### System overview:
- ![Architecture](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/architecture.png)
+ ![Architecture](/images/architecture.png)
   -  **Cellular library** with SSL offload uses the certificates stored in the modem file system to establish a secure connection between the board and AWS Cloud.
 
   - **Secure socket** library is a standard from Amazon FreeRTOS and only supports TCP.
@@ -138,7 +138,7 @@ In order to set up the MQTT client to use a secure connection.
 
 #### MQTT configuration: 
 To facilitate the understanding of our solution we try to give you some scenario.
- ![mqtt scenario](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/mqtt.png)
+ ![mqtt scenario](/images/mqtt.png)
 
 #### Resources needed :
 | RAM           | Flash Memory  | 
@@ -184,8 +184,33 @@ The bluePrint consists of an example to publish a message in IoT Core with UDP.
 
 #### Demo: 
 In IoT Core we subscribe in <ICCID>/messages and we run our solution : 
-![UDP Demo](https://github.com/1NCE-GmbH/blueprint-freertos/blob/master/images/udp.png)
+![UDP Demo](/images/udp.png)
+### CoAP connection with our SDK: 
+#### COAP POST request sending over UDP:
+In this Section our SDK following steps are executed:
+* Register to the Network. 
+* Perform a DNS Resolution.
+* Create a socket and connect to Server
+* Create Confirmable CoAP POST with Quiry option
+* Create Client Interaction and analyse the response (ACK)
+* Valid the response.
+##### User Guide:
+The code by default work with MQTT if you want to use our CoAP Solution you need to add : 
+/aws_demos/config_files/demo_config.h
+```c
+#define USE_UDP
+#define COAP
+#define COAP_ENDPOINT "coap.connectivity-suite.cloud"
+#define configCOAP_PORT    5683
+#define configCOAP_URI_PATH    "t=<quiry_path>"
+#define PUBLISH_PAYLOAD_FORMAT                   "your text"
+```
+Example: 
+![demo_config.h](/images/CoAP1.PNG)
 
 
+The Message show in AWS :
+ 
+![aws after Sending a message](/images/CoAP2.PNG)
 #### Conclusion:
 When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection.

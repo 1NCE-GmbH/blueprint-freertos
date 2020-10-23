@@ -50,8 +50,8 @@
 
 #include "nce_onboarding.h"
 #include "nce_bg96_configuration.h"
-
-
+#include "coap_main.h"
+#include "at_core.h"
 /* MQTT Demo Defines */
 //#define <fi  clientcredentialIOT_THING_NAME
 #define AWSIOT_NETWORK_TYPE_NONE     			 0x00000000
@@ -110,7 +110,7 @@ typedef struct {
 #include "iot_logging_setup.h"
 
 /* Private defines -----------------------------------------------------------*/
-
+//bool DEVICE_ONBOARDED ;
 /*
  /* Private macro -------------------------------------------------------------*/
 
@@ -159,7 +159,7 @@ CS_Status_t cs_status;
 static osThreadId mqttdemoTaskHandle;
 UBaseType_t uxHighWaterMark;
 char identifier[25];
-char	iotCoreEndpointUrl[50];
+char iotCoreEndpointUrl[50];
 
 /* Private function prototypes -----------------------------------------------*/
 /* Callback */
@@ -172,7 +172,6 @@ static void mqttdemo_socket_thread(void const *argument);
 /* Private functions ---------------------------------------------------------*/
 
 //##########################################################################################################
-
 static const struct IotNetworkServerInfo xMQTTBrokerInfo = { .pHostName =
 		iotCoreEndpointUrl, .port =
 clientcredentialMQTT_BROKER_PORT };
@@ -841,7 +840,7 @@ static void prvMQTTConnect(void) {
 		PRINT_INFO("MQTT CONNECT returned error %s.", IotMqtt_strerror(xResult));
 
 	} else {
-		PRINT_INFO("D O N E ");
+		PRINT_INFO("D O N E");
 	}
 
 	configASSERT(xResult == IOT_MQTT_SUCCESS);
@@ -931,6 +930,15 @@ void mqttdemo_init(void) {
 		ERROR_Handler(DBG_CHAN_MQTTDEMO, 1, ERROR_FATAL);
 	}
 }
+#ifdef COAP
+
+CoAP_RespHandler_fn_t CoAP_Resp_handler(CoAP_Message_t *pRespMsg,
+		NetEp_t *Sender) {
+	configPRINTF(
+			( "MESSAGE Payload : %s \r\n" , pRespMsg->Payload ));
+	PrintEndpoint(Sender);
+}
+#endif
 #ifndef USE_UDP
 /**
  * @brief  Socket thread
@@ -961,7 +969,7 @@ static void mqttdemo_socket_thread(void const *argument) {
 	}
 
 	if (mqttdemo_network_is_on == true) {
-		PRINT_INFO("  mqttdemo_network_is_on == true")
+		PRINT_INFO("---------STARTING DEMO---------\n")
 #ifndef USE_UDP
 		PRINT_FORCE("\n\r<<< MQTT STARTED >>>\n\r")
 		mqttdemo_process_flag = true;
@@ -1009,18 +1017,20 @@ static void mqttdemo_socket_thread(void const *argument) {
 
 
 #else
+#ifndef COAP
 		PRINT_FORCE("\n\r<<< UDP STARTED >>>\n\r")
 		Socket_t cert_socket = SOCKETS_Socket( SOCKETS_AF_INET,
 		SOCKETS_SOCK_DGRAM, COM_IPPROTO_UDP);
 		UBaseType_t uxHighWaterMark;
 		uxHighWaterMark = uxTaskGetStackHighWaterMark(mqttdemoTaskHandle);
-		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r",uxHighWaterMark)
+		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r", uxHighWaterMark)
 
 		uint32_t UDP_IP = SOCKETS_GetHostByName(&UDP_ENDPOINT);
-		SocketsSockaddr_t udp_address = {
-				.ucLength = sizeof(SocketsSockaddr_t), .ucSocketDomain =
-						SOCKETS_AF_INET, .usPort = SOCKETS_htons(UDP_PORT),
-				.ulAddress = UDP_IP };
+		SocketsSockaddr_t udp_address = { .ucLength = sizeof(SocketsSockaddr_t),
+				.ucSocketDomain =
+				SOCKETS_AF_INET, .usPort = SOCKETS_htons(UDP_PORT), .ulAddress =
+						UDP_IP };
+
 		uint32_t timeout = 30000;
 
 		int32_t set_timeout = SOCKETS_SetSockOpt(cert_socket,
@@ -1028,17 +1038,93 @@ static void mqttdemo_socket_thread(void const *argument) {
 				(int32_t) sizeof(timeout));
 		int32_t lRetVal = SOCKETS_Connect(cert_socket, &udp_address,
 				sizeof(SocketsSockaddr_t));
-		PRINT_FORCE("\n\r<<< %d >>>\n\r",lRetVal)
+		PRINT_FORCE("\n\r<<< %d >>>\n\r", lRetVal)
 		char send_packet[100];
-		sprintf(send_packet,&PUBLISH_PAYLOAD_FORMAT,UDP_ENDPOINT);
+		sprintf(send_packet, &PUBLISH_PAYLOAD_FORMAT, UDP_ENDPOINT);
 		int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,
-							strlen(send_packet), NULL);
+				strlen(send_packet), NULL);
 		uxHighWaterMark = uxTaskGetStackHighWaterMark(mqttdemoTaskHandle);
-		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r",uxHighWaterMark)
+		PRINT_FORCE("\n\r<<< UDP %d >>>\n\r", uxHighWaterMark)
 		SOCKETS_Close(cert_socket);
 		PRINT_FORCE("\n\r<<< UDP FINISH >>>\n\r")
+#else
+		SocketsSockaddr_t ServerAddress;
+		NetPacket_t pPacket;
+		int status;
+		uint32_t timeout = 30000;
+//		DNS Resolution
+		uint32_t COAP_IP = SOCKETS_GetHostByName(&COAP_ENDPOINT);
+		uint8_t configCOAP_SERVER_ADDR3 = (uint8_t) (COAP_IP >> 24);
+		uint8_t configCOAP_SERVER_ADDR2 = (uint8_t) (COAP_IP >> 16);
+		uint8_t configCOAP_SERVER_ADDR1 = (uint8_t) (COAP_IP >> 8);
+		uint8_t configCOAP_SERVER_ADDR0 = (uint8_t) (COAP_IP >> 0);
+		const NetEp_t ServerEp = { .NetType = IPV4, .NetPort =
+		configCOAP_PORT, .NetAddr = { .IPv4 = { .u8 = { configCOAP_SERVER_ADDR0,
+				configCOAP_SERVER_ADDR1, configCOAP_SERVER_ADDR2,
+				configCOAP_SERVER_ADDR3 } } } };
+//		Create Socket and Allocate memorie
+		Socket_t udp = SOCKETS_Socket( SOCKETS_AF_INET, SOCKETS_SOCK_DGRAM,
+		COM_IPPROTO_UDP);
+		CoAP_Socket_t *socket = AllocSocket();
+
+		SocketsSockaddr_t coap_address = {
+				.ucLength = sizeof(SocketsSockaddr_t), .ucSocketDomain =
+				SOCKETS_AF_INET, .usPort = SOCKETS_htons(configCOAP_PORT),
+				.ulAddress = COAP_IP };
+
+		int32_t set_timeout = SOCKETS_SetSockOpt(udp,
+		COM_SOL_SOCKET, SOCKETS_SO_RCVTIMEO, &timeout,
+				(int32_t) sizeof(timeout));
+		if (SOCKETS_Connect(udp, &coap_address, sizeof(coap_address)) == 0) {
+			PRINT_INFO("Connected to CoAP client\r\n")
+			/* Add socket and Network Interface configuration */
+			socket->Handle = udp;
+			socket->Tx = CoAP_Send_Wifi;
+			/* Create confirmable CoAP POST packet with URI Path option */
+			CoAP_Message_t *pReqMsg = CoAP_CreateMessage(CON, REQ_POST,
+					CoAP_GetNextMid(), CoAP_GenerateToken());
+
+			CoAP_addNewPayloadToMessage(pReqMsg, PUBLISH_PAYLOAD_FORMAT,
+					strlen(PUBLISH_PAYLOAD_FORMAT));
+//			add QUery support as option
+			CoAP_AddOption(pReqMsg, OPT_NUM_URI_QUERY, configCOAP_URI_PATH,
+					strlen(configCOAP_URI_PATH));
+
+			/* Create CoAP Client Interaction to send a confirmable POST Request  */
+			CoAP_StartNewClientInteraction(pReqMsg, socket->Handle, &ServerEp,
+					CoAP_Resp_handler);
+			CoAP_Interaction_t *pIA = CoAP_GetLongestPendingInteraction();
+
+			/* Execute the Interaction list  */
+			while (pIA != NULL) {
+
+				CoAP_doWork();
+
+				if (pIA->State == COAP_STATE_WAITING_RESPONSE) {
+
+					CoAP_Recv_Wifi(socket->Handle, &pPacket, ServerEp);
+				}
+
+				pIA = CoAP_GetLongestPendingInteraction();
+
+			}
+
+		}
+		/* DO NOT EDIT - This message is used in the test framework to
+		 * determine whether or not the demo was successful. */
+		PRINT_INFO("Demo completed successfully.");
+
+		_cleanup();
+	} else {
+		/* DO NOT EDIT - This demo end marker is used in the test framework to
+		 * determine the end of a demo. */
+
+		PRINT_ERR("Failed to initialize the demo. exiting...");
 #endif
+#endif
+
 	}
+	PRINT_INFO("-------DEMO FINISHED-------\n");
 }
 
 /**

@@ -278,7 +278,8 @@ static void com_ip_modem_init_socket_desc(socket_desc_t *socket_desc)
   socket_desc->remote_port      = 0U;
   socket_desc->remote_addr.addr = 0U;
   (void)memset((void *)&socket_desc->remote_addr, 0, sizeof(socket_desc->remote_addr));
-  socket_desc->rcv_timeout      = RTOS_WAIT_FOREVER;
+//  socket_desc->rcv_timeout      = RTOS_WAIT_FOREVER;
+  socket_desc->rcv_timeout      = 100U;
   socket_desc->snd_timeout      = RTOS_WAIT_FOREVER;
   socket_desc->error            = COM_SOCKETS_ERR_OK;
   /* socket_desc->next is not re-initialize - element is let in the list at its place */

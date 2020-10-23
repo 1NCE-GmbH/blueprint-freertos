@@ -14,6 +14,10 @@
 
 
 /* UDP Configuration */ 
-//#define USE_UDP 
+#define USE_UDP
 #define UDP_ENDPOINT "udp.connectivity-suite.cloud"
 #define UDP_PORT 4445
+#define COAP
+#define COAP_ENDPOINT "coap.connectivity-suite.cloud"
+#define configCOAP_PORT    5683
+#define configCOAP_URI_PATH    "t=test"
