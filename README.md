@@ -80,7 +80,7 @@ We send an HTTPS request to our API to get the response :
 
 ```c
 char send_packet[] = "GET /device-api/onboarding HTTP/1.1\r\n"
-          "Host: device.dev.connectivity-suite.cloud\r\n"
+          "Host: device.connectivity-suite.cloud\r\n"
           "Accept: text/csv\r\n\r\n";
 int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,strlen(send_packet), NULL);
 ```
