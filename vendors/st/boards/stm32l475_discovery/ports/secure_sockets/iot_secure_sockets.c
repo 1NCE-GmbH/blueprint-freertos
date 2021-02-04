@@ -55,7 +55,6 @@
 #include "es_wifi_io.h" */
 
 /* Socket and WiFi interface includes.
-#include "iot_wifi.h"
 
 /* WiFi configuration includes.
 #include "aws_wifi_config.h" */
@@ -65,6 +64,8 @@
 /* Credentials includes. */
 #include "aws_clientcredential.h"
 #include "iot_default_root_certificates.h"
+
+#include "iot_tls.h"
 
 #undef _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
 
@@ -413,13 +414,28 @@ Socket_t SOCKETS_Socket( int32_t lDomain, /* OK */
 
     /* Ensure that only supported values are supplied. */
     configASSERT( lDomain == SOCKETS_AF_INET );
-#ifndef USE_UDP
 
+    /* Here we have 3 cases
+     * 1. DTLS with Onboarding: needs QSSL initially for onboarding and then QI
+     * 2. MQTT: always uses QSSL
+     * 3. UDP : always uses QI
+     * */
+#if defined(USE_UDP) && defined(DTLS_DEMO)
+if(DEVICE_ONBOARDED == false) {
     configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
-#else
+}
+else{
     configASSERT( ( lType == SOCKETS_SOCK_DGRAM && lProtocol == COM_IPPROTO_UDP ) );
+
+}
+#elif  !defined(USE_UDP) && !defined(DTLS_DEMO)
+configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
+#else
+configASSERT( ( lType == SOCKETS_SOCK_DGRAM && lProtocol == COM_IPPROTO_UDP ) );
 #endif
-    /* Try to get a free socket. */
+
+
+      /* Try to get a free socket. */
     ulSocketNumber = prvGetFreeSocket();
 
 
@@ -461,7 +477,10 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
 {
     uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
     STSecureSocket_t * pxSecureSocket;
-    //TLSParams_t xTLSParams = { 0 };
+	#ifndef USE_OFFLOAD_SSL
+        TLSParams_t xTLSParams = { 0 };
+    #endif /* USE_OFFLOAD_SSL */
+
     int32_t lRetVal = SOCKETS_SOCKET_ERROR;
     com_sockaddr_in_t  destination_address;
     uint32_t lRecvTimeout,lSendTimeout;
@@ -486,6 +505,40 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             lRetVal = SOCKETS_ERROR_NONE;
         }
     }
+    /* TLS initialization is needed only if we are not using offload SSL. */
+        	#ifndef USE_OFFLOAD_SSL
+                  /* Initialize TLS only if the connection is successful. */
+                  if( ( lRetVal == SOCKETS_ERROR_NONE ) &&
+                      ( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL ) )
+                  {
+                      /* Setup TLS parameters. */
+                      xTLSParams.ulSize = sizeof( xTLSParams );
+                      xTLSParams.pcDestination = pxSecureSocket->pcDestination;
+                      xTLSParams.pcServerCertificate = pxSecureSocket->pcServerCertificate;
+                      xTLSParams.ulServerCertificateLength = pxSecureSocket->ulServerCertificateLength;
+                      xTLSParams.pvCallerContext = ( void * ) xSocket;
+                      xTLSParams.pxNetworkRecv = &( prvNetworkRecv );
+                      xTLSParams.pxNetworkSend = &( prvNetworkSend );
+
+
+
+                      /* Initialize TLS. */
+                      if( TLS_Init( &( pxSecureSocket->pvTLSContext ), &( xTLSParams ) ) == pdFREERTOS_ERRNO_NONE )
+                      {
+                          /* Initiate TLS handshake. */
+                          if( TLS_Connect( pxSecureSocket->pvTLSContext ) != pdFREERTOS_ERRNO_NONE )
+                          {
+                              /* TLS handshake failed. */
+                              lRetVal = SOCKETS_TLS_HANDSHAKE_ERROR;
+                          }
+                      }
+                      else
+                      {
+                          /* TLS Initialization failed. */
+                          lRetVal = SOCKETS_TLS_INIT_ERROR;
+                      }
+                  }
+              #endif /* USE_OFFLOAD_SSL*/
 
     return lRetVal;
 }
@@ -515,7 +568,31 @@ int32_t SOCKETS_Recv( Socket_t xSocket,
         /* Check that receive is allowed on the socket. */
         if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_READ_CLOSED_FLAG ) == 0UL )
         {
+#ifndef USE_OFFLOAD_SSL
+                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL )
+                {
+                    /* Receive through TLS pipe, if negotiated. */
+                    lReceivedBytes = TLS_Recv( pxSecureSocket->pvTLSContext, pvBuffer, xBufferLength );
+
+
+
+                    /* Convert the error code. */
+                    if( lReceivedBytes < 0 )
+                    {
+                        /* TLS_Recv failed. */
+                        lReceivedBytes = SOCKETS_TLS_RECV_ERROR;
+                    }
+                }
+                else
+                {
+                    /* Receive un-encrypted. */
+                    lReceivedBytes = prvNetworkRecv( xSocket, pvBuffer, xBufferLength );
+                }
+            #else /* USE_OFFLOAD_SSL */
+                /* Always receive using prvNetworkRecv if using offload SSL. */
                 lReceivedBytes = prvNetworkRecv( xSocket, pvBuffer, xBufferLength );
+            #endif /* USE_OFFLOAD_SSL */
+
         }
         else
         {
@@ -551,7 +628,31 @@ int32_t SOCKETS_Send( Socket_t xSocket,
         /* Check that send is allowed on the socket. */
         if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_WRITE_CLOSED_FLAG ) == 0UL )
         {
+#ifndef USE_OFFLOAD_SSL
+                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL )
+                {
+                    /* Send through TLS pipe, if negotiated. */
+                    lSentBytes = TLS_Send( pxSecureSocket->pvTLSContext, pvBuffer, xDataLength );
+
+
+
+                    /* Convert the error code. */
+                    if( lSentBytes < 0 )
+                    {
+                        /* TLS_Send failed. */
+                        lSentBytes = SOCKETS_TLS_SEND_ERROR;
+                    }
+                }
+                else
+                {
+                    /* Send un-encrypted. */
+                    lSentBytes = prvNetworkSend( xSocket, pvBuffer, xDataLength );
+                }
+            #else /* USE_OFFLOAD_SSL */
+                /* Always send using prvNetworkSend if using offload SSL. */
                 lSentBytes = prvNetworkSend( xSocket, pvBuffer, xDataLength );
+            #endif /* USE_OFFLOAD_SSL */
+
         }
         else
         {
