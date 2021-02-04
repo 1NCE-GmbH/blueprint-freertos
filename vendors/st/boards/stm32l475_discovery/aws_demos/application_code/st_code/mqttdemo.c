@@ -110,7 +110,7 @@ typedef struct {
 #include "iot_logging_setup.h"
 
 /* Private defines -----------------------------------------------------------*/
-//bool DEVICE_ONBOARDED ;
+bool DEVICE_ONBOARDED ;
 /*
  /* Private macro -------------------------------------------------------------*/
 
@@ -186,18 +186,7 @@ static struct IotNetworkCredentials xNetworkSecurityCredentials = {
 
 /* SNI is enabled by default. */
 .disableSni = false,
-
-/* Provide the certificate for validating the server. Only required for
- * demos using TLS. */
-.pRootCa = tlsATS1_ROOT_CERTIFICATE_PEM, .rootCaSize =
-		sizeof(tlsATS1_ROOT_CERTIFICATE_PEM),
-
-/* Strong mutual authentication to authenticate both the broker and
- * the client. */
-.pClientCert = keyCLIENT_CERTIFICATE_PEM, .clientCertSize =
-		sizeof(keyCLIENT_CERTIFICATE_PEM), .pPrivateKey =
-		keyCLIENT_PRIVATE_KEY_PEM, .privateKeySize =
-		sizeof(keyCLIENT_PRIVATE_KEY_PEM) };
+};
 
 static IotMqttNetworkInfo_t xNetworkInfo = {
 /* No connection to the MQTT broker has been established yet and we want to
@@ -866,11 +855,11 @@ static void mqttdemo_notif_cb(dc_com_event_id_t dc_event_id,
 		(void) dc_com_read(&dc_com_db, DC_CELLULAR_NIFMAN_INFO,
 				(void*) &dc_nifman_info, sizeof(dc_nifman_info));
 		if (dc_nifman_info.rt_state == DC_SERVICE_ON) {
-			PRINT_FORCE("Echo: Network is up\n\r")
+			PRINT_FORCE("\n\r Network is up\n\r")
 			mqttdemo_network_is_on = true;
 			(void) osMessagePut(mqttdemo_queue, (uint32_t) dc_event_id, 0U);
 		} else {
-			PRINT_FORCE("Echo: Network is down\n\r")
+			PRINT_FORCE("\n\r Network is down\n\r")
 			mqttdemo_network_is_on = false;
 		}
 	}
@@ -939,17 +928,7 @@ CoAP_RespHandler_fn_t CoAP_Resp_handler(CoAP_Message_t *pRespMsg,
 	PrintEndpoint(Sender);
 }
 #endif
-#ifndef USE_UDP
-/**
- * @brief  Socket thread
- * @note   Infinite loop Mqtt Demo body
- * @param  argument - parameter osThread
- * @note   UNUSED
- * @retval -
- */
 
-
-#endif
 static void mqttdemo_socket_thread(void const *argument) {
 #ifndef USE_UDP
 	uint32_t nfmc_tempo;
@@ -961,7 +940,7 @@ static void mqttdemo_socket_thread(void const *argument) {
 	PRINT_FORCE("\n\r<<<  connecting  >>>\n\r")
 	(void) osMessageGet(mqttdemo_queue, RTOS_WAIT_FOREVER);
 	(void) osDelay(1000U);
-	PRINT_INFO("mqttdemo_network_is_on) %d", mqttdemo_network_is_on)
+	PRINT_INFO("mqttdemo_network_is_on %d", mqttdemo_network_is_on)
 
 	if (SYSTEM_Init() == pdPASS) {
 		PRINT_INFO("SYSTEM_Init Done")
@@ -1048,6 +1027,12 @@ static void mqttdemo_socket_thread(void const *argument) {
 		SOCKETS_Close(cert_socket);
 		PRINT_FORCE("\n\r<<< UDP FINISH >>>\n\r")
 #else
+#ifdef DTLS_DEMO
+        Onboarding_Status_t onboarding_status ;
+        onboarding_status = nce_onboard_device();
+    	nce_disable_qssl();
+    	DEVICE_ONBOARDED=true;
+#endif
 		SocketsSockaddr_t ServerAddress;
 		NetPacket_t pPacket;
 		int status;
@@ -1058,6 +1043,7 @@ static void mqttdemo_socket_thread(void const *argument) {
 		uint8_t configCOAP_SERVER_ADDR2 = (uint8_t) (COAP_IP >> 16);
 		uint8_t configCOAP_SERVER_ADDR1 = (uint8_t) (COAP_IP >> 8);
 		uint8_t configCOAP_SERVER_ADDR0 = (uint8_t) (COAP_IP >> 0);
+
 		const NetEp_t ServerEp = { .NetType = IPV4, .NetPort =
 		configCOAP_PORT, .NetAddr = { .IPv4 = { .u8 = { configCOAP_SERVER_ADDR0,
 				configCOAP_SERVER_ADDR1, configCOAP_SERVER_ADDR2,
@@ -1066,6 +1052,8 @@ static void mqttdemo_socket_thread(void const *argument) {
 		Socket_t udp = SOCKETS_Socket( SOCKETS_AF_INET, SOCKETS_SOCK_DGRAM,
 		COM_IPPROTO_UDP);
 		CoAP_Socket_t *socket = AllocSocket();
+
+		SOCKETS_SetSockOpt( udp, 0, SOCKETS_SO_REQUIRE_TLS, NULL, ( size_t ) 0 );
 
 		SocketsSockaddr_t coap_address = {
 				.ucLength = sizeof(SocketsSockaddr_t), .ucSocketDomain =
@@ -1081,7 +1069,7 @@ static void mqttdemo_socket_thread(void const *argument) {
 			socket->Handle = udp;
 			socket->Tx = CoAP_Send_Wifi;
 			/* Create confirmable CoAP POST packet with URI Path option */
-			CoAP_Message_t *pReqMsg = CoAP_CreateMessage(CON, REQ_POST,
+			CoAP_Message_t *pReqMsg = CoAP_CreateMessage(NON, REQ_POST,
 					CoAP_GetNextMid(), CoAP_GenerateToken());
 
 			CoAP_addNewPayloadToMessage(pReqMsg, PUBLISH_PAYLOAD_FORMAT,
@@ -1094,25 +1082,15 @@ static void mqttdemo_socket_thread(void const *argument) {
 			CoAP_StartNewClientInteraction(pReqMsg, socket->Handle, &ServerEp,
 					CoAP_Resp_handler);
 			CoAP_Interaction_t *pIA = CoAP_GetLongestPendingInteraction();
-
-			/* Execute the Interaction list  */
-			while (pIA != NULL) {
-
-				CoAP_doWork();
-
-				if (pIA->State == COAP_STATE_WAITING_RESPONSE) {
-
-					CoAP_Recv_Wifi(socket->Handle, &pPacket, ServerEp);
-				}
-
-				pIA = CoAP_GetLongestPendingInteraction();
-
-			}
+			CoAP_doWork();
+			/* DO NOT EDIT - This message is used in the test framework to
+			 * determine whether or not the demo was successful. */
+			PRINT_INFO("Demo completed successfully.");
+		}
+		else {
+			PRINT_INFO("Failed to connect to CoAP Server..\n");
 
 		}
-		/* DO NOT EDIT - This message is used in the test framework to
-		 * determine whether or not the demo was successful. */
-		PRINT_INFO("Demo completed successfully.");
 
 		_cleanup();
 	} else {

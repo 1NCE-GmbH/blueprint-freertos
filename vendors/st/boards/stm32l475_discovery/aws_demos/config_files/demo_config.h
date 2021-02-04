@@ -18,10 +18,10 @@
 #define UDP_PORT 4445
 
 /* COAP Configuration with/without DTLS */
-//#define DTLS_DEMO
+#define DTLS_DEMO
 #define COAP
 #define COAP_ENDPOINT "coap.connectivity-suite.cloud"
-#define configCOAP_PORT    5683
+#define configCOAP_PORT    5684
 #define configCOAP_URI_PATH    "t=test"
 
 #if  !defined(USE_UDP) && !defined(DTLS_DEMO)

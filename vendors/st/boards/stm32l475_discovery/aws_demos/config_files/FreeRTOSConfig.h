@@ -91,7 +91,7 @@
 #include <stdint.h>
 extern uint32_t SystemCoreClock;
 #endif /* (__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__) */
-
+#include "demo_config.h"
 #define configUSE_PREEMPTION                     1
 #define configSUPPORT_STATIC_ALLOCATION          1
 #define configSUPPORT_DYNAMIC_ALLOCATION         1
@@ -101,7 +101,12 @@ extern uint32_t SystemCoreClock;
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 7 )
 #define configMINIMAL_STACK_SIZE                 ((size_t)128)
-#define configTOTAL_HEAP_SIZE                    ( ( size_t ) ( 70* 1024 ) )
+
+#if  !defined(USE_UDP) && !defined(DTLS_DEMO)
+#define configTOTAL_HEAP_SIZE                    ( ( size_t ) ( 65* 1024 ) )
+#else
+#define configTOTAL_HEAP_SIZE                    ( ( size_t ) ( 60* 1024 ) )
+#endif
 //#define configTOTAL_HEAP_SIZE                    ((size_t)TOTAL_HEAP_SIZE)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1

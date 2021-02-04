@@ -212,5 +212,22 @@ Example:
 The Message show in AWS :
  
 ![aws after Sending a message](/images/CoAP2.PNG)
+### COAP with DTLS Support: 
+
+For the DTLS Support the default Port is 5684 and define the DTLS_Demo as aditional define 
+```c
+#define USE_UDP
+#define COAP
+#define DTLS_Demo
+#define COAP_ENDPOINT "coap.connectivity-suite.cloud"
+#define configCOAP_PORT    5684
+#define configCOAP_URI_PATH    "t=<quiry_path>"
+#define PUBLISH_PAYLOAD_FORMAT                   "your text"
+```
+The CoAP DTLS performs 3 main tasks :
+* Send the Onboarding Request
+* Get the Response
+* Process the Response and give the DTLS identity and PSK to the application code.
+![DTLS Flow](/images/DTLS.png)
 #### Conclusion:
 When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection.
