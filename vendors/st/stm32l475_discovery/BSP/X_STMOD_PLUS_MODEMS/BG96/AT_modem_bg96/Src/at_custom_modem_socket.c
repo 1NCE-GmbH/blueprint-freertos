@@ -35,7 +35,7 @@
 #include "error_handler.h"
 
 /* Private typedef -----------------------------------------------------------*/
-#ifndef USE_UDP
+#if !(defined(USE_UDP) ^ defined(DTLS_DEMO))
 uint8_t WAIT_RESP_FRM_QSSLOPEN = 0;
 uint8_t sslctxID = 0U;
 bool DEVICE_ONBOARDED = false ;
@@ -116,9 +116,8 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
   /* Array to convert AT+QIOPEN service type parameter to a string
   *  need to be aligned with ATCustom_BG96_QIOPENservicetype_t
   */
-  #ifndef USE_UDP
+  #if !(defined(USE_UDP) ^ defined(DTLS_DEMO))
   	WAIT_RESP_FRM_QSSLOPEN=1;
-
 	sslctxID = (DEVICE_ONBOARDED == true) ?  1U :  0U;
   #endif
   static const AT_CHAR_t *const bg96_array_QIOPEN_service_type[] =
@@ -168,15 +167,38 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
           service_type_index = ((p_modem_ctxt->socket_ctxt.socket_info->protocol == CS_TCP_PROTOCOL) ?
                                 QIOPENSERVICETYPE_TCP_CLIENT : QIOPENSERVICETYPE_UDP_CLIENT);
         }
-#ifndef USE_UDP
 
-	        (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%d,%ld,\"%s\",%d,%d",
-	                       pdp_modem_cid,sslctxID,
-	                       atcm_socket_get_modem_cid(p_modem_ctxt,p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
-	                       p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
-	                       p_modem_ctxt->socket_ctxt.socket_info->remote_port,
-	                       access_mode);
-
+        /* Here we have 3 cases
+         * 1. DTLS with Onboarding: needs QSSL initially for onboarding and then QI
+         * 2. MQTT: always uses QSSL
+         * 3. UDP : always uses QI
+         * */
+#if defined(USE_UDP) && defined(DTLS_DEMO)
+	if(DEVICE_ONBOARDED == false) {
+		(void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%d,%ld,\"%s\",%d,%d",
+					   pdp_modem_cid,sslctxID,
+					   atcm_socket_get_modem_cid(p_modem_ctxt,p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
+					   p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
+					   p_modem_ctxt->socket_ctxt.socket_info->remote_port,
+					   access_mode);
+	}
+	else{
+	(void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
+				   pdp_modem_cid,
+				   atcm_socket_get_modem_cid(p_modem_ctxt, p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
+				   bg96_array_QIOPEN_service_type[service_type_index],
+				   p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
+				   p_modem_ctxt->socket_ctxt.socket_info->remote_port,
+				   p_modem_ctxt->socket_ctxt.socket_info->local_port,
+				   access_mode);
+	}
+#elif  !defined(USE_UDP) && !defined(DTLS_DEMO)
+	(void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%d,%ld,\"%s\",%d,%d",
+				   pdp_modem_cid,sslctxID,
+				   atcm_socket_get_modem_cid(p_modem_ctxt,p_modem_ctxt->socket_ctxt.socket_info->socket_handle),
+				   p_modem_ctxt->socket_ctxt.socket_info->ip_addr_value,
+				   p_modem_ctxt->socket_ctxt.socket_info->remote_port,
+				   access_mode);
 #else
         (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%d,%ld,\"%s\",\"%s\",%d,%d,%d",
                        pdp_modem_cid,
@@ -187,6 +209,8 @@ at_status_t fCmdBuild_QIOPEN_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem
                        p_modem_ctxt->socket_ctxt.socket_info->local_port,
                        access_mode);
 #endif
+
+
 
         /* waiting for +QIOPEN now */
         bg96_shared.QIOPEN_waiting = AT_TRUE;
@@ -333,14 +357,14 @@ at_status_t fCmdBuild_QIRD_BG96(atparser_context_t *p_atp_ctxt, atcustom_modem_c
       requested_data_size = p_modem_ctxt->socket_ctxt.socket_rx_expected_buf_size;
 
       /* requesting socket data with correct size */
-#ifndef USE_UDP
+#if !(defined(USE_UDP) ^ defined(DTLS_DEMO))
       if (DEVICE_ONBOARDED == true) {
 #endif
     	 (void) sprintf((CRC_CHAR_t *)p_atp_ctxt->current_atcmd.params, "%ld,%ld",
                  atcm_socket_get_modem_cid(p_modem_ctxt,
                                            p_modem_ctxt->socket_ctxt.socketReceivedata.socket_handle),
                  requested_data_size);
-#ifndef USE_UDP
+#if !(defined(USE_UDP) ^ defined(DTLS_DEMO))
       }
 
       else {

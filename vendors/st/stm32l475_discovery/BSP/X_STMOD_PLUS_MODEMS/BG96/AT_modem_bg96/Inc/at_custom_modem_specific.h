@@ -309,6 +309,9 @@ typedef struct
 
 /* External variables --------------------------------------------------------*/
 extern bg96_shared_variables_t bg96_shared;
+extern atcustom_LUT_t ATCMD_BG96_LUT[];
+extern atcustom_modem_context_t BG96_ctxt;
+
 
 /* Exported macros -----------------------------------------------------------*/
 
