@@ -31,6 +31,24 @@ CS_Status_t nce_send_modem_command(CS_CHAR_t* at_command) {
 	return (result);
 }
 
+void nce_enable_qssl(void) {
+
+  strcpy(&BG96_ctxt.p_modem_LUT[71].cmd_str , "+QSSLOPEN");
+  strcpy(&BG96_ctxt.p_modem_LUT[72].cmd_str , "+QSSLCLOSE");
+  strcpy(&BG96_ctxt.p_modem_LUT[73].cmd_str , "+QSSLSEND");
+  strcpy(&BG96_ctxt.p_modem_LUT[75].cmd_str , "+QSSLRECV");
+  strcpy(&BG96_ctxt.p_modem_LUT[76].cmd_str , "+QSSLSTATE");
+}
+
+void nce_disable_qssl(void) {
+  strcpy(&BG96_ctxt.p_modem_LUT[71].cmd_str , "+QIOPEN");
+  strcpy(&BG96_ctxt.p_modem_LUT[72].cmd_str , "+QICLOSE");
+  strcpy(&BG96_ctxt.p_modem_LUT[73].cmd_str , "+QISEND");
+  strcpy(&BG96_ctxt.p_modem_LUT[75].cmd_str , "+QIRD");
+  strcpy(&BG96_ctxt.p_modem_LUT[76].cmd_str , "+QISTATE");
+}
+
+
 CS_Status_t nce_configure_onboarding_socket(void) {
 
 

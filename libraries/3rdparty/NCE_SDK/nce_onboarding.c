@@ -18,10 +18,13 @@
   TRACE_PRINT(DBG_CHAN_ATCMD, DBL_LVL_ERR, "1NCE_Demo ERROR: " format "\n\r", ## args)
 
 /* Onboarding Defines */
+uint8_t PSK[500];
+uint8_t psk_identity[20];
 uint8_t PART[1800];
-int offset = &PART[0];
 char find[] = "\\n";
 char replace_with[] = "\n";
+
+int offset = &PART[0];
 char end_key[] = "-----END RSA PRIVATE KEY-----";
 int end_key_len = sizeof(end_key);
 char end_cert[] = "-----END CERTIFICATE-----";
@@ -36,7 +39,6 @@ int root_size = 0;
 int root_cmd_size = 0;
 char amazonRootCaUrl[80];
 char sim_iccid[30];
-
 /* MQTT Defines */
 char IOT_DEMO_MQTT_TOPIC_PREFIX[19];
 char WILL_TOPIC_NAME[35];
@@ -44,7 +46,6 @@ char ACKNOWLEDGEMENT_TOPIC_NAME[40];
 const char *pTopics[TOPIC_FILTER_COUNT];
 uint16_t WILL_TOPIC_NAME_LENGTH = 0;
 uint16_t TOPIC_FILTER_LENGTH = 0;
-
 /* Modem Defines */
 CS_Status_t cs_status;
 
@@ -65,6 +66,10 @@ Onboarding_Status_t nce_onboard_device(void) {
 	} else {
 		PRINT_INFO(" ************** Modem Reset Done ************** \n");
 	}
+
+	#if defined(USE_UDP) && defined(DTLS_DEMO)
+	nce_enable_qssl();
+	#endif
 
 	cs_status = nce_configure_onboarding_socket();
 
@@ -90,10 +95,16 @@ Onboarding_Status_t nce_onboard_device(void) {
 	int32_t lRetVal = SOCKETS_Connect(cert_socket, &root_address,
 			sizeof(SocketsSockaddr_t));
 	char send_packet[100];
-
+#ifdef DTLS_DEMO
+	sprintf(send_packet, "GET /device-api/onboarding/coap HTTP/1.1\r\n"
+				"Host: %s\r\n"
+				"Accept: text/csv\r\n\r\n", ONBOARDING_ENDPOINT);
+#else
 	sprintf(send_packet, "GET /device-api/onboarding HTTP/1.1\r\n"
 			"Host: %s\r\n"
 			"Accept: text/csv\r\n\r\n", ONBOARDING_ENDPOINT);
+
+#endif
 	int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,
 			strlen(send_packet), NULL);
 	HAL_Delay(1000);
@@ -107,7 +118,7 @@ Onboarding_Status_t nce_onboard_device(void) {
 
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 
-	waitforprocessing(30);
+//	waitforprocessing(5);
 
 	int32_t rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
 			(int32_t) sizeof(PART),
@@ -116,14 +127,21 @@ Onboarding_Status_t nce_onboard_device(void) {
 
 	PRINT_INFO(" ************** Raw Response (1) **************   %d bytes \n",
 			strlen(PART))
+
+#ifdef DTLS_DEMO
+	strcat(complete_response,
+					strstr(PART, "Express\r\n\r\n") + strlen("Express\r\n\r\n"));
+	nce_dtls_psk(complete_response);
+#else
 	strcat(complete_response,
 			strstr(PART, "Express\r\n\r\n\"") + strlen("Express\r\n\r\n\""));
+
+
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
 
 	rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
 			(int32_t) sizeof(PART),
 			COM_MSG_WAIT);
-
 	PRINT_INFO(" ************** Raw Response (2) **************   %d bytes \n",
 			strlen(PART))
 
@@ -133,6 +151,7 @@ Onboarding_Status_t nce_onboard_device(void) {
 	rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
 			(int32_t) sizeof(PART),
 			COM_MSG_WAIT);
+
 
 	PRINT_INFO(" ************** Raw Response (3) **************   %d bytes \n",
 			strlen(PART))
@@ -149,10 +168,11 @@ Onboarding_Status_t nce_onboard_device(void) {
 
 	strncat(complete_response, PART, strlen(PART));
 	(void) memset(&PART, (int8_t) '\0', sizeof(PART));
+	nce_prepare_and_upload_certificates(complete_response);
+#endif
 
 	PRINT_INFO(" ************** Response Received ************** \n");
 
-	nce_prepare_and_upload_certificates(complete_response);
 
 	onboarding_status = ONBOARDING_OK;
 
@@ -202,7 +222,18 @@ void waitforprocessing(int n) {
 	HAL_Delay(500);
 
 }
+#ifdef DTLS_DEMO
+static void nce_dtls_psk(uint8_t *complete_response){
+	/* get the first token */
+	char *token = strtok(complete_response, ",");
+	memcpy(PSK, token, strlen(token));
+	PRINT_INFO(" *****PSK********* %s ************** \n",PSK)
+	token = strtok(NULL, ",");
+	memcpy(psk_identity, token, strlen(token));
+	PRINT_INFO(" ******ID******** %s ************** \n",psk_identity)
 
+}
+#else
 static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 
 	/* get the first token */
@@ -314,3 +345,4 @@ static void nce_prepare_and_upload_certificates(uint8_t *complete_response) {
 			" ************** Certificates Uploaded Successfully  ************** \n");
 }
 
+#endif

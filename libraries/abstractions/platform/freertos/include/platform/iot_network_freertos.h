@@ -100,14 +100,10 @@ typedef struct _networkConnection IotNetworkConnectionAfr_t;
     {                                                          \
         .pAlpnProtos = socketsAWS_IOT_ALPN_MQTT,               \
         .maxFragmentLength = 0,                                \
-        .disableSni = false,                                   \
-        .pRootCa = NULL,                                       \
-        .rootCaSize = 0,                                       \
-        .pClientCert = keyCLIENT_CERTIFICATE_PEM,              \
-        .clientCertSize = sizeof( keyCLIENT_CERTIFICATE_PEM ), \
-        .pPrivateKey = keyCLIENT_PRIVATE_KEY_PEM,              \
-        .privateKeySize = sizeof( keyCLIENT_PRIVATE_KEY_PEM )  \
+        .disableSni = false                                   \
     }
+
+
 
 /**
  * @brief Provides a pointer to an #IotNetworkInterface_t that uses the functions

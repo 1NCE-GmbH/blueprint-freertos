@@ -276,7 +276,7 @@ typedef struct
 typedef struct
 {
   uint32_t                           modem_LUT_size;
-  const struct atcustom_LUT_struct   *p_modem_LUT;
+  struct atcustom_LUT_struct   *p_modem_LUT;
 
   /* received command syntax analysis: state of automaton which analyzes cmd syntax */
   atcustom_modem_SyntaxAutomatonState_t   state_SyntaxAutomaton;
@@ -324,10 +324,10 @@ typedef struct atcustom_LUT_struct
 /* Exported macros -----------------------------------------------------------*/
 
 /* Exported functions ------------------------------------------------------- */
-const AT_CHAR_t       *atcm_get_CmdStr(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
-uint32_t               atcm_get_CmdTimeout(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
-CmdBuildFuncTypeDef    atcm_get_CmdBuildFunc(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
-CmdAnalyzeFuncTypeDef  atcm_get_CmdAnalyzeFunc(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
+const AT_CHAR_t       *atcm_get_CmdStr( atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
+uint32_t               atcm_get_CmdTimeout(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
+CmdBuildFuncTypeDef    atcm_get_CmdBuildFunc(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
+CmdAnalyzeFuncTypeDef  atcm_get_CmdAnalyzeFunc(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id);
 const AT_CHAR_t       *atcm_get_PDPtypeStr(CS_PDPtype_t pdp_type);
 
 void atcm_program_AT_CMD(atcustom_modem_context_t *p_modem_ctxt, atparser_context_t *p_atp_ctxt, at_type_t cmd_type,

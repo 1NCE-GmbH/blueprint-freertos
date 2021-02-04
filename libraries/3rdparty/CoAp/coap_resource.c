@@ -231,8 +231,9 @@ CoAP_HandlerResult_t _rom WellKnown_GetHandler(CoAP_Message_t* pReq, CoAP_Messag
 
 void _rom CoAP_InitResources() {
 	CoAP_ResOpts_t Options = {.Cf = COAP_CF_LINK_FORMAT, .AllowedMethods = RES_OPT_GET};
-//	CoAP_CreateResource("/.well-known/core", "\0", Options, WellKnown_GetHandler, NULL);
+#ifdef COAP
 	CoAP_CreateResource(configCOAP_URI_PATH, "\0", Options, WellKnown_GetHandler, NULL);
+#endif
 }
 
 static CoAP_Result_t _rom CoAP_AppendResourceToList(CoAP_Res_t** pListStart, CoAP_Res_t* pResToAdd) {

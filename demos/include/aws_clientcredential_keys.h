@@ -11,7 +11,7 @@
  * "...base64 data...\n"\
  * "-----END CERTIFICATE-----"
  */
- static char keyCLIENT_CERTIFICATE_PEM[] = "\0";
+// static char keyCLIENT_CERTIFICATE_PEM[] = "\0";
 //"-----BEGIN CERTIFICATE-----\n"
 //"MIIDWjCCAkKgAwIBAgIVAONLT4gTvFiiwOQP12ZiA8QBsRh2MA0GCSqGSIb3DQEB\n"
 //"CwUAME0xSzBJBgNVBAsMQkFtYXpvbiBXZWIgU2VydmljZXMgTz1BbWF6b24uY29t\n"
@@ -41,7 +41,7 @@
  * "...base64 data...\n"\
  * "-----END RSA PRIVATE KEY-----"
  */
- static char keyCLIENT_PRIVATE_KEY_PEM[] = "\0";
+// static char keyCLIENT_PRIVATE_KEY_PEM[] = "\0";
 //"-----BEGIN RSA PRIVATE KEY-----\n"
 //"MIIEpQIBAAKCAQEA2rIJTfmtoRSOGdxSGbgGlbGlRF+7eqftZl+Xa15L7LFyRx6X\n"
 //"oNQKNiD/cXJd0S6M3agg828D/OUtO0wXQYEX8SOdkoAE5ujav/Arv2m8fxHtOam0\n"
@@ -78,7 +78,7 @@
  * "...base64 data...\n"\
  * "-----END CERTIFICATE-----"
  */
-#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM  ""
+//#define keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM  ""
 
 
 #endif /* AWS_CLIENT_CREDENTIAL_KEYS_H */

@@ -174,7 +174,7 @@ at_status_t atcm_socket_set_modem_cid(atcustom_modem_context_t *p_modem_ctxt, so
   * @brief  This function returns the socket handle (ID shared between upper layers and at-custom)
   *         corresponding to modem connection Id (ID shared between at-custom and the modem)
   */
-socket_handle_t atcm_socket_get_socket_handle(const atcustom_modem_context_t *p_modem_ctxt, uint32_t modemCID)
+socket_handle_t atcm_socket_get_socket_handle(atcustom_modem_context_t *p_modem_ctxt, uint32_t modemCID)
 {
   socket_handle_t sockHandle = CS_INVALID_SOCKET_HANDLE;
 
@@ -298,7 +298,7 @@ socket_handle_t atcm_socket_get_hdlr_urc_closed_by_remote(atcustom_modem_context
 /**
   * @brief  This function returns if there are pending "socket data received" URC
   */
-at_bool_t atcm_socket_remaining_urc_data_pending(const atcustom_modem_context_t *p_modem_ctxt)
+at_bool_t atcm_socket_remaining_urc_data_pending(atcustom_modem_context_t *p_modem_ctxt)
 {
   PRINT_API("enter atcm_socket_remaining_urc_data_pending")
   at_bool_t remain = AT_FALSE;
@@ -321,7 +321,7 @@ at_bool_t atcm_socket_remaining_urc_data_pending(const atcustom_modem_context_t 
 /**
   * @brief  This function returns if there are pending "socket closed by remote" URC
   */
-at_bool_t atcm_socket_remaining_urc_closed_by_remote(const atcustom_modem_context_t *p_modem_ctxt)
+at_bool_t atcm_socket_remaining_urc_closed_by_remote(atcustom_modem_context_t *p_modem_ctxt)
 {
   PRINT_API("enter atcm_socket_remaining_urc_closed_by_remote")
 
@@ -342,7 +342,7 @@ at_bool_t atcm_socket_remaining_urc_closed_by_remote(const atcustom_modem_contex
   return (remain);
 }
 
-at_bool_t atcm_socket_is_connected(const atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle)
+at_bool_t atcm_socket_is_connected(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle)
 {
   at_bool_t retval = AT_FALSE;
 

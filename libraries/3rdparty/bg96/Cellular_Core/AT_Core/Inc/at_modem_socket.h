@@ -49,15 +49,15 @@ at_status_t     atcm_socket_release_modem_cid(atcustom_modem_context_t *p_modem_
 uint32_t        atcm_socket_get_modem_cid(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle);
 at_status_t     atcm_socket_set_modem_cid(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle,
                                           uint32_t modemcid);
-socket_handle_t atcm_socket_get_socket_handle(const atcustom_modem_context_t *p_modem_ctxt, uint32_t modemCID);
+socket_handle_t atcm_socket_get_socket_handle(atcustom_modem_context_t *p_modem_ctxt, uint32_t modemCID);
 at_status_t     atcm_socket_set_urc_data_pending(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle);
 at_status_t     atcm_socket_set_urc_closed_by_remote(atcustom_modem_context_t *p_modem_ctxt,
                                                      socket_handle_t sockHandle);
 socket_handle_t atcm_socket_get_hdle_urc_data_pending(atcustom_modem_context_t *p_modem_ctxt);
 socket_handle_t atcm_socket_get_hdlr_urc_closed_by_remote(atcustom_modem_context_t *p_modem_ctxt);
-at_bool_t       atcm_socket_remaining_urc_data_pending(const atcustom_modem_context_t *p_modem_ctxt);
-at_bool_t       atcm_socket_remaining_urc_closed_by_remote(const atcustom_modem_context_t *p_modem_ctxt);
-at_bool_t       atcm_socket_is_connected(const atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle);
+at_bool_t       atcm_socket_remaining_urc_data_pending(atcustom_modem_context_t *p_modem_ctxt);
+at_bool_t       atcm_socket_remaining_urc_closed_by_remote(atcustom_modem_context_t *p_modem_ctxt);
+at_bool_t       atcm_socket_is_connected(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle);
 at_status_t     atcm_socket_set_connected(atcustom_modem_context_t *p_modem_ctxt, socket_handle_t sockHandle);
 
 #ifdef __cplusplus

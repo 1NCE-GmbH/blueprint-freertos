@@ -36,7 +36,7 @@ NetTransmit_fn CoAP_Send_Wifi(Socket_t socketHandle, NetPacket_t *pckt) {
 
 
 	xTransmitted = SOCKETS_Send(socketHandle, /* The socket being sent to. */
-	(void*) pckt->pData, /* The data being sent. */
+	(void*) pckt->pData + 8 , /* The data being sent. */
 	pckt->size, /* The length of the data being sent. */
 	0); /* No flags. */
 

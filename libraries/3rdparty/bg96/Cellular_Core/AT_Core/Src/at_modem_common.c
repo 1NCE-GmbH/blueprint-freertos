@@ -360,7 +360,7 @@ CS_PDN_conf_id_t atcm_get_cid_current_SID(atcustom_modem_context_t *p_modem_ctxt
   * @param  cmd_id Id of the command to find
   * @retval string of the command name
   */
-const AT_CHAR_t *atcm_get_CmdStr(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
+const AT_CHAR_t *atcm_get_CmdStr( atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
 {
   const AT_CHAR_t *retval = ((uint8_t *)"");
   uint16_t i = 0U;
@@ -391,7 +391,7 @@ const AT_CHAR_t *atcm_get_CmdStr(const atcustom_modem_context_t *p_modem_ctxt, u
   * @param  cmd_id Id of the command to find
   * @retval timeout for this command
   */
-uint32_t atcm_get_CmdTimeout(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
+uint32_t atcm_get_CmdTimeout(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
 {
   uint32_t retval = MODEM_DEFAULT_TIMEOUT;
 
@@ -422,7 +422,7 @@ uint32_t atcm_get_CmdTimeout(const atcustom_modem_context_t *p_modem_ctxt, uint3
   * @param  cmd_id Id of the command to find
   * @retval BuildFunction
   */
-CmdBuildFuncTypeDef atcm_get_CmdBuildFunc(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
+CmdBuildFuncTypeDef atcm_get_CmdBuildFunc(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
 {
   CmdBuildFuncTypeDef retval = fCmdBuild_NoParams; /* return default value */
 
@@ -452,7 +452,7 @@ CmdBuildFuncTypeDef atcm_get_CmdBuildFunc(const atcustom_modem_context_t *p_mode
   * @param  cmd_id Id of the command to find
   * @retval AnalyzeFunction
   */
-CmdAnalyzeFuncTypeDef atcm_get_CmdAnalyzeFunc(const atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
+CmdAnalyzeFuncTypeDef atcm_get_CmdAnalyzeFunc(atcustom_modem_context_t *p_modem_ctxt, uint32_t cmd_id)
 {
   CmdAnalyzeFuncTypeDef retval = fRspAnalyze_None;
 
