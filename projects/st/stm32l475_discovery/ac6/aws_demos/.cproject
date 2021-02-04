@@ -80,6 +80,7 @@
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -167,6 +168,18 @@
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/NCE_SDK/Inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls_utils&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls_config&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/platform/include/platform&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/tinycbor/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface/mem&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/option-types&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface/network&quot;"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols.1242720538" name="Define symbols (-D)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.definedsymbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="HWREF_B_CELL_BG96_V2"/>
@@ -175,6 +188,16 @@
 									<listOptionValue builtIn="false" value="USER_FLAG_MODEM_FORCE_NO_FLOW_CONTROL"/>
 									<listOptionValue builtIn="false" value="USE_HAL_DRIVER"/>
 									<listOptionValue builtIn="false" value="STM32L475xx"/>
+									<listOptionValue builtIn="false" value="CONFIG_MBEDTLS_USE_AFR_MEMORY"/>
+									<listOptionValue builtIn="false" value="ENABLE_IOT_ERROR"/>
+									<listOptionValue builtIn="false" value="ENABLE_IOT_INFO"/>
+									<listOptionValue builtIn="false" value="MBEDTLS_CONFIG_FILE=&quot;aws_mbedtls_config.h&quot;"/>
+									<listOptionValue builtIn="false" value="MBEDTLS_SSL_PROTO_DTLS"/>
+									<listOptionValue builtIn="false" value="MBEDTLS_SSL_PROTO_TLS1_2"/>
+									<listOptionValue builtIn="false" value="RFU"/>
+									<listOptionValue builtIn="false" value="SENSOR"/>
+									<listOptionValue builtIn="false" value="MQTTCLIENT_PLATFORM_HEADER=MQTTCMSIS.h"/>
+									<listOptionValue builtIn="false" value="DTLS"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.otherflags.299695666" name="Other flags" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.otherflags" useByScannerDiscovery="false" valueType="stringList"/>
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.languagestandard.36622305" name="Language standard" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.languagestandard" useByScannerDiscovery="false" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.languagestandard.value.gnu11" valueType="enumerated"/>
@@ -261,8 +284,113 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1600312397" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1763364513"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1703126612.1076847641" name="/" resourcePath="libraries/3rdparty/mbedtls_utils">
+						<toolChain id="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug.1803891072" name="MCU ARM GCC" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.toolchain.exe.debug" unusedChildren="">
+							<option id="com.st.stm32cube.ide.mcu.option.internal.toolchain.type.1410096967.1013762879" name="Internal Toolchain Type" superClass="com.st.stm32cube.ide.mcu.option.internal.toolchain.type.1410096967"/>
+							<option id="com.st.stm32cube.ide.mcu.option.internal.toolchain.version.32909123.2092755292" name="Internal Toolchain Version" superClass="com.st.stm32cube.ide.mcu.option.internal.toolchain.version.32909123"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.2056664826.1446905943" name="Mcu" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_mcu.2056664826"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.1328168492.1055983486" name="Board" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_board.1328168492"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.instructionset.437281784.462110815" name="Instruction set" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.instructionset.437281784"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1143547180.200414147" name="Floating-point ABI" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.floatabi.1143547180"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.656984756.104879454" name="Floating-point unit" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.fpu.656984756"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.970426558.1687057238" name="CpuId" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_cpuid.970426558"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.408730750.332878135" name="CpuCoreId" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.target_coreid.408730750"/>
+							<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.runtimelibrary_c.35615608.1766175617" name="Runtime library" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.option.runtimelibrary_c.35615608"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.854641533" name="MCU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.1049824543">
+								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1166207964" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
+							</tool>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.669973387" name="MCU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.986602628">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths.870935856" name="Include paths (-I)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.option.includepaths" valueType="includePath">
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../freertos_kernel/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../freertos_kernel/portable/GCC/ARM_CM4F"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/Common"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/es_wifi"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/hts221"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/lis3mdl"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/lps22hb"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/lsm6dsl"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/mx25r6435f"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/Components/vl53l0x"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/CMSIS/Device/ST/STM32L4xx/Include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/Inc/Legacy"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/boards/stm32l475_discovery/aws_demos/application_code"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../demos/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../vendors/st/boards/stm32l475_discovery/aws_demos/config_files"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../demos/network_manager"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/standard/common/include/private"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/standard/common/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/platform/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/platform/freertos/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/secure_sockets/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/freertos_plus/standard/tls/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/freertos_plus/standard/crypto/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/freertos_plus/standard/pkcs11/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/wifi/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/freertos_plus/standard/utils/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../demos/dev_mode_key_provisioning/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/aws/defender/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/standard/mqtt/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/standard/serializer/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/aws/shadow/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/c_sdk/standard/https/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/freertos_plus/aws/greengrass/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls/include"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls/include/mbedtls"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/mbedtls"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/pkcs11"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/tinycbor"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/http_parser"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../libraries/3rdparty/jsmn"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Core/AT_Core/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Core/Ipc/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Core/Nifman/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Core/PPPosif/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Interface/Cellular_Mngt/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Interface/Com/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Error_Handler/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/bg96/Cellular_Common/Trace_Interface/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/NCE_SDK/Inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls_utils&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls_config&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/mbedtls&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/abstractions/platform/include/platform&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/tinycbor/src&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface/mem&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/option-types&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../libraries/3rdparty/CoAp/interface/network&quot;"/>
+								</option>
+								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.989996836" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
+							</tool>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.304830453" name="MCU G++ Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.366151199"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.583638344" name="MCU GCC Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.linker.607746092"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.279419429" name="MCU G++ Linker" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.linker.570806520"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.1404115292" name="MCU GCC Archiver" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.archiver.2013313191"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.1610367477" name="MCU Size" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.size.1721806164"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.1461627484" name="MCU Output Converter list file" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objdump.listfile.448990674"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.162824958" name="MCU Output Converter Hex" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.hex.446844543"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1575125619" name="MCU Output Converter Binary" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.binary.1403050208"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.1431563363" name="MCU Output Converter Verilog" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.verilog.453807123"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.746853876" name="MCU Output Converter Motorola S-rec" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.srec.458963602"/>
+							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.624199208" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.1763364513"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="libraries/freertos_plus/standard/utils/src/iot_pki_utils.c|libraries/freertos_plus/standard/tls|libraries/freertos_plus/standard/pkcs11|libraries/freertos_plus/standard/crypto|vendors/st/boards/stm32l475_discovery/ports/pkcs11|libraries/abstractions/wifi|libraries/abstractions/pkcs11|libraries/3rdparty/pkcs11|libraries/3rdparty/mbedtls|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets.c|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_statistic.c|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_err_compat.c|libraries/3rdparty/bg96/Cellular_Common/DataCache_Supplier|vendors/st/stm32l475_discovery/BSP/Components/lsm6dsl/lsm6dsl.c|vendors/st/stm32l475_discovery/BSP/Components/lps22hb/lps22hb.c|vendors/st/stm32l475_discovery/BSP/Components/hts221/hts221.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_i2c.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_i2c_ex.c|libraries/3rdparty/bg96/Cellular_Common/Time_Date|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.c|demos|application_code/board_buttons.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.c|vendors/st/stm32l475_discovery/BSP/Components/lis3mdl|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_lwip_mcu.c|libraries/3rdparty/bg96/Cellular_Common/Setup|libraries/abstractions/wifi/include|libraries/3rdparty/bg96/Cellular_Common/Stack_Analysis|libraries/3rdparty/bg96/Cellular_Common/Cmd|vendors/st/stm32l475_discovery/BSP/Components/mx25r6435f|vendors/st/stm32l475_discovery/BSP/Components/vl53l0x|libraries/abstractions/platform|libraries/c_sdk|application_code/st_code/vl53l0x_proximity.c|application_code/st_code/vl53l0x_platform.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_spi.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_spi_ex.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_qspi.c|freertos_kernel/stream_buffer.c|demos/dev_mode_key_provisioning|vendors/st/boards/stm32l475_discovery/ports/wifi|vendors/st/stm32l475_discovery/BSP/Components/es_wifi|application_code/st_code/es_wifi_io.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c|demos/tcp|libraries/c_sdk/standard/common/logging|application_code/default_main.c|Application/Common/rfu.c|Application/Common/network.c|Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc|Libraries/ThirdParty/printf-stdarg/printf-stdarg.c|Application/User/subscribe_publish_sample.c|Application/Common/iot_flash_config.c|Application/Common/aws_iot_test_metering.c|Libraries/ThirdParty/tracealyzer_recorder|Application/Common/printf.c|Application/Common/timer.c|Application/Common/subscribe_publish_sensor_values.c|Application/Common/network_st_wrapper.c|Application/Common/aws_iot_test_basic_connectivity.c|Application/Common/sensors_data.c|Application/Common/firewall_wrapper.c|Application/Common/timedate.c|Application/Common/mbedtls_patch.c|Application/Common/heap.c|Application/Common/metering.c|Libraries/FreeRTOS-Plus-TCP/Source" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="libraries/freertos_plus/standard/utils/src/iot_pki_utils.c|libraries/freertos_plus/standard/pkcs11|libraries/abstractions/wifi|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets.c|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_statistic.c|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_err_compat.c|libraries/3rdparty/bg96/Cellular_Common/DataCache_Supplier|vendors/st/stm32l475_discovery/BSP/Components/lsm6dsl/lsm6dsl.c|vendors/st/stm32l475_discovery/BSP/Components/lps22hb/lps22hb.c|vendors/st/stm32l475_discovery/BSP/Components/hts221/hts221.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_i2c.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_i2c_ex.c|libraries/3rdparty/bg96/Cellular_Common/Time_Date|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.c|demos|application_code/board_buttons.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.c|vendors/st/stm32l475_discovery/BSP/Components/lis3mdl|libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_lwip_mcu.c|libraries/3rdparty/bg96/Cellular_Common/Setup|libraries/abstractions/wifi/include|libraries/3rdparty/bg96/Cellular_Common/Stack_Analysis|libraries/3rdparty/bg96/Cellular_Common/Cmd|vendors/st/stm32l475_discovery/BSP/Components/mx25r6435f|vendors/st/stm32l475_discovery/BSP/Components/vl53l0x|libraries/abstractions/platform|libraries/c_sdk|application_code/st_code/vl53l0x_proximity.c|application_code/st_code/vl53l0x_platform.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_spi.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_spi_ex.c|vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_qspi.c|freertos_kernel/stream_buffer.c|demos/dev_mode_key_provisioning|vendors/st/boards/stm32l475_discovery/ports/wifi|vendors/st/stm32l475_discovery/BSP/Components/es_wifi|application_code/st_code/es_wifi_io.c|vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c|demos/tcp|libraries/c_sdk/standard/common/logging|application_code/default_main.c|Application/Common/rfu.c|Application/Common/network.c|Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc|Libraries/ThirdParty/printf-stdarg/printf-stdarg.c|Application/User/subscribe_publish_sample.c|Application/Common/iot_flash_config.c|Application/Common/aws_iot_test_metering.c|Libraries/ThirdParty/tracealyzer_recorder|Application/Common/printf.c|Application/Common/timer.c|Application/Common/subscribe_publish_sensor_values.c|Application/Common/network_st_wrapper.c|Application/Common/aws_iot_test_basic_connectivity.c|Application/Common/sensors_data.c|Application/Common/firewall_wrapper.c|Application/Common/timedate.c|Application/Common/mbedtls_patch.c|Application/Common/heap.c|Application/Common/metering.c|Libraries/FreeRTOS-Plus-TCP/Source" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry excluding="iot_metrics.c|include/iot_metrics.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libraries/abstractions/platform/freertos"/>
 						<entry excluding="iot_taskpool_static_memory.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libraries/c_sdk/standard/common/taskpool"/>
 						<entry excluding="src/iot_mqtt_static_memory.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="libraries/c_sdk/standard/mqtt"/>
