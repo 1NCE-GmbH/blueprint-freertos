@@ -48,8 +48,8 @@
 #include "flash.h"
 
 /* WiFi includes. */
-#ifdef WIFI
-//    #include "iot_wifi.h"
+#ifdef USE_OFFLOAD_SSL
+    #include "iot_wifi.h"
 /* mbedTLS includes. */
     #include "mbedtls/pk.h"
     #include "mbedtls/base64.h"
@@ -60,7 +60,7 @@
     #define pkcs11ROOT_CA_MAX_LENGTH            1792
     #define pkcs11CLIENT_CERT_MAX_LENGTH        1408
     #define pkcs11CLIENT_PRIV_KEY_MAX_LENGTH    1792
-#endif /* ifdef WIFI */
+#endif /* ifdef USE_OFFLOAD_SSL */
 
 #define pkcs11OBJECT_MAX_SIZE                   2048
 #define pkcs11OBJECT_PRESENT_MAGIC              ( 0xABCD0000uL )
@@ -96,7 +96,7 @@ typedef struct
 P11KeyConfig_t P11KeyConfig __attribute__( ( section( "UNINIT_FIXED_LOC" ) ) );
 /*-----------------------------------------------------------*/
 
-#ifdef WIFI
+#ifdef USE_OFFLOAD_SSL
 
 /* Exported from iot_wifi.c */
     extern WIFIReturnCode_t WIFI_StoreCertificate( uint8_t * pucCertificate,
@@ -297,7 +297,7 @@ P11KeyConfig_t P11KeyConfig __attribute__( ( section( "UNINIT_FIXED_LOC" ) ) );
         return xReturn;
     }
 
-#endif /* ifdef WIFI */
+#endif /* ifdef USE_OFFLOAD_SSL */
 /*-----------------------------------------------------------*/
 
 CK_RV PKCS11_PAL_Initialize( void )
@@ -326,7 +326,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
     CK_OBJECT_HANDLE xHandle = eInvalidHandle;
     CK_RV xBytesWritten = 0;
     uint32_t ulFlashMark = ( pkcs11OBJECT_PRESENT_MAGIC | ( ulDataSize ) );
-    #ifdef WIFI
+    #ifdef USE_OFFLOAD_SSL
         CK_RV xReturn = CKR_OK;
         uint8_t * pemBuffer = NULL;
         size_t pemLength = 0;
@@ -334,7 +334,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
         int temp;
     #endif
 
-    #ifdef WIFI
+    #ifdef USE_OFFLOAD_SSL
         for( int i = 0; i < ulDataSize; i++ )
         {
             if( pucData[ i ] != 0 )
@@ -367,7 +367,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
                               sizeof( uint32_t ) );
             }
 
-            #ifdef WIFI
+            #ifdef USE_OFFLOAD_SSL
 
                 /* If we are using offload SSL, write the certificate to the
                  * WiFi module as well. */
@@ -412,7 +412,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
                 {
                     vPortFree( pemBuffer );
                 }
-            #endif /* WIFI */
+            #endif /* USE_OFFLOAD_SSL */
         }
 
         /*
@@ -435,7 +435,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
                               sizeof( uint32_t ) );
             }
 
-            #ifdef WIFI
+            #ifdef USE_OFFLOAD_SSL
 
                 /* If we are using offload SSL, write the private key to the
                  * WiFi module as well. */
@@ -480,7 +480,7 @@ CK_OBJECT_HANDLE PKCS11_PAL_SaveObject( CK_ATTRIBUTE_PTR pxLabel,
                 {
                     vPortFree( pemBuffer );
                 }
-            #endif /* WIFI */
+            #endif /* USE_OFFLOAD_SSL */
         }
 
         else if( strcmp( pxLabel->pValue,

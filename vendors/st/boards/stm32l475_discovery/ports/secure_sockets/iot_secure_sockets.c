@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Secure Sockets for STM32L4 Discovery kit IoT node V1.0.0 Beta 4
+ * Amazon FreeRTOS Cellular Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,918 +23,1665 @@
  * http://www.FreeRTOS.org
  */
 
+#include "iot_config.h"
 
-/**
- * @file iot_secure_sockets.c
- * @brief WiFi and Secure Socket interface implementation for ST board.
- */
-
-#include <stdbool.h>
-
-/* Define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE to prevent secure sockets functions
- * from redefining in iot_secure_sockets_wrapper_metrics.h */
-//#define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
+/* Standard includes. */
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"
-#include "cmsis_os.h"
+#include "event_groups.h"
 
+/* Define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE to prevent secure sockets functions
+ * from redefining in iot_secure_sockets_wrapper_metrics.h. */
+#define _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
+
+/* Amazon FreeRTOS network include. */
 #include "iot_secure_sockets.h"
 
-/* Modem includes */
-#include "com_sockets_ip_modem.h"
-#include "com_sockets_net_compat.h"
-#include "com_sockets_err_compat.h"
-#include "cellular_service.h"
+/* Cellular HAL api includes. */
+#include "aws_cellular_config.h"
+#include "cellular_config_defaults.h"
+#include "cellular_api.h"
 
-#include "demo_config.h"
-/* WiFi driver includes.
-#include "es_wifi.h"
-#include "es_wifi_io.h" */
-
-/* Socket and WiFi interface includes.
-
-/* WiFi configuration includes.
-#include "aws_wifi_config.h" */
-
-
-
-/* Credentials includes. */
-#include "aws_clientcredential.h"
-#include "iot_default_root_certificates.h"
-
+/* TLS includes. */
 #include "iot_tls.h"
 
-#undef _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
+/* Clock includes. */
+#include "platform/iot_clock.h"
 
-/**
- * @brief A Flag to indicate whether or not a socket is
- * secure i.e. it uses TLS or not.
- */
-#define stsecuresocketsSOCKET_SECURE_FLAG          ( 1UL << 0 )
+/* Configure logs for the functions in this file. */
+#ifdef IOT_LOG_LEVEL_NETWORK
+    #define LIBRARY_LOG_LEVEL        IOT_LOG_LEVEL_NETWORK
+#else
+    #ifdef IOT_LOG_LEVEL_GLOBAL
+        #define LIBRARY_LOG_LEVEL    IOT_LOG_LEVEL_GLOBAL
+    #else
+        #define LIBRARY_LOG_LEVEL    IOT_LOG_ERROR
+    #endif
+#endif
+#define LIBRARY_LOG_NAME             "SECURE_SOCKETS_CELLULAR"
 
-/**
- * @brief A flag to indicate whether or not a socket is closed
- * for receive.
- */
-#define stsecuresocketsSOCKET_READ_CLOSED_FLAG     ( 1UL << 1 )
-
-/**
- * @brief A flag to indicate whether or not a socket is closed
- * for send.
- */
-#define stsecuresocketsSOCKET_WRITE_CLOSED_FLAG    ( 1UL << 2 )
-
-/**
- * @brief A flag to indicate whether or not the socket is connected.
- */
-#define stsecuresocketsSOCKET_IS_CONNECTED_FLAG    ( 1UL << 3 )
-
-/**
- * @brief The maximum timeout accepted by the Inventek module.
- *
- * This value is dictated by the hardware and should not be
- * modified.
- */
-#define stsecuresocketsMAX_TIMEOUT                 ( 60000 )
-
-#define minMESSAGE_SIZE                                (5)
+/* logging includes. */
+#include "iot_logging_setup.h"
 
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Represents the WiFi module.
- *
- * Since there is only one WiFi module on the ST board, only
- * one instance of this type is needed. All the operations on
- * the WiFi module must be serialized because a single operation
- * (like socket connect, send etc) consists of multiple AT Commands
- * sent over the same SPI bus. A semaphore is therefore used to
- * serialize all the operations.
- */
+/* Secure socket needs application provide the cellular handle and pdn context id. */
+/* User of secure sockets cellular should provide this variable. */
+/* coverity[misra_c_2012_rule_8_6_violation] */
+extern CellularHandle_t CellularHandle;
+/* User of secure sockets cellular should provide this variable. */
+/* coverity[misra_c_2012_rule_8_6_violation] */
+extern uint8_t CellularSocketPdnContextId;
 
+/*-----------------------------------------------------------*/
 
-/**
- * @brief Represents a secure socket.
- */
-typedef struct STSecureSocket
+/* Windows simulator implementation. */
+#if defined( _WIN32 ) || defined( _WIN64 )
+    #define strtok_r    strtok_s
+#endif
+
+/* Cellular socket access mode. */
+#define CELLULAR_SOCKET_ACCESS_MODE           CELLULAR_ACCESSMODE_BUFFER
+
+#define CELLULAR_SOCKET_OPEN_FLAG             ( 1UL << 0 )
+#define CELLULAR_SOCKET_CONNECT_FLAG          ( 1UL << 1 )
+#define CELLULAR_SOCKET_SECURE_FLAG           ( 1UL << 2 )
+#define CELLULAR_SOCKET_READ_CLOSED_FLAG      ( 1UL << 3 )
+#define CELLULAR_SOCKET_WRITE_CLOSED_FLAG     ( 1UL << 4 )
+
+#define SOCKET_DATA_RECEIVED_CALLBACK_BIT     ( 0x00000001U )
+#define SOCKET_OPEN_CALLBACK_BIT              ( 0x00000002U )
+#define SOCKET_OPEN_FAILED_CALLBACK_BIT       ( 0x00000004U )
+#define SOCKET_CLOSE_CALLBACK_BIT             ( 0x00000008U )
+
+#define CELLULAR_SOCKET_OPEN_TIMEOUT_TICKS    ( portMAX_DELAY )
+
+#define TICKS_TO_MS( xTicks )    ( ( ( xTicks ) * 1000U ) / ( ( uint32_t ) configTICK_RATE_HZ ) )
+#define UINT32_MAX_DELAY_MS                   ( 0xFFFFFFFFUL )
+#define UINT32_MAX_MS_TICKS                   ( UINT32_MAX_DELAY_MS / ( TICKS_TO_MS( 1U ) ) )
+
+#define CELLULAR_PDN_CONTEXT_ID_SOCKETS       ( CellularSocketPdnContextId )
+
+#define CELLULAR_SOCKET_RECV_TIMEOUT_MS       ( 1000UL )   /* Cellular recv command timeout. */
+
+#ifndef SOCKETS_ntohs
+    #define SOCKETS_ntohs                     SOCKETS_htons
+#endif
+
+#if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+    #define     GETHOSTBYNAME_CACHE_SIZE    ( 10U )
+#endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
+
+/*-----------------------------------------------------------*/
+
+typedef struct xSOCKET
 {
-    int32_t ST_socket_handle;           /**< This is the socket handle created by the BG96 modem*/
-    uint8_t ucInUse;                    /**< Tracks whether the socket is in use or not. */
-    uint32_t ulFlags;                   /**< Various properties of the socket (secured etc.). */
-    uint32_t ulSendTimeout;             /**< Send timeout. */
-    uint32_t ulReceiveTimeout;          /**< Receive timeout. */
-    char * pcDestination;               /**< Destination URL. Set using SOCKETS_SO_SERVER_NAME_INDICATION option in SOCKETS_SetSockOpt function. */
-    void * pvTLSContext;                /**< The TLS Context. */
-    char * pcServerCertificate;         /**< Server certificate. Set using SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE option in SOCKETS_SetSockOpt function. */
-    uint32_t ulServerCertificateLength; /**< Length of the server certificate. */
-} STSecureSocket_t;
+    CellularSocketHandle_t cellularSocketHandle;
+    uint32_t ulFlags;
+    uint32_t xSendFlags;
+    uint32_t xRecvFlags;
+
+    TickType_t receiveTimeout;
+    TickType_t sendTimeout;
+
+    char * pcDestination;
+    void * pvTLSContext;
+    char * pcServerCertificate;
+    uint32_t ulServerCertificateLength;
+
+    EventGroupHandle_t socketEventGroupHandle;
+} _cellularSecureSocket_t;
+
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Secure socket objects.
- *
- * An index in this array is returned to the user from SOCKETS_Socket
- * function.
- */
-static STSecureSocket_t xSockets[ CELLULAR_MAX_SOCKETS ];
+static BaseType_t prvNetworkSend( void * ctx,
+                                  const uint8_t * buf,
+                                  size_t len );
+static BaseType_t prvNetworkRecvCellular( const _cellularSecureSocket_t * pCellularSocketContext,
+                                          uint8_t * buf,
+                                          size_t len );
+static BaseType_t prvNetworkRecv( void * ctx,
+                                  uint8_t * buf,
+                                  size_t len );
+static void prvCellularSocketOpenCallback( CellularUrcEvent_t urcEvent,
+                                           CellularSocketHandle_t socketHandle,
+                                           void * pCallbackContext );
+static void prvCellularSocketDataReadyCallback( CellularSocketHandle_t socketHandle,
+                                                void * pCallbackContext );
+static void prvCellularSocketClosedCallback( CellularSocketHandle_t socketHandle,
+                                             void * pCallbackContext );
+static int32_t prvSetupSocketNonblock( _cellularSecureSocket_t * pCellularSocketContext );
+static int32_t prvSetupSocketRecvTimeout( _cellularSecureSocket_t * pCellularSocketContext,
+                                          TickType_t receiveTimeout );
+static int32_t prvSetupSocketSendTimeout( _cellularSecureSocket_t * pCellularSocketContext,
+                                          TickType_t sendTimeout );
+static int32_t prvSetupServerNameIndication( _cellularSecureSocket_t * pCellularSocketContext,
+                                             const void * pvOptionValue,
+                                             size_t xOptionLength );
+static int32_t prvSetupTrustedServerCertificate( _cellularSecureSocket_t * pCellularSocketContext,
+                                                 const void * pvOptionValue,
+                                                 size_t xOptionLength );
+static int32_t prvCellularSocketRegisterCallback( CellularSocketHandle_t tcpSocket,
+                                                  _cellularSecureSocket_t * pCellularSocketContext );
+static int32_t prvCellularSetupTLS( _cellularSecureSocket_t * pCellularSocketContext );
+static bool prvGetNextTok( char ** pDnsResultStr,
+                           char delimiter,
+                           char ** pToken );
+static bool prvConvertStrToNumber( const char * pToken,
+                                   uint32_t * pRetValue );
+static int32_t prvSocketsAton( char * cp,
+                               uint32_t * pIpAddress );
+static bool _calculateElapsedTime( uint64_t entryTimeMs,
+                                   uint32_t timeoutValueMs,
+                                   uint64_t * pElapsedTimeMs );
+static int32_t prvCheckSetSockOptParams( Socket_t xSocket,
+                                         int32_t lOptionName,
+                                         const void * pvOptionValue,
+                                         TickType_t * pSockTimeout );
 
-/**
- * @brief WiFi module object.
- *
- * Since the ST board contains only one WiFi module, only one instance
- * is needed and there is no need to pass this to the user.
- */
-//extern STWiFiModule_t xWiFiModule;
+#if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+    static const char * prvReverseLookup( uint32_t ipAddress );
+    static uint32_t prvLookup( const char * pcHostName );
+#endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
 
-/**
- * @brief Maximum time to wait in ticks for obtaining the WiFi semaphore
- * before failing the operation.
- */
-//static const TickType_t xSemaphoreWaitTicks = pdMS_TO_TICKS( wificonfigMAX_SEMAPHORE_WAIT_TIME_MS );
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Get a free socket from the free socket pool.
- *
- * Iterates over the xSockets array to see if it can find
- * a free socket. A free or unused socket is indicated by
- * the zero value of the ucInUse member of STSecureSocket_t.
- *
- * @return Index of the socket in the xSockets array, if it is
- * able to find a free socket, SOCKETS_INVALID_SOCKET otherwise.
- */
-static uint32_t prvGetFreeSocket( void );
+#if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+    static char _dnsCache[ GETHOSTBYNAME_CACHE_SIZE ][ CELLULAR_IP_ADDRESS_MAX_SIZE + 1 ];
+#endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
 
-/**
- * @brief Returns the socket back to the free socket pool.
- *
- * Marks the socket as free by setting ucInUse member of the
- * STSecureSocket_t structure as zero.
- */
-static void prvReturnSocket( uint32_t ulSocketNumber );
-
-/**
- * @brief Checks whether or not the provided socket number is valid.
- *
- * Ensures that the provided number is less than wificonfigMAX_SOCKETS
- * and the socket is "in-use" i.e. ucInUse is set to non-zero in the
- * socket structure.
- *
- * @param[in] ulSocketNumber The provided socket number to check.
- *
- * @return pdTRUE if the socket is valid, pdFALSE otherwise.
- */
-static BaseType_t prvIsValidSocket( uint32_t ulSocketNumber );
-
-/**
- * @brief Sends the provided data over WiFi.
- *
- * @param[in] pvContext The caller context. Socket number in our case.
- * @param[in] pucData The data to send.
- * @param[in] xDataLength Length of the data.
- *
- * @return Number of bytes actually sent if successful, SOCKETS_SOCKET_ERROR
- * otherwise.
- */
-static BaseType_t prvNetworkSend( void * pvContext,
-                                  const unsigned char * pucData,
-                                  size_t xDataLength );
-
-/**
- * @brief Receives the data over WiFi.
- *
- * @param[in] pvContext The caller context. Socket number in our case.
- * @param[out] pucReceiveBuffer The buffer to receive the data in.
- * @param[in] xReceiveBufferLength The length of the provided buffer.
- *
- * @return The number of bytes actually received if successful, SOCKETS_SOCKET_ERROR
- * otherwise.
- */
-static BaseType_t prvNetworkRecv( void * pvContext,
-                                  unsigned char * pucReceiveBuffer,
-                                  size_t xReceiveBufferLength );
 /*-----------------------------------------------------------*/
 
-static uint32_t prvGetFreeSocket( void ) /* OK */
+/* This function sends the data until timeout or data is completely sent to server.
+ * Send timeout unit is TickType_t. Any timeout value greater than UINT32_MAX_MS_TICKS
+ * or portMAX_DELAY will be regarded as MAX deley. In this case, this function
+ * will not return until all bytes of data are sent successfully or until an error occurs. */
+static BaseType_t prvNetworkSend( void * ctx,
+                                  const uint8_t * buf,
+                                  size_t len )
 {
-    uint32_t ulIndex;
+    CellularSocketHandle_t tcpSocket = NULL;
+    BaseType_t retSendLength = 0;
+    uint32_t sentLength = 0;
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) ctx;
+    uint32_t bytesToSend = len;
+    uint64_t entryTimeMs = IotClock_GetTimeMs();
+    uint64_t elapsedTimeMs = 0;
+    uint32_t sendTimeoutMs = 0;
 
-    /* Iterate over xSockets array to see if any free socket
-     * is available. */
-    for( ulIndex = 0; ulIndex < ( uint32_t ) CELLULAR_MAX_SOCKETS; ulIndex++ )
+    if( pCellularSocketContext == NULL )
     {
-        /* Since multiple tasks can be accessing this simultaneously,
-         * this has to be in critical section. */
-        taskENTER_CRITICAL();
-
-        if( xSockets[ ulIndex ].ucInUse == 0U )
+        IotLogError( "Cellular prvNetworkSend Invalid xSocket %p", pCellularSocketContext );
+        retSendLength = ( BaseType_t ) SOCKETS_SOCKET_ERROR;
+    }
+    else if( ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) ||
+             ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) == 0U ) )
+    {
+        /* Don't send the data if write closed is set. Otherwise return error. */
+        if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_WRITE_CLOSED_FLAG ) == 0U )
         {
-            /* Mark the socket as "in-use". */
-            xSockets[ ulIndex ].ucInUse = 1;
-            taskEXIT_CRITICAL();
+            IotLogError( "Cellular prvNetworkSend Invalid xSocket flag %p 0x%08x",
+                         pCellularSocketContext, pCellularSocketContext->ulFlags );
+            retSendLength = ( BaseType_t ) SOCKETS_SOCKET_ERROR;
+        }
+    }
+    else
+    {
+        tcpSocket = pCellularSocketContext->cellularSocketHandle;
 
-            /* We have found a free socket, so stop. */
-            break;
+        /* Convert ticks to ms delay. */
+        if( ( pCellularSocketContext->sendTimeout >= UINT32_MAX_MS_TICKS ) || ( pCellularSocketContext->sendTimeout >= portMAX_DELAY ) )
+        {
+            /* Check if the ticks cause overflow. */
+            sendTimeoutMs = UINT32_MAX_DELAY_MS;
         }
         else
         {
-            taskEXIT_CRITICAL();
+            sendTimeoutMs = TICKS_TO_MS( pCellularSocketContext->sendTimeout );
         }
-    }
 
-    /* Did we find a free socket? */
-    if( ulIndex == ( uint32_t ) CELLULAR_MAX_SOCKETS )
-    {
-        /* Return SOCKETS_INVALID_SOCKET if we fail to
-         * find a free socket. */
-        ulIndex = ( uint32_t ) SOCKETS_INVALID_SOCKET;
-    }
-
-    return ulIndex;
-}
-/*-----------------------------------------------------------*/
-
-static void prvReturnSocket( uint32_t ulSocketNumber ) /* OK */
-{
-    /* Since multiple tasks can be accessing this simultaneously,
-     * this has to be in critical section. */
-    taskENTER_CRITICAL();
-    {
-        /* Mark the socket as free. */
-        xSockets[ ulSocketNumber ].ucInUse = 0;
-    }
-    taskEXIT_CRITICAL();
-}
-/*-----------------------------------------------------------*/
-
-static BaseType_t prvIsValidSocket( uint32_t ulSocketNumber ) /* OK */
-{
-    BaseType_t xValid = pdFALSE;
-
-    /* Check that the provided socket number is within the valid
-     * index range. */
-    if( ulSocketNumber < ( uint32_t ) CELLULAR_MAX_SOCKETS )
-    {
-        /* Since multiple tasks can be accessing this simultaneously,
-         * this has to be in critical section. */
-        taskENTER_CRITICAL();
+        /* Loop sending data until data is sent completly or timeout. */
+        while( bytesToSend > 0U )
         {
-            /* Check that this socket is in use. */
-            if( xSockets[ ulSocketNumber ].ucInUse == 1U )
+            socketStatus = Cellular_SocketSend( CellularHandle,
+                                                tcpSocket,
+                                                &buf[ retSendLength ],
+                                                bytesToSend,
+                                                &sentLength );
+
+            if( socketStatus == CELLULAR_SUCCESS )
             {
-                /* This is a valid socket number. */
-                xValid = pdTRUE;
+                retSendLength = retSendLength + ( BaseType_t ) sentLength;
+                bytesToSend = bytesToSend - sentLength;
+            }
+
+            /* Check socket status or timeout break. */
+            if( ( socketStatus != CELLULAR_SUCCESS ) ||
+                ( _calculateElapsedTime( entryTimeMs, sendTimeoutMs, &elapsedTimeMs ) ) )
+            {
+                if( socketStatus != CELLULAR_SUCCESS )
+                {
+                    retSendLength = ( BaseType_t ) SOCKETS_SOCKET_ERROR;
+                }
+
+                break;
             }
         }
-        taskEXIT_CRITICAL();
+
+        IotLogDebug( "prvNetworkSend expect %d write %d", len, sentLength );
     }
 
-    return xValid;
+    return retSendLength;
 }
+
 /*-----------------------------------------------------------*/
 
-static BaseType_t prvNetworkSend( void * pvContext, /* OK */
-                                  const unsigned char * pucData,
-                                  size_t xDataLength )
+/* This function receives data. It returns when non-zero bytes of data is received,
+ * when an error occurs, or when timeout occurs. Receive timeout unit is TickType_t.
+ * Any timeout value bigger than portMAX_DELAY will be regarded as max delay.
+ * In this case, this function will not return until non-zero bytes of data is received
+ * or until an error occurs. */
+static BaseType_t prvNetworkRecvCellular( const _cellularSecureSocket_t * pCellularSocketContext,
+                                          uint8_t * buf,
+                                          size_t len )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) pvContext; /*lint !e923 cast is necessary for port. */
-    BaseType_t xRetVal = SOCKETS_SOCKET_ERROR;
+    CellularSocketHandle_t tcpSocket = NULL;
+    BaseType_t retRecvLength = 0;
+    uint32_t recvLength = 0;
+    TickType_t recvTimeout = 0;
+    TickType_t recvStartTime = 0;
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+    EventBits_t waitEventBits = 0;
 
-    /* Sends the data. Note that this is a blocking function and the send timeout must be set properly
-     * using SOCKETS_SetSockOpt. If the timeout expires when sending data, the function will return
-     * an ERROR, so please be wise in setting the value. Also note that you should not use the option
-     * COM_MSG_DONTWAIT as it does not handle sending buffers greater than the MSS (1460).
-     */
-    xRetVal = ( BaseType_t )com_send_ip_modem ((uint32_t)xSockets[ulSocketNumber].ST_socket_handle,
-                (const com_char_t *) &pucData[0], (int32_t) xDataLength, 0);
+    tcpSocket = pCellularSocketContext->cellularSocketHandle;
 
-    /* If the data was successfully sent, return the actual
-     * number of bytes sent. Otherwise return SOCKETS_SOCKET_ERROR. */
-    if ( xRetVal <= 0 )
+    if( pCellularSocketContext->receiveTimeout >= portMAX_DELAY )
     {
-        xRetVal = SOCKETS_SOCKET_ERROR;
+        recvTimeout = portMAX_DELAY;
+    }
+    else
+    {
+        recvTimeout = pCellularSocketContext->receiveTimeout;
     }
 
+    recvStartTime = xTaskGetTickCount();
 
-    /* To allow other tasks of equal priority that are using this API to run as
-     * a switch to an equal priority task that is waiting for the mutex will
-     * only otherwise occur in the tick interrupt - at which point the mutex
-     * might have been taken again by the currently running task.
-     */
+    ( void ) xEventGroupClearBits( pCellularSocketContext->socketEventGroupHandle,
+                                   SOCKET_DATA_RECEIVED_CALLBACK_BIT );
+    socketStatus = Cellular_SocketRecv( CellularHandle, tcpSocket, buf, len, &recvLength );
 
-    taskYIELD();
-
- return xRetVal;
-}
-/*-----------------------------------------------------------*/
-
-static BaseType_t prvNetworkRecv( void * pvContext,
-                                  unsigned char * pucReceiveBuffer,
-                                  size_t xReceiveBufferLength )
-
-{
-    uint32_t ulSocketNumber = ( uint32_t ) pvContext; /*lint !e923 cast is needed for portability. */
-    BaseType_t xRetVal = 0;
-    int32_t xReceiveValue,xTotalBytesReceived = 0;
-    unsigned char * tmpReceiveBuffer = pucReceiveBuffer;
-    int32_t tmpReceiveBufferLength = xReceiveBufferLength;
-    int32_t errorCount = 0;
-
-    for (;;)
+    /* Calculate remain recvTimeout. */
+    if( recvTimeout != portMAX_DELAY )
     {
-        /* Receive the data. Note that this is a blocking function unless COM_MSG_DONTWAIT is specified.
-            * The receive timeout must be properly set using SOCKETS_SetSockOpt. If the timeout expires
-            * when receiving data, the function will return an ERROR, so please be wise in setting the value.
-            * Also note that you should not use the option COM_MSG_DONTWAIT as it does not handle receiving
-            * buffers greater than the MSS (1460). If the timeout expires and there is data in the modem
-            * receive buffer the data cache may try to flush it and this may result in data loss
-            */
-
-        xReceiveValue = (BaseType_t) com_recv_ip_modem ((uint32_t)xSockets[ulSocketNumber].ST_socket_handle,
-                tmpReceiveBuffer, (int32_t) tmpReceiveBufferLength, 0);
-
-        if( xReceiveValue < 0 )
+        if( ( recvStartTime + recvTimeout ) > xTaskGetTickCount() )
         {
-            /* check if the receive timeout expired and return 0 as this is a valid case */
-            if (xReceiveValue == COM_SOCKETS_ERR_TIMEOUT)
+            recvTimeout = recvTimeout - ( xTaskGetTickCount() - recvStartTime );
+        }
+        else
+        {
+            recvTimeout = 0;
+        }
+    }
+
+    if( ( socketStatus == CELLULAR_SUCCESS ) && ( recvLength == 0U ) &&
+        ( recvTimeout != 0U ) )
+    {
+        waitEventBits = xEventGroupWaitBits( pCellularSocketContext->socketEventGroupHandle,
+                                             SOCKET_DATA_RECEIVED_CALLBACK_BIT | SOCKET_CLOSE_CALLBACK_BIT,
+                                             pdTRUE,
+                                             pdFALSE,
+                                             recvTimeout );
+
+        if( ( waitEventBits & SOCKET_CLOSE_CALLBACK_BIT ) != 0U )
+        {
+            socketStatus = CELLULAR_SOCKET_CLOSED;
+        }
+        else if( ( waitEventBits & SOCKET_DATA_RECEIVED_CALLBACK_BIT ) != 0U )
+        {
+            socketStatus = Cellular_SocketRecv( CellularHandle, tcpSocket, buf, len, &recvLength );
+        }
+        else
+        {
+            IotLogInfo( "prvNetworkRecv timeout" );
+            socketStatus = CELLULAR_SUCCESS;
+            recvLength = 0;
+        }
+    }
+
+    if( socketStatus == CELLULAR_SUCCESS )
+    {
+        retRecvLength = ( BaseType_t ) recvLength;
+    }
+    else
+    {
+        IotLogError( "prvNetworkRecv failed %d", socketStatus );
+        retRecvLength = SOCKETS_SOCKET_ERROR;
+    }
+
+    IotLogDebug( "prvNetworkRecv expect %d read %d", len, recvLength );
+    return retRecvLength;
+}
+
+/*-----------------------------------------------------------*/
+
+static BaseType_t prvNetworkRecv( void * ctx,
+                                  uint8_t * buf,
+                                  size_t len )
+{
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) ctx;
+    BaseType_t retRecvLength = 0;
+
+    if( pCellularSocketContext == NULL )
+    {
+        IotLogError( "Cellular prvNetworkRecv Invalid xSocket %p", pCellularSocketContext );
+        retRecvLength = SOCKETS_EINVAL;
+    }
+    else if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_READ_CLOSED_FLAG ) != 0U )
+    {
+        IotLogDebug( "Cellular prvNetworkRecv shutdown %p", pCellularSocketContext );
+        retRecvLength = 0;
+    }
+    else if( ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) ||
+             ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) == 0U ) )
+    {
+        IotLogError( "Cellular prvNetworkRecv Invalid xSocket flag %p",
+                     pCellularSocketContext, pCellularSocketContext->ulFlags );
+        retRecvLength = SOCKETS_ENOTCONN;
+    }
+    else
+    {
+        retRecvLength = prvNetworkRecvCellular( pCellularSocketContext, buf, len );
+    }
+
+    return retRecvLength;
+}
+
+/*-----------------------------------------------------------*/
+
+/* socketHandle is function prototype. Not used in this callback function. */
+/* coverity[misra_c_2012_rule_8_13_violation] */
+static void prvCellularSocketOpenCallback( CellularUrcEvent_t urcEvent,
+                                           CellularSocketHandle_t socketHandle,
+                                           void * pCallbackContext )
+{
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) pCallbackContext;
+
+    ( void ) socketHandle;
+
+    if( pCellularSocketContext != NULL )
+    {
+        IotLogDebug( "Socket open callback on Socket %p %d %d.",
+                     pCellularSocketContext, socketHandle, urcEvent );
+
+        if( urcEvent == CELLULAR_URC_SOCKET_OPENED )
+        {
+            pCellularSocketContext->ulFlags = pCellularSocketContext->ulFlags | CELLULAR_SOCKET_CONNECT_FLAG;
+            ( void ) xEventGroupSetBits( pCellularSocketContext->socketEventGroupHandle,
+                                         SOCKET_OPEN_CALLBACK_BIT );
+        }
+        else
+        {
+            /* Socket open failed. */
+            ( void ) xEventGroupSetBits( pCellularSocketContext->socketEventGroupHandle,
+                                         SOCKET_OPEN_FAILED_CALLBACK_BIT );
+        }
+    }
+    else
+    {
+        IotLogError( "Spurious socket open callback." );
+    }
+}
+
+/*-----------------------------------------------------------*/
+
+/* socketHandle is function prototype. Not used in this callback function. */
+/* coverity[misra_c_2012_rule_8_13_violation] */
+static void prvCellularSocketDataReadyCallback( CellularSocketHandle_t socketHandle,
+                                                void * pCallbackContext )
+{
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) pCallbackContext;
+
+    ( void ) socketHandle;
+
+    if( pCellularSocketContext != NULL )
+    {
+        IotLogDebug( "Data ready on Socket %p", pCellularSocketContext );
+        ( void ) xEventGroupSetBits( pCellularSocketContext->socketEventGroupHandle,
+                                     SOCKET_DATA_RECEIVED_CALLBACK_BIT );
+    }
+    else
+    {
+        IotLogError( "spurious data callback" );
+    }
+}
+
+/*-----------------------------------------------------------*/
+
+/* socketHandle is function prototype. Not used in this callback function. */
+/* coverity[misra_c_2012_rule_8_13_violation] */
+static void prvCellularSocketClosedCallback( CellularSocketHandle_t socketHandle,
+                                             void * pCallbackContext )
+{
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) pCallbackContext;
+
+    ( void ) socketHandle;
+
+    if( pCellularSocketContext != NULL )
+    {
+        IotLogInfo( "Socket Close on Socket %p", pCellularSocketContext );
+        pCellularSocketContext->ulFlags = pCellularSocketContext->ulFlags & ( ~CELLULAR_SOCKET_CONNECT_FLAG );
+        ( void ) xEventGroupSetBits( pCellularSocketContext->socketEventGroupHandle,
+                                     SOCKET_CLOSE_CALLBACK_BIT );
+    }
+    else
+    {
+        IotLogError( "spurious socket close callback" );
+    }
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvSetupSocketNonblock( _cellularSecureSocket_t * pCellularSocketContext )
+{
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+    uint32_t sendTimeoutMs = 0;
+    CellularSocketHandle_t tcpSocket = NULL;
+
+    if( pCellularSocketContext == NULL )
+    {
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else
+    {
+        tcpSocket = pCellularSocketContext->cellularSocketHandle;
+
+        /* Setup send timeout. */
+        socketStatus = Cellular_SocketSetSockOpt( CellularHandle,
+                                                  tcpSocket,
+                                                  CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
+                                                  CELLULAR_SOCKET_OPTION_SEND_TIMEOUT,
+                                                  ( const uint8_t * ) &sendTimeoutMs,
+                                                  sizeof( uint32_t ) );
+
+        if( socketStatus != CELLULAR_SUCCESS )
+        {
+            retSetSockOpt = SOCKETS_EINVAL;
+        }
+        else
+        {
+            /* Setup receive timeout. */
+            pCellularSocketContext->receiveTimeout = 0;
+        }
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvSetupSocketRecvTimeout( _cellularSecureSocket_t * pCellularSocketContext,
+                                          TickType_t receiveTimeout )
+{
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+
+    if( pCellularSocketContext == NULL )
+    {
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else
+    {
+        if( receiveTimeout >= portMAX_DELAY )
+        {
+            pCellularSocketContext->receiveTimeout = portMAX_DELAY;
+        }
+        else
+        {
+            pCellularSocketContext->receiveTimeout = receiveTimeout;
+        }
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+/* Send timeout unit is TickType_t. The underlying cellular API uses miliseconds for timeout.
+ * Any send timeout greater than UINT32_MAX_MS_TICKS( UINT32_MAX_DELAY_MS/MS_PER_TICKS ) or
+ * portMAX_DELAY is regarded as UINT32_MAX_DELAY_MS for cellular API. */
+static int32_t prvSetupSocketSendTimeout( _cellularSecureSocket_t * pCellularSocketContext,
+                                          TickType_t sendTimeout )
+{
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+    uint32_t sendTimeoutMs = 0;
+    CellularSocketHandle_t tcpSocket = NULL;
+
+    if( pCellularSocketContext == NULL )
+    {
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else
+    {
+        tcpSocket = pCellularSocketContext->cellularSocketHandle;
+
+        if( sendTimeout >= UINT32_MAX_MS_TICKS )
+        {
+            /* Check if the ticks cause overflow. */
+            pCellularSocketContext->sendTimeout = portMAX_DELAY;
+            sendTimeoutMs = UINT32_MAX_DELAY_MS;
+        }
+        else if( sendTimeout >= portMAX_DELAY )
+        {
+            IotLogWarn( "Sendtimeout %d longer than portMAX_DELAY, %d ms is used instead",
+                        sendTimeout, UINT32_MAX_DELAY_MS );
+            pCellularSocketContext->sendTimeout = portMAX_DELAY;
+            sendTimeoutMs = UINT32_MAX_DELAY_MS;
+        }
+        else
+        {
+            pCellularSocketContext->sendTimeout = sendTimeout;
+            sendTimeoutMs = TICKS_TO_MS( sendTimeout );
+        }
+
+        socketStatus = Cellular_SocketSetSockOpt( CellularHandle,
+                                                  tcpSocket,
+                                                  CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
+                                                  CELLULAR_SOCKET_OPTION_SEND_TIMEOUT,
+                                                  ( const uint8_t * ) &sendTimeoutMs,
+                                                  sizeof( uint32_t ) );
+
+        if( socketStatus != CELLULAR_SUCCESS )
+        {
+            retSetSockOpt = SOCKETS_EINVAL;
+        }
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvSetupServerNameIndication( _cellularSecureSocket_t * pCellularSocketContext,
+                                             const void * pvOptionValue,
+                                             size_t xOptionLength )
+{
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+
+    if( ( pCellularSocketContext == NULL ) || ( pvOptionValue == NULL ) )
+    {
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else
+    {
+        if( pCellularSocketContext->pcDestination != NULL )
+        {
+            IotLogWarn( "Server name indication is already set. Previous setting is freed and set the new setting." );
+            vPortFree( pCellularSocketContext->pcDestination );
+            pCellularSocketContext->pcDestination = NULL;
+        }
+
+        pCellularSocketContext->pcDestination = ( char * ) pvPortMalloc( 1U + xOptionLength );
+
+        if( pCellularSocketContext->pcDestination == NULL )
+        {
+            retSetSockOpt = SOCKETS_ENOMEM;
+        }
+        else
+        {
+            ( void ) memcpy( ( void * ) pCellularSocketContext->pcDestination, pvOptionValue, xOptionLength );
+            pCellularSocketContext->pcDestination[ xOptionLength ] = '\0';
+        }
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvSetupTrustedServerCertificate( _cellularSecureSocket_t * pCellularSocketContext,
+                                                 const void * pvOptionValue,
+                                                 size_t xOptionLength )
+{
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+
+    if( ( pCellularSocketContext == NULL ) || ( pvOptionValue == NULL ) )
+    {
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else
+    {
+        if( pCellularSocketContext->pcServerCertificate != NULL )
+        {
+            IotLogWarn( "Server certificate is already set. Previous setting is freed and set the new setting." );
+            vPortFree( pCellularSocketContext->pcServerCertificate );
+            pCellularSocketContext->pcServerCertificate = NULL;
+        }
+
+        pCellularSocketContext->pcServerCertificate = ( char * ) pvPortMalloc( xOptionLength );
+
+        if( pCellularSocketContext->pcServerCertificate == NULL )
+        {
+            retSetSockOpt = SOCKETS_ENOMEM;
+        }
+        else
+        {
+            ( void ) memcpy( ( void * ) pCellularSocketContext->pcServerCertificate, pvOptionValue, xOptionLength );
+            pCellularSocketContext->ulServerCertificateLength = xOptionLength;
+        }
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvCellularSocketRegisterCallback( CellularSocketHandle_t tcpSocket,
+                                                  _cellularSecureSocket_t * pCellularSocketContext )
+{
+    int32_t retRegCallback = SOCKETS_ERROR_NONE;
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+
+    if( tcpSocket == NULL )
+    {
+        retRegCallback = SOCKETS_EINVAL;
+    }
+
+    if( retRegCallback == SOCKETS_ERROR_NONE )
+    {
+        socketStatus = Cellular_SocketRegisterDataReadyCallback( CellularHandle, tcpSocket,
+                                                                 prvCellularSocketDataReadyCallback, ( void * ) pCellularSocketContext );
+
+        if( socketStatus != CELLULAR_SUCCESS )
+        {
+            IotLogError( "Failed to SocketRegisterDataReadyCallback. Socket status %d.", socketStatus );
+            retRegCallback = SOCKETS_SOCKET_ERROR;
+        }
+    }
+
+    if( retRegCallback == SOCKETS_ERROR_NONE )
+    {
+        socketStatus = Cellular_SocketRegisterSocketOpenCallback( CellularHandle, tcpSocket,
+                                                                  prvCellularSocketOpenCallback, ( void * ) pCellularSocketContext );
+
+        if( socketStatus != CELLULAR_SUCCESS )
+        {
+            IotLogError( "Failed to SocketRegisterSocketOpenCallbac. Socket status %d.", socketStatus );
+            retRegCallback = SOCKETS_SOCKET_ERROR;
+        }
+    }
+
+    if( retRegCallback == SOCKETS_ERROR_NONE )
+    {
+        socketStatus = Cellular_SocketRegisterClosedCallback( CellularHandle, tcpSocket,
+                                                              prvCellularSocketClosedCallback, ( void * ) pCellularSocketContext );
+
+        if( socketStatus != CELLULAR_SUCCESS )
+        {
+            IotLogError( "Failed to SocketRegisterClosedCallback. Socket status %d.", socketStatus );
+            retRegCallback = SOCKETS_SOCKET_ERROR;
+        }
+    }
+
+    return retRegCallback;
+}
+
+/*-----------------------------------------------------------*/
+static int32_t prvCellularSetupTLS( _cellularSecureSocket_t * pCellularSocketContext )
+{
+    int32_t retSetupTLS = SOCKETS_ERROR_NONE;
+    TLSParams_t xTLSParams = { 0 };
+    BaseType_t tlsRet = pdFREERTOS_ERRNO_NONE;
+
+    if( pCellularSocketContext == NULL )
+    {
+        retSetupTLS = SOCKETS_EINVAL;
+    }
+
+    if( retSetupTLS == SOCKETS_ERROR_NONE )
+    {
+        xTLSParams.ulSize = sizeof( xTLSParams );
+        xTLSParams.pcDestination = pCellularSocketContext->pcDestination;
+        xTLSParams.pcServerCertificate = pCellularSocketContext->pcServerCertificate;
+        xTLSParams.ulServerCertificateLength = pCellularSocketContext->ulServerCertificateLength;
+        xTLSParams.pvCallerContext = ( void * ) pCellularSocketContext;
+        xTLSParams.pxNetworkRecv = prvNetworkRecv;
+        xTLSParams.pxNetworkSend = prvNetworkSend;
+
+        /* Initialize TLS. */
+        tlsRet = TLS_Init( &pCellularSocketContext->pvTLSContext, &xTLSParams );
+
+        if( tlsRet != pdFREERTOS_ERRNO_NONE )
+        {
+            IotLogError( "Failed to TLS_Init. tls status %d.", tlsRet );
+            retSetupTLS = SOCKETS_TLS_INIT_ERROR;
+        }
+
+        /* Initiate TLS handshake. */
+        if( retSetupTLS == SOCKETS_ERROR_NONE )
+        {
+            tlsRet = TLS_Connect( pCellularSocketContext->pvTLSContext );
+
+            if( tlsRet != pdFREERTOS_ERRNO_NONE )
             {
-                /* The socket read has timed out too. Returning SOCKETS_EWOULDBLOCK
-                    * will cause mBedTLS to fail and so we must return zero. */
-                xTotalBytesReceived = 0;
-                break;
+                IotLogError( "Failed to TLS_Connect. tls status %d.", tlsRet );
+                retSetupTLS = SOCKETS_TLS_HANDSHAKE_ERROR;
+            }
+        }
+    }
+
+    return retSetupTLS;
+}
+/*-----------------------------------------------------------*/
+
+static bool prvGetNextTok( char ** pDnsResultStr,
+                           char delimiter,
+                           char ** pToken )
+{
+    bool ret = true;
+    uint32_t strIndex = 0;
+    char * pDnsResultStrStart = *pDnsResultStr;
+
+    if( ( **pDnsResultStr == delimiter ) || ( **pDnsResultStr == '\0' ) )
+    {
+        ret = false;
+    }
+    else
+    {
+        *pToken = ( char * ) *pDnsResultStr;
+
+        while( ( **pDnsResultStr != delimiter ) && ( **pDnsResultStr != '\0' ) )
+        {
+            strIndex = strIndex + 1U;
+            *pDnsResultStr = &( pDnsResultStrStart )[ strIndex ];
+        }
+
+        /* Move 1 char ahead after the delimiter. */
+        if( **pDnsResultStr == delimiter )
+        {
+            **pDnsResultStr = '\0';
+            strIndex = strIndex + 1U;
+            *pDnsResultStr = &( pDnsResultStrStart )[ strIndex ];
+        }
+    }
+
+    return ret;
+}
+
+
+/*-----------------------------------------------------------*/
+
+/* Internal function of prvSocketsAton to reduce complexity. */
+static bool prvConvertStrToNumber( const char * pToken,
+                                   uint32_t * pRetValue )
+{
+    bool retStatus = true;
+    int32_t retStrtol = 0;
+    char * pEndStr = NULL;
+
+    if( ( pToken == NULL ) || ( pRetValue == NULL ) )
+    {
+        retStatus = false;
+    }
+    else
+    {
+        /* MISRA C 2012 Directive 4.7 � If a function returns error information, then
+         * that error information shall be tested.
+         * MISRA C 2012 Rule 22.8 � The errno variable must be "zero" before calling
+         * strtol function.
+         * MISRA C 2012 Rule 22.9 � The errno must be tested after strtol function is
+         * called.
+         *
+         * The following line violates MISRA rule 4.7 because return value of strtol()
+         * is not checked for error. Also, it violates MISRA rule 22.8 because variable
+         * "errno" is neither used nor initialized to zero before strtol() is called.
+         * It violates MISRA Rule 22.9 because Variable "errno" is not checked for error
+         * after strtol() is called.
+         *
+         * The above three violations are justified because error checking by "errno"
+         * for any POSIX API is not thread safe in FreeRTOS unless "configUSE_POSIX_ERRNO"
+         * is enabled. In order to avoid the dependency on this feature, errno variable
+         * is not used. The function strtol returns LONG_MIN and LONG_MAX in case of
+         * underflow and overflow respectively and sets the errno to ERANGE. It is not
+         * possible to distinguish between valid LONG_MIN and LONG_MAX return values
+         * and underflow and overflow scenarios without checking errno. Therefore, we
+         * cannot check return value of strtol for errors. We ensure that strtol performed
+         * a valid conversion by checking that *pEndPtr is '\0'. strtol stores the address
+         * of the first invalid character in *pEndPtr and therefore, '\0' value of *pEndPtr
+         * means that the complete pToken string passed for conversion was valid and a valid
+         * conversion was performed. */
+        /* coverity[misra_c_2012_directive_4_7_violation] */
+        /* coverity[misra_c_2012_rule_22_8_violation] */
+        /* coverity[misra_c_2012_rule_22_9_violation] */
+        retStrtol = strtol( pToken, &pEndStr, 10 );
+
+        if( ( *pEndStr == '\0' ) && ( retStrtol >= 0 ) )
+        {
+            *pRetValue = ( uint32_t ) retStrtol;
+        }
+        else
+        {
+            retStatus = false;
+        }
+    }
+
+    return retStatus;
+}
+
+/*-----------------------------------------------------------*/
+
+/* This function is a simplifed version of int inet_aton(const char *cp, struct in_addr *addr)
+ * Only accept IPV4 "xxx.xxx.xxx.xxx" format.
+ * return 1 for success, 0 for error. */
+static int32_t prvSocketsAton( char * cp,
+                               uint32_t * pIpAddress )
+{
+    int32_t ret = 1;
+    uint32_t i = 0;
+    uint32_t tempValue = 0;
+    char * pToken = NULL;
+    uint32_t ulIP[ 4 ] = { 0 };
+    bool retGetToken = true;
+    char * pLocatCp = cp;
+
+    for( ; i < ( uint32_t ) 4; i++ )
+    {
+        /* Get next tok. */
+        retGetToken = prvGetNextTok( &pLocatCp, '.', &pToken );
+
+        /* Convert the pToken to int. */
+        if( retGetToken == true )
+        {
+            if( prvConvertStrToNumber( pToken, &tempValue ) == false )
+            {
+                ret = 0;
+            }
+        }
+        else
+        {
+            ret = 0;
+        }
+
+        if( ret == 1 )
+        {
+            ulIP[ i ] = tempValue;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    /* store the data to output parameter. */
+    if( ret == 1 )
+    {
+        *pIpAddress = SOCKETS_inet_addr_quick( ulIP[ 0 ], ulIP[ 1 ], ulIP[ 2 ], ulIP[ 3 ] );
+    }
+
+    return ret;
+}
+
+/*-----------------------------------------------------------*/
+
+static bool _calculateElapsedTime( uint64_t entryTimeMs,
+                                   uint32_t timeoutValueMs,
+                                   uint64_t * pElapsedTimeMs )
+{
+    uint64_t currentTimeMs = IotClock_GetTimeMs();
+    bool isExpired = false;
+
+    /* timeoutValueMs with UINT32_MAX_DELAY_MS means wait for ever, same behavior as freertos_plus_tcp. */
+    if( timeoutValueMs == UINT32_MAX_DELAY_MS )
+    {
+        isExpired = false;
+    }
+
+    /* timeoutValueMs = 0 means none blocking mode. */
+    else if( timeoutValueMs == 0U )
+    {
+        isExpired = true;
+    }
+    else
+    {
+        *pElapsedTimeMs = currentTimeMs - entryTimeMs;
+
+        if( ( currentTimeMs - entryTimeMs ) >= timeoutValueMs )
+        {
+            isExpired = true;
+        }
+        else
+        {
+            isExpired = false;
+        }
+    }
+
+    return isExpired;
+}
+
+/*-----------------------------------------------------------*/
+
+static int32_t prvCheckSetSockOptParams( Socket_t xSocket,
+                                         int32_t lOptionName,
+                                         const void * pvOptionValue,
+                                         TickType_t * pSockTimeout )
+{
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
+
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
+        ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
+    {
+        IotLogError( "Invalid xSocket %p", pCellularSocketContext );
+        retSetSockOpt = SOCKETS_SOCKET_ERROR;
+    }
+    else if( ( pvOptionValue == NULL ) && ( ( lOptionName == SOCKETS_SO_SERVER_NAME_INDICATION ) ||
+                                            ( lOptionName == SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE ) ||
+                                            ( lOptionName == SOCKETS_SO_SNDTIMEO ) ||
+                                            ( lOptionName == SOCKETS_SO_RCVTIMEO ) ) )
+    {
+        /* These socket options require option value. Return error if option value is not
+         * provided. */
+        retSetSockOpt = SOCKETS_EINVAL;
+    }
+    else if( ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) != 0U ) &&
+             ( ( lOptionName == SOCKETS_SO_SERVER_NAME_INDICATION ) ||
+               ( lOptionName == SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE ) ||
+               ( lOptionName == SOCKETS_SO_REQUIRE_TLS ) ) )
+    {
+        /* TLS socket option can only be set before connection. */
+        retSetSockOpt = SOCKETS_EISCONN;
+    }
+    else if( ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) == 0U ) &&
+             ( lOptionName == SOCKETS_SO_NONBLOCK ) )
+    {
+        /* Nonblock option can only be set after connection. */
+        retSetSockOpt = SOCKETS_ENOTCONN;
+    }
+    else if( ( lOptionName == SOCKETS_SO_SNDTIMEO ) || ( lOptionName == SOCKETS_SO_RCVTIMEO ) )
+    {
+        *pSockTimeout = *( ( const TickType_t * ) pvOptionValue );
+
+        /* Comply with Berkeley standard - a 0 timeout is wait forever. */
+        if( *pSockTimeout == 0U )
+        {
+            *pSockTimeout = portMAX_DELAY;
+        }
+    }
+    else
+    {
+        /* Empty Else MISRA 15.7 */
+    }
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+#if ( ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) )
+
+    static uint32_t prvLookup( const char * pcHostName )
+    {
+        uint32_t resolvedAddress = 0, i = 0, foundInCache = 0;
+        uint32_t hostNameLength = strlen( pcHostName ); /* pcHostName is checked by caller. */
+        uint32_t cacheEntryLength = 0;
+
+        /* Ensure that the provided DNS name is of valid length. */
+        if( hostNameLength <= CELLULAR_IP_ADDRESS_MAX_SIZE )
+        {
+            /* Check if the provided DNS name already exists in cache. */
+            for( i = 0; i < GETHOSTBYNAME_CACHE_SIZE; i++ )
+            {
+                cacheEntryLength = strlen( _dnsCache[ i ] );
+
+                /* The length check is necessary to avoid false substring matches. */
+                if( ( cacheEntryLength == hostNameLength ) &&
+                    ( strncmp( _dnsCache[ i ], pcHostName, hostNameLength ) == 0 ) )
+                {
+                    foundInCache = 1;
+                    break;
+                }
+            }
+
+            if( foundInCache == 1 )
+            {
+                /* We return i + 1 to avoid returing 0 which is used to indicate a
+                 * lookup failure. */
+                resolvedAddress = i + 1;
             }
             else
             {
-                if (errorCount++ > 5) {
-                    /* We had a communication error status of some sort */
-                    xRetVal = SOCKETS_SOCKET_ERROR;
-                    break;
+                /* Find an empty place in the cache and copy the DNS name. */
+                for( i = 0; i < GETHOSTBYNAME_CACHE_SIZE; i++ )
+                {
+                    if( _dnsCache[ i ][ 0 ] == '\0' )
+                    {
+                        strncpy( _dnsCache[ i ], pcHostName, CELLULAR_IP_ADDRESS_MAX_SIZE );
+
+                        IotLogWarn( "Store %s in cache %d", pcHostName, i );
+
+                        /* Ensure NULL termination. */
+                        _dnsCache[ i ][ hostNameLength ] = '\0';
+
+                        break;
+                    }
                 }
-                vTaskDelay(pdMS_TO_TICKS(10));
+
+                /* Was an empty place found? */
+                if( i < GETHOSTBYNAME_CACHE_SIZE )
+                {
+                    resolvedAddress = i + 1;
+                }
             }
         }
-        else if (( xReceiveValue >= minMESSAGE_SIZE ) || (xReceiveValue == xReceiveBufferLength))
-        {
-            /* We received enough data and need to pass it back */
-            xTotalBytesReceived +=  xReceiveValue;
-            break;
-        }
-        else
-        {
-            /* we received less than minMESSAGE_SIZE bytes, so wait a little longer to see if something is coming back.
-                * This also allows other tasks of equal priority to take the hand.
-                */
-            tmpReceiveBuffer = tmpReceiveBuffer + xReceiveValue;
-            tmpReceiveBufferLength = tmpReceiveBufferLength - xReceiveValue;
-            xTotalBytesReceived += xReceiveValue;
-            vTaskDelay( pdMS_TO_TICKS(5) );
-        }
-    }
 
-    if (xRetVal != SOCKETS_SOCKET_ERROR )
-    {
-        xRetVal = (BaseType_t) xTotalBytesReceived;
+        return resolvedAddress;
     }
-
-    return xRetVal;
-}
 
 /*-----------------------------------------------------------*/
 
-Socket_t SOCKETS_Socket( int32_t lDomain, /* OK */
+    static const char * prvReverseLookup( uint32_t ipAddress )
+    {
+        char * hostName = NULL;
+
+        /* Ensure that the provided IP address is a valid one resolved by us
+         * earlier.*/
+        if( ( ipAddress > 0 ) && ( ipAddress <= GETHOSTBYNAME_CACHE_SIZE ) )
+        {
+            hostName = _dnsCache[ ( ipAddress - 1 ) ];
+        }
+
+        return hostName;
+    }
+#endif /* ( ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) ) */
+
+/*-----------------------------------------------------------*/
+
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
+Socket_t SOCKETS_Socket( int32_t lDomain,
                          int32_t lType,
                          int32_t lProtocol )
 {
-    uint32_t ulSocketNumber;
-    int32_t  ulModemSocketNumber;
-
+    Socket_t retSocket = NULL;
+    CellularSocketHandle_t Socket = NULL;
+    _cellularSecureSocket_t * pCellularSocketContext = NULL;
+    CellularError_t socketStatus = CELLULAR_INVALID_HANDLE;
 
     /* Ensure that only supported values are supplied. */
+    /* configASSET is used to check the function not supported in secure sockets. */
+    /* coverity[misra_c_2012_rule_10_4_violation] */
+    /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( lDomain == SOCKETS_AF_INET );
+    /* coverity[misra_c_2012_rule_10_4_violation] */
+    /* coverity[misra_c_2012_rule_10_5_violation] */
+    configASSERT( lType == SOCKETS_SOCK_STREAM );
+    /* coverity[misra_c_2012_rule_10_4_violation] */
+    /* coverity[misra_c_2012_rule_10_5_violation] */
+    configASSERT( lProtocol == SOCKETS_IPPROTO_TCP );
 
-    /* Here we have 3 cases
-     * 1. DTLS with Onboarding: needs QSSL initially for onboarding and then QI
-     * 2. MQTT: always uses QSSL
-     * 3. UDP : always uses QI
-     * */
-#if defined(USE_UDP) && defined(DTLS_DEMO)
-if(DEVICE_ONBOARDED == false) {
-    configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
-}
-else{
-    configASSERT( ( lType == SOCKETS_SOCK_DGRAM && lProtocol == COM_IPPROTO_UDP ) );
-
-}
-#elif  !defined(USE_UDP) && !defined(DTLS_DEMO)
-configASSERT( ( lType == SOCKETS_SOCK_STREAM && lProtocol == SOCKETS_IPPROTO_TCP ) );
-#else
-configASSERT( ( lType == SOCKETS_SOCK_DGRAM && lProtocol == COM_IPPROTO_UDP ) );
-#endif
-
-
-      /* Try to get a free socket. */
-    ulSocketNumber = prvGetFreeSocket();
-
-
-    /* Get a free socket from the modem pool */
-
-    ulModemSocketNumber = com_socket_ip_modem(lDomain, lType, lProtocol);
-
-
-    /* If we get a free socket, set its attributes. */
-    if( ulSocketNumber != ( uint32_t ) SOCKETS_INVALID_SOCKET && (ulModemSocketNumber < CELLULAR_MAX_SOCKETS))
+    /* Create a new TCP socket. */
+    socketStatus = Cellular_CreateSocket( CellularHandle,
+                                          CELLULAR_PDN_CONTEXT_ID_SOCKETS,
+                                          CELLULAR_SOCKET_DOMAIN_AF_INET,
+                                          CELLULAR_SOCKET_TYPE_STREAM,
+                                          CELLULAR_SOCKET_PROTOCOL_TCP,
+                                          &Socket );
+    if( socketStatus == CELLULAR_SUCCESS )
     {
-        /* Initialize all the members to sane values. */
-        xSockets[ ulSocketNumber ].ulFlags = 0;
-        xSockets[ ulSocketNumber ].ulSendTimeout = socketsconfigDEFAULT_SEND_TIMEOUT;
-        xSockets[ ulSocketNumber ].ulReceiveTimeout = socketsconfigDEFAULT_RECV_TIMEOUT;
-        xSockets[ ulSocketNumber ].pcDestination = NULL;
-        xSockets[ ulSocketNumber ].pvTLSContext = NULL;
-        xSockets[ ulSocketNumber ].pcServerCertificate = NULL;
-        xSockets[ ulSocketNumber ].ulServerCertificateLength = 0;
-        xSockets[ ulSocketNumber ].ST_socket_handle = ulModemSocketNumber; /*+*/
+        pCellularSocketContext = pvPortMalloc( sizeof( _cellularSecureSocket_t ) );
 
-
-    }
-    else {
-            ulSocketNumber = ( uint32_t ) SOCKETS_INVALID_SOCKET;
+        if( pCellularSocketContext == NULL )
+        {
+            IotLogError( "Failed to allocate new socket context." );
+            retSocket = NULL;
+            ( void ) Cellular_SocketClose( CellularHandle, Socket );
         }
+        else
+        {
+            /* Initialize all the members to sane values. */
+            IotLogDebug( "Created CELLULAR Socket %p.", pCellularSocketContext );
+            ( void ) memset( pCellularSocketContext, 0, sizeof( _cellularSecureSocket_t ) );
+            pCellularSocketContext->cellularSocketHandle = Socket;
+            pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_OPEN_FLAG;
+            pCellularSocketContext->xSendFlags = 0U;
+            pCellularSocketContext->xRecvFlags = 0U;
+            pCellularSocketContext->receiveTimeout = ( TickType_t ) socketsconfigDEFAULT_RECV_TIMEOUT;
+            pCellularSocketContext->sendTimeout = ( TickType_t ) socketsconfigDEFAULT_SEND_TIMEOUT;
+            pCellularSocketContext->pcDestination = NULL;
+            pCellularSocketContext->pvTLSContext = NULL;
+            pCellularSocketContext->pcServerCertificate = NULL;
+            pCellularSocketContext->ulServerCertificateLength = 0U;
+            pCellularSocketContext->socketEventGroupHandle = NULL;
+            retSocket = ( Socket_t ) pCellularSocketContext;
+        }
+    }
 
-    /* If we fail to get a free socket, we return SOCKETS_INVALID_SOCKET. */
-    return ( Socket_t ) ulSocketNumber; /*lint !e923 cast required for portability. */
+    if( retSocket != NULL )
+    {
+        pCellularSocketContext->socketEventGroupHandle = xEventGroupCreate();
+
+        if( pCellularSocketContext->socketEventGroupHandle == NULL )
+        {
+            IotLogError( "Failed create cellular socket eventGroupHandle %p.", pCellularSocketContext );
+            ( void ) Cellular_SocketClose( CellularHandle, Socket );
+            vPortFree( pCellularSocketContext );
+            retSocket = NULL;
+        }
+    }
+
+    return retSocket;
 }
-
-/* IS_ONLINE */
 
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_Connect( Socket_t xSocket,
                          SocketsSockaddr_t * pxAddress,
                          Socklen_t xAddressLength )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-	#ifndef USE_OFFLOAD_SSL
-        TLSParams_t xTLSParams = { 0 };
-    #endif /* USE_OFFLOAD_SSL */
+    /* Initialize the local variable to zero. */
+    /* coverity[misra_c_2012_rule_10_3_violation] */
+    CellularSocketAddress_t serverAddress = { 0 };
+    CellularSocketHandle_t tcpSocket = NULL;
+    CellularError_t socketStatus = CELLULAR_SUCCESS;
+    EventBits_t waitEventBits = 0;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    int32_t retConnect = SOCKETS_ERROR_NONE;
+    __attribute__((unused)) uint32_t tlsFlag = 0;
+    const uint32_t defaultReceiveTimeoutMs = CELLULAR_SOCKET_RECV_TIMEOUT_MS;
 
-    int32_t lRetVal = SOCKETS_SOCKET_ERROR;
-    com_sockaddr_in_t  destination_address;
-    uint32_t lRecvTimeout,lSendTimeout;
+    #if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+        const char * pHostname = NULL;
+    #endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
 
-    /* Ensure that a valid socket was passed. */
-    if( prvIsValidSocket( ulSocketNumber ) == pdTRUE )
+    ( void ) xAddressLength;
+
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
+        ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+        IotLogError( "Cellular connect Invalid xSocket %p", pCellularSocketContext );
+        retConnect = SOCKETS_EINVAL;
+    }
+    else if( pxAddress == NULL )
+    {
+        IotLogError( "Cellular connect Invalid Address %p", pxAddress );
+        retConnect = SOCKETS_EINVAL;
+    }
+    else
+    {
+        tcpSocket = pCellularSocketContext->cellularSocketHandle;
+        tlsFlag = pCellularSocketContext->ulFlags & CELLULAR_SOCKET_SECURE_FLAG;
+    }
 
-        /* Start the client connection. */
+    if( retConnect == SOCKETS_ERROR_NONE )
+    {
+        serverAddress.ipAddress.ipAddressType = CELLULAR_IP_ADDRESS_V4;
 
-        destination_address.sin_family      = COM_AF_INET;
-        destination_address.sin_port        = pxAddress->usPort;
-        destination_address.sin_addr.s_addr =  pxAddress->ulAddress;
+        #if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+            pHostname = prvReverseLookup( pxAddress->ulAddress );
 
-        int32_t res = com_connect_ip_modem((uint32_t)xSockets[ulSocketNumber].ST_socket_handle ,
-                (com_sockaddr_t *) &destination_address, sizeof(com_sockaddr_in_t));
-        if(res == CELLULAR_OK)
+            if( pHostname != NULL )
+            {
+                strncpy( serverAddress.ipAddress.ipAddress, pHostname, CELLULAR_IP_ADDRESS_MAX_SIZE );
+            }
+            else
+            {
+                /* This macro is defined in secure sockets header file.
+                 * It should be used during address convert in secure sockets implementation. */
+                /* coverity[misra_c_2012_directive_4_6_violation] */
+                /* coverity[misra_c_2012_rule_21_6_violation] */
+                ( void ) SOCKETS_inet_ntoa( pxAddress->ulAddress, serverAddress.ipAddress.ipAddress );
+            }
+        #else /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
+
+            /* This macro is defined in secure sockets header file.
+             * It should be used during address convert in secure sockets implementation. */
+            /* coverity[misra_c_2012_directive_4_6_violation] */
+            /* coverity[misra_c_2012_rule_21_6_violation] */
+            ( void ) SOCKETS_inet_ntoa( pxAddress->ulAddress, serverAddress.ipAddress.ipAddress );
+        #endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
+
+        /* Cellular socket use host endian. */
+        serverAddress.port = SOCKETS_ntohs( pxAddress->usPort );
+        IotLogDebug( "Ip address %s port %d\r\n", serverAddress.ipAddress.ipAddress, serverAddress.port );
+        retConnect = prvCellularSocketRegisterCallback( tcpSocket, pCellularSocketContext );
+    }
+
+    if( retConnect == SOCKETS_ERROR_NONE )
+    {
+        ( void ) xEventGroupClearBits( pCellularSocketContext->socketEventGroupHandle,
+                                       SOCKET_DATA_RECEIVED_CALLBACK_BIT | SOCKET_OPEN_FAILED_CALLBACK_BIT );
+        socketStatus = Cellular_SocketConnect( CellularHandle, tcpSocket, CELLULAR_SOCKET_ACCESS_MODE, &serverAddress );
+
+        if( socketStatus != CELLULAR_SUCCESS )
         {
-            /* Successful connection is established. */
-            lRetVal = SOCKETS_ERROR_NONE;
+            IotLogError( "Failed to establish new connection. Socket status %d.", socketStatus );
+            retConnect = SOCKETS_SOCKET_ERROR;
         }
     }
-    /* TLS initialization is needed only if we are not using offload SSL. */
-        	#ifndef USE_OFFLOAD_SSL
-                  /* Initialize TLS only if the connection is successful. */
-                  if( ( lRetVal == SOCKETS_ERROR_NONE ) &&
-                      ( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL ) )
-                  {
-                      /* Setup TLS parameters. */
-                      xTLSParams.ulSize = sizeof( xTLSParams );
-                      xTLSParams.pcDestination = pxSecureSocket->pcDestination;
-                      xTLSParams.pcServerCertificate = pxSecureSocket->pcServerCertificate;
-                      xTLSParams.ulServerCertificateLength = pxSecureSocket->ulServerCertificateLength;
-                      xTLSParams.pvCallerContext = ( void * ) xSocket;
-                      xTLSParams.pxNetworkRecv = &( prvNetworkRecv );
-                      xTLSParams.pxNetworkSend = &( prvNetworkSend );
 
+    /* Set cellular socket recv AT command default timeout. */
+    if( retConnect == SOCKETS_ERROR_NONE )
+    {
+        socketStatus = Cellular_SocketSetSockOpt( CellularHandle,
+                                                  tcpSocket,
+                                                  CELLULAR_SOCKET_OPTION_LEVEL_TRANSPORT,
+                                                  CELLULAR_SOCKET_OPTION_RECV_TIMEOUT,
+                                                  ( const uint8_t * ) &defaultReceiveTimeoutMs,
+                                                  sizeof( uint32_t ) );
+    }
 
+    if( retConnect == SOCKETS_ERROR_NONE )
+    {
+        waitEventBits = xEventGroupWaitBits( pCellularSocketContext->socketEventGroupHandle,
+                                             SOCKET_OPEN_CALLBACK_BIT | SOCKET_OPEN_FAILED_CALLBACK_BIT,
+                                             pdTRUE,
+                                             pdFALSE,
+                                             CELLULAR_SOCKET_OPEN_TIMEOUT_TICKS );
 
-                      /* Initialize TLS. */
-                      if( TLS_Init( &( pxSecureSocket->pvTLSContext ), &( xTLSParams ) ) == pdFREERTOS_ERRNO_NONE )
-                      {
-                          /* Initiate TLS handshake. */
-                          if( TLS_Connect( pxSecureSocket->pvTLSContext ) != pdFREERTOS_ERRNO_NONE )
-                          {
-                              /* TLS handshake failed. */
-                              lRetVal = SOCKETS_TLS_HANDSHAKE_ERROR;
-                          }
-                      }
-                      else
-                      {
-                          /* TLS Initialization failed. */
-                          lRetVal = SOCKETS_TLS_INIT_ERROR;
-                      }
-                  }
-              #endif /* USE_OFFLOAD_SSL*/
-
-    return lRetVal;
+        if( waitEventBits != SOCKET_OPEN_CALLBACK_BIT )
+        {
+            IotLogError( "Socket connect timeout." );
+            retConnect = SOCKETS_ENOTCONN;
+        }
+    }
+    /* Setup TLS parameters. */
+    if( ( retConnect == SOCKETS_ERROR_NONE ) && ( tlsFlag != 0U ) )
+    {
+        retConnect = prvCellularSetupTLS( pCellularSocketContext );
+    }
+    return retConnect;
 }
 
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_Recv( Socket_t xSocket,
                       void * pvBuffer,
                       size_t xBufferLength,
                       uint32_t ulFlags )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-    int32_t lReceivedBytes = SOCKETS_SOCKET_ERROR;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    uint32_t tlsFlag = 0;
+    int32_t retRecvLength = SOCKETS_ERROR_NONE;
+    BaseType_t bytesRecv = 0;
 
-    /* Remove warning about unused parameters. */
-    ( void ) ulFlags;
-
-    /* Ensure that a valid socket was passed and the
-     * passed buffer is not NULL. */
-    if( ( prvIsValidSocket( ulSocketNumber ) == pdTRUE ) &&
-        ( pvBuffer != NULL ) )
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
+        ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+        IotLogDebug( "Cellular recv Invalid xSocket %p", pCellularSocketContext );
+        retRecvLength = SOCKETS_EINVAL;
+    }
+    else if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) == 0U )
+    {
+        IotLogDebug( "Cellular recv Invalid xSocket %p not conn", pCellularSocketContext );
+        retRecvLength = SOCKETS_ENOTCONN;
+    }
+    else if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_READ_CLOSED_FLAG ) != 0U )
+    {
+        IotLogDebug( "Cellular recv Invalid xSocket %p closed", pCellularSocketContext );
+        retRecvLength = SOCKETS_ECLOSED;
+    }
+    else if( pvBuffer == NULL )
+    {
+        IotLogDebug( "Cellular recv Invalid parameter pvBuffer %p", pvBuffer );
+        retRecvLength = SOCKETS_EINVAL;
+    }
+    else
+    {
+        pCellularSocketContext->xRecvFlags = ulFlags;
+        tlsFlag = pCellularSocketContext->ulFlags & CELLULAR_SOCKET_SECURE_FLAG;
+    }
 
-        /* Check that receive is allowed on the socket. */
-        if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_READ_CLOSED_FLAG ) == 0UL )
+    /* Socket Receive operation. */
+    if( retRecvLength == SOCKETS_ERROR_NONE )
+    {
+        if( tlsFlag != 0U )
         {
-#ifndef USE_OFFLOAD_SSL
-                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL )
-                {
-                    /* Receive through TLS pipe, if negotiated. */
-                    lReceivedBytes = TLS_Recv( pxSecureSocket->pvTLSContext, pvBuffer, xBufferLength );
-
-
-
-                    /* Convert the error code. */
-                    if( lReceivedBytes < 0 )
-                    {
-                        /* TLS_Recv failed. */
-                        lReceivedBytes = SOCKETS_TLS_RECV_ERROR;
-                    }
-                }
-                else
-                {
-                    /* Receive un-encrypted. */
-                    lReceivedBytes = prvNetworkRecv( xSocket, pvBuffer, xBufferLength );
-                }
-            #else /* USE_OFFLOAD_SSL */
-                /* Always receive using prvNetworkRecv if using offload SSL. */
-                lReceivedBytes = prvNetworkRecv( xSocket, pvBuffer, xBufferLength );
-            #endif /* USE_OFFLOAD_SSL */
-
+            bytesRecv = TLS_Recv( pCellularSocketContext->pvTLSContext, pvBuffer, xBufferLength );
         }
         else
         {
-            /* The socket has been closed for read. */
-            lReceivedBytes = SOCKETS_ECLOSED;
+            bytesRecv = prvNetworkRecv( pCellularSocketContext, pvBuffer, xBufferLength );
+        }
+
+        /* Check if gracefully shutdown again. */
+        if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_READ_CLOSED_FLAG ) != 0U )
+        {
+            IotLogInfo( "Cellular recv Invalid xSocket %p closed in receive", pCellularSocketContext );
+            retRecvLength = SOCKETS_ECLOSED;
+        }
+        else
+        {
+            retRecvLength = ( int32_t ) bytesRecv;
         }
     }
 
-    return lReceivedBytes;
+    IotLogDebug( "(Network connection %p) Recv %d bytes.", pCellularSocketContext, retRecvLength );
+    return retRecvLength;
 }
+
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_Send( Socket_t xSocket,
                       const void * pvBuffer,
                       size_t xDataLength,
                       uint32_t ulFlags )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-    int32_t lSentBytes = SOCKETS_SOCKET_ERROR;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    uint32_t tlsFlag = 0;
+    int32_t retSentLength = SOCKETS_ERROR_NONE;
+    BaseType_t bytesSent = 0;
 
-    /* Remove warning about unused parameters. */
-    ( void ) ulFlags;
-
-    /* Ensure that a valid socket was passed and the passed buffer
-     * is not NULL. */
-    if( ( prvIsValidSocket( ulSocketNumber ) == pdTRUE ) &&
-        ( pvBuffer != NULL ) )
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
+        ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+        IotLogInfo( "Cellular send Invalid xSocket %p", pCellularSocketContext );
+        retSentLength = SOCKETS_EINVAL;
+    }
+    else if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_CONNECT_FLAG ) == 0U )
+    {
+        retSentLength = SOCKETS_ENOTCONN;
+    }
+    else if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_WRITE_CLOSED_FLAG ) != 0U )
+    {
+        retSentLength = SOCKETS_ECLOSED;
+    }
+    else if( pvBuffer == NULL )
+    {
+        IotLogError( "Cellular send Invalid parameter pvBuffer %p", pvBuffer );
+        retSentLength = SOCKETS_EINVAL;
+    }
+    else
+    {
+        pCellularSocketContext->xSendFlags = ulFlags;
+        tlsFlag = pCellularSocketContext->ulFlags & CELLULAR_SOCKET_SECURE_FLAG;
+    }
 
-        /* Check that send is allowed on the socket. */
-        if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_WRITE_CLOSED_FLAG ) == 0UL )
+    if( retSentLength == SOCKETS_ERROR_NONE )
+    {
+        if( tlsFlag != 0U )
         {
-#ifndef USE_OFFLOAD_SSL
-                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_SECURE_FLAG ) != 0UL )
-                {
-                    /* Send through TLS pipe, if negotiated. */
-                    lSentBytes = TLS_Send( pxSecureSocket->pvTLSContext, pvBuffer, xDataLength );
-
-
-
-                    /* Convert the error code. */
-                    if( lSentBytes < 0 )
-                    {
-                        /* TLS_Send failed. */
-                        lSentBytes = SOCKETS_TLS_SEND_ERROR;
-                    }
-                }
-                else
-                {
-                    /* Send un-encrypted. */
-                    lSentBytes = prvNetworkSend( xSocket, pvBuffer, xDataLength );
-                }
-            #else /* USE_OFFLOAD_SSL */
-                /* Always send using prvNetworkSend if using offload SSL. */
-                lSentBytes = prvNetworkSend( xSocket, pvBuffer, xDataLength );
-            #endif /* USE_OFFLOAD_SSL */
-
+            bytesSent = TLS_Send( pCellularSocketContext->pvTLSContext, pvBuffer, xDataLength );
         }
         else
         {
-            /* The socket has been closed for write. */
-            lSentBytes = SOCKETS_ECLOSED;
+            bytesSent = prvNetworkSend( pCellularSocketContext, pvBuffer, xDataLength );
+        }
+
+        /* Check if gracefully shutdown. */
+        if( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_WRITE_CLOSED_FLAG ) != 0U )
+        {
+            retSentLength = SOCKETS_ECLOSED;
+        }
+        else if( bytesSent < 0 )
+        {
+            if( tlsFlag != 0U )
+            {
+                IotLogError( "Error %d while TLS_Send data. %08x", bytesSent, pCellularSocketContext->ulFlags );
+                retSentLength = SOCKETS_TLS_SEND_ERROR;
+            }
+            else
+            {
+                IotLogError( "Error %d while send data.", bytesSent );
+                retSentLength = SOCKETS_SOCKET_ERROR;
+            }
+        }
+        else
+        {
+            retSentLength = ( int32_t ) bytesSent;
         }
     }
 
-    return lSentBytes;
+    IotLogDebug( "(Network connection %p) Sent %d bytes.", pCellularSocketContext, retSentLength );
+    return retSentLength;
 }
+
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_Shutdown( Socket_t xSocket,
                           uint32_t ulHow )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-    int32_t lRetVal = SOCKETS_SOCKET_ERROR;
+    int32_t retShutdown = SOCKETS_ERROR_NONE;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
 
-    /* Ensure that a valid socket was passed. */
-    if( prvIsValidSocket( ulSocketNumber ) == pdTRUE )
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) ||
+        ( ( pCellularSocketContext->ulFlags & CELLULAR_SOCKET_OPEN_FLAG ) == 0U ) )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
+        retShutdown = SOCKETS_EINVAL;
+    }
 
+    if( retShutdown == SOCKETS_ERROR_NONE )
+    {
         switch( ulHow )
         {
             case SOCKETS_SHUT_RD:
-                /* Further receive calls on this socket should return error. */
-                pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_READ_CLOSED_FLAG;
-
-                /* Return success to the user. */
-                lRetVal = SOCKETS_ERROR_NONE;
+                pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_READ_CLOSED_FLAG;
                 break;
 
             case SOCKETS_SHUT_WR:
-                /* Further send calls on this socket should return error. */
-                pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_WRITE_CLOSED_FLAG;
-
-                /* Return success to the user. */
-                lRetVal = SOCKETS_ERROR_NONE;
+                pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_WRITE_CLOSED_FLAG;
                 break;
 
             case SOCKETS_SHUT_RDWR:
-                /* Further send or receive calls on this socket should return error. */
-                pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_READ_CLOSED_FLAG;
-                pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_WRITE_CLOSED_FLAG;
-
-                /* Return success to the user. */
-                lRetVal = SOCKETS_ERROR_NONE;
+                pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_READ_CLOSED_FLAG;
+                pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_WRITE_CLOSED_FLAG;
                 break;
 
             default:
-                /* An invalid value was passed for ulHow. */
-                lRetVal = SOCKETS_EINVAL;
+                retShutdown = SOCKETS_EINVAL;
                 break;
         }
     }
-    else
-    {
-        /* Invalid socket was passed. */
-        lRetVal = SOCKETS_EINVAL;
-    }
 
-    return lRetVal;
+    return retShutdown;
 }
+
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_Close( Socket_t xSocket )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-    int32_t lRetVal = SOCKETS_SOCKET_ERROR;
+    int32_t retClose = SOCKETS_ERROR_NONE;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    CellularSocketHandle_t tcpSocket = NULL;
 
-    /* Ensure that a valid socket was passed. */
-    if( prvIsValidSocket( ulSocketNumber ) == pdTRUE )
+    /* xSocket need to be check against SOCKET_INVALID_SOCKET. */
+    /* coverity[misra_c_2012_rule_11_4_violation] */
+    if( ( pCellularSocketContext == NULL ) || ( xSocket == SOCKETS_INVALID_SOCKET ) )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
-
-        /* Mark the socket as closed. */
-        pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_READ_CLOSED_FLAG;
-        pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_WRITE_CLOSED_FLAG;
-
-        /* Free the space allocated for pcDestination. */
-        if( pxSecureSocket->pcDestination != NULL )
-        {
-            vPortFree( pxSecureSocket->pcDestination );
-        }
-
-        /* Free the space allocated for pcServerCertificate. */
-        if( pxSecureSocket->pcServerCertificate != NULL )
-        {
-            vPortFree( pxSecureSocket->pcServerCertificate );
-        }
-
-            /* Stop the client connection. */
-            if(com_closesocket_ip_modem((uint32_t)xSockets[ulSocketNumber].ST_socket_handle) == CELLULAR_OK )
-            {
-                /* Connection close successful. */
-                lRetVal = SOCKETS_ERROR_NONE;
-            }
-
-
-
-        /* Return the socket back to the free socket pool. */
-        prvReturnSocket( ulSocketNumber );
+        IotLogError( "Invalid xSocket %p", pCellularSocketContext );
+        retClose = SOCKETS_EINVAL;
     }
     else
     {
-        /* Bad argument. */
-        lRetVal = SOCKETS_EINVAL;
+        tcpSocket = pCellularSocketContext->cellularSocketHandle;
     }
 
-    return lRetVal;
+    if( retClose == SOCKETS_ERROR_NONE )
+    {
+        if( tcpSocket != NULL )
+        {
+            if( Cellular_SocketClose( CellularHandle, tcpSocket ) != CELLULAR_SUCCESS )
+            {
+                IotLogWarn( "Failed to destroy connection." );
+                retClose = SOCKETS_SOCKET_ERROR;
+            }
+
+            ( void ) Cellular_SocketRegisterDataReadyCallback( CellularHandle, tcpSocket, NULL, NULL );
+            ( void ) Cellular_SocketRegisterSocketOpenCallback( CellularHandle, tcpSocket, NULL, NULL );
+            ( void ) Cellular_SocketRegisterClosedCallback( CellularHandle, tcpSocket, NULL, NULL );
+            pCellularSocketContext->cellularSocketHandle = NULL;
+        }
+
+        if( pCellularSocketContext->pcDestination != NULL )
+        {
+            vPortFree( pCellularSocketContext->pcDestination );
+            pCellularSocketContext->pcDestination = NULL;
+        }
+
+        if( pCellularSocketContext->pcServerCertificate != NULL )
+        {
+            vPortFree( pCellularSocketContext->pcServerCertificate );
+            pCellularSocketContext->pcServerCertificate = NULL;
+        }
+
+        if( pCellularSocketContext->pvTLSContext != NULL )
+        {
+            TLS_Cleanup( pCellularSocketContext->pvTLSContext );
+            pCellularSocketContext->pvTLSContext = NULL;
+        }
+
+        if( pCellularSocketContext->socketEventGroupHandle != NULL )
+        {
+            vEventGroupDelete( pCellularSocketContext->socketEventGroupHandle );
+            pCellularSocketContext->socketEventGroupHandle = NULL;
+        }
+
+        vPortFree( pCellularSocketContext );
+    }
+
+    return retClose;
 }
+
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 int32_t SOCKETS_SetSockOpt( Socket_t xSocket,
                             int32_t lLevel,
                             int32_t lOptionName,
                             const void * pvOptionValue,
                             size_t xOptionLength )
 {
-    uint32_t ulSocketNumber = ( uint32_t ) xSocket; /*lint !e923 cast required for portability. */
-    STSecureSocket_t * pxSecureSocket;
-    int32_t lRetVal = SOCKETS_ERROR_NONE;
-    uint32_t lTimeout,lRecvTimeout,lSendTimeout;
+    TickType_t sockTimeout = 0;
+    _cellularSecureSocket_t * pCellularSocketContext = ( _cellularSecureSocket_t * ) xSocket;
+    int32_t retSetSockOpt = SOCKETS_ERROR_NONE;
 
-    /* Ensure that a valid socket was passed. */
-    if( prvIsValidSocket( ulSocketNumber ) == pdTRUE )
+    ( void ) lLevel;
+
+    retSetSockOpt = prvCheckSetSockOptParams( xSocket, lOptionName, pvOptionValue, &sockTimeout );
+
+    if( retSetSockOpt == SOCKETS_ERROR_NONE )
     {
-        /* Shortcut for easy access. */
-        pxSecureSocket = &( xSockets[ ulSocketNumber ] );
-
         switch( lOptionName )
         {
             case SOCKETS_SO_SERVER_NAME_INDICATION:
-
-                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_IS_CONNECTED_FLAG ) == 0 )
-                {
-                    /* Non-NULL destination string indicates that SNI extension should
-                     * be used during TLS negotiation. */
-                    pxSecureSocket->pcDestination = ( char * ) pvPortMalloc( 1U + xOptionLength );
-
-                    if( pxSecureSocket->pcDestination == NULL )
-                    {
-                        lRetVal = SOCKETS_ENOMEM;
-                    }
-                    else
-                    {
-                        memcpy( pxSecureSocket->pcDestination, pvOptionValue, xOptionLength );
-                        pxSecureSocket->pcDestination[ xOptionLength ] = '\0';
-                    }
-                }
-                else
-                {
-                    /* SNI must be set before connection is established. */
-                    lRetVal = SOCKETS_SOCKET_ERROR;
-                }
-
+                retSetSockOpt = prvSetupServerNameIndication( pCellularSocketContext, pvOptionValue, xOptionLength );
                 break;
 
             case SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE:
-
-                if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_IS_CONNECTED_FLAG ) == 0 )
-                {
-                    /* Non-NULL server certificate field indicates that the default trust
-                     * list should not be used. */
-                    pxSecureSocket->pcServerCertificate = ( char * ) pvPortMalloc( xOptionLength );
-
-                    if( pxSecureSocket->pcServerCertificate == NULL )
-                    {
-                        lRetVal = SOCKETS_ENOMEM;
-                    }
-                    else
-                    {
-                        memcpy( pxSecureSocket->pcServerCertificate, pvOptionValue, xOptionLength );
-                        pxSecureSocket->ulServerCertificateLength = xOptionLength;
-                    }
-                }
-                else
-                {
-                    /* Trusted server certificate must be set before the connection is established. */
-                    lRetVal = SOCKETS_SOCKET_ERROR;
-                }
-
+                retSetSockOpt = prvSetupTrustedServerCertificate( pCellularSocketContext, pvOptionValue, xOptionLength );
                 break;
 
             case SOCKETS_SO_REQUIRE_TLS:
-
-              if( ( pxSecureSocket->ulFlags & stsecuresocketsSOCKET_IS_CONNECTED_FLAG ) == 0 )
-                {
-                    /* Mark that it is a secure socket. */
-                    pxSecureSocket->ulFlags |= stsecuresocketsSOCKET_SECURE_FLAG;
-                }
-                else
-                {
-                    /* Require TLS must be set before the connection is established. */
-                    lRetVal = SOCKETS_SOCKET_ERROR;
-                }
-
+                pCellularSocketContext->ulFlags |= CELLULAR_SOCKET_SECURE_FLAG;
                 break;
 
             case SOCKETS_SO_SNDTIMEO:
-
-                lTimeout = *( ( const uint32_t * ) pvOptionValue ); /*lint !e9087 pvOptionValue is passed in as an opaque value, and must be casted for setsockopt. */
-
-                /* Valid timeouts are 0 (no timeout) or 1-30000ms. */
-                if( lTimeout < stsecuresocketsMAX_TIMEOUT )
-                {
-                    /* Store send timeout. */
-                    pxSecureSocket->ulSendTimeout = lTimeout;
-                }
-                else
-                {
-                    lRetVal = SOCKETS_EINVAL;
-                }
-
+                retSetSockOpt = prvSetupSocketSendTimeout( pCellularSocketContext, sockTimeout );
                 break;
 
             case SOCKETS_SO_RCVTIMEO:
+                retSetSockOpt = prvSetupSocketRecvTimeout( pCellularSocketContext, sockTimeout );
+                break;
 
-                lTimeout = *( ( const uint32_t * ) pvOptionValue ); /*lint !e9087 pvOptionValue is passed in as an opaque value, and must be casted for setsockopt. */
-
-                /* Valid timeouts are 0 (no timeout) or 1-30000ms. */
-                if( lTimeout < stsecuresocketsMAX_TIMEOUT )
-                {
-                    /* Store receive timeout. */
-                    pxSecureSocket->ulReceiveTimeout = lTimeout;
-                }
-                else
-                {
-                    lRetVal = SOCKETS_EINVAL;
-                }
-
+            case SOCKETS_SO_NONBLOCK:
+                retSetSockOpt = prvSetupSocketNonblock( pCellularSocketContext );
                 break;
 
             default:
-
-                lRetVal = SOCKETS_ENOPROTOOPT;
+                retSetSockOpt = SOCKETS_ENOPROTOOPT;
                 break;
         }
     }
-    else
+
+    return retSetSockOpt;
+}
+
+/*-----------------------------------------------------------*/
+
+#if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 )
+
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
+    uint32_t SOCKETS_GetHostByName( const char * pcHostName )
     {
-        lRetVal = SOCKETS_SOCKET_ERROR;
+        uint32_t ulIPAddress = 0;
+
+        if( pcHostName != NULL )
+        {
+            ulIPAddress = prvLookup( pcHostName );
+        }
+
+        return ulIPAddress;
     }
 
-    return lRetVal;
-}
 /*-----------------------------------------------------------*/
 
-uint32_t SOCKETS_GetHostByName( const char * pcHostName )
-{
-    uint32_t ulIPAddres = -1;
-    com_sockaddr_t distantaddr;
+#else /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
 
-    /* Do a DNS Lookup. */
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
+    uint32_t SOCKETS_GetHostByName( const char * pcHostName )
+    {
+        uint32_t ulIPAddress = 0;
+        char pIpAddress[ CELLULAR_IP_ADDRESS_MAX_SIZE ] = { 0 };
+        CellularError_t socketStatus = CELLULAR_SUCCESS;
 
-    com_gethostbyname_ip_modem ((const com_char_t *) pcHostName, &distantaddr);
-    ulIPAddres = ((com_sockaddr_in_t *)&distantaddr)->sin_addr.s_addr;
+        if( pcHostName != NULL )
+        {
+            socketStatus = Cellular_GetHostByName( CellularHandle,
+                                                   CELLULAR_PDN_CONTEXT_ID_SOCKETS, pcHostName, pIpAddress );
 
-    return ulIPAddres;
-}
+            if( socketStatus == CELLULAR_SUCCESS )
+            {
+                /* Convert the IP string to uIPAddress. */
+                if( prvSocketsAton( pIpAddress, &ulIPAddress ) == 0 )
+                {
+                    ulIPAddress = 0;
+                }
+            }
+            else
+            {
+                ulIPAddress = 0;
+            }
+        }
+
+        return ulIPAddress;
+    }
+#endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
+
 /*-----------------------------------------------------------*/
 
+/* Standard secure socket api implementation. */
+/* coverity[misra_c_2012_rule_8_7_violation] */
 BaseType_t SOCKETS_Init( void )
 {
-    uint32_t ulIndex;
-
-    /* Mark all the sockets as free and closed. */
-    for( ulIndex = 0; ulIndex < ( uint32_t ) CELLULAR_MAX_SOCKETS; ulIndex++ )
-    {
-        xSockets[ ulIndex ].ucInUse = 0;
-        xSockets[ ulIndex ].ulFlags = 0;
-
-        xSockets[ ulIndex ].ulFlags |= stsecuresocketsSOCKET_READ_CLOSED_FLAG;
-        xSockets[ ulIndex ].ulFlags |= stsecuresocketsSOCKET_WRITE_CLOSED_FLAG;
-    }
-
-    /* Empty initialization for ST board. */
+    /* Empty initialization for this port. */
     return pdPASS;
 }
+
 /*-----------------------------------------------------------*/

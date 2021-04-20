@@ -66,7 +66,7 @@
    */
 #define __STM32L475E_IOT01_BSP_VERSION_MAIN   (0x01) /*!< [31:24] main version */
 #define __STM32L475E_IOT01_BSP_VERSION_SUB1   (0x01) /*!< [23:16] sub1 version */
-#define __STM32L475E_IOT01_BSP_VERSION_SUB2   (0x03) /*!< [15:8]  sub2 version */
+#define __STM32L475E_IOT01_BSP_VERSION_SUB2   (0x01) /*!< [15:8]  sub2 version */
 #define __STM32L475E_IOT01_BSP_VERSION_RC     (0x00) /*!< [7:0]  release candidate */
 #define __STM32L475E_IOT01_BSP_VERSION        ((__STM32L475E_IOT01_BSP_VERSION_MAIN << 24)\
                                                  |(__STM32L475E_IOT01_BSP_VERSION_SUB1 << 16)\
@@ -709,7 +709,7 @@ void NFC_IO_DeInit(void)
 
 /**
   * @brief  This functions reads a response of the M24SR device
-  * @param  Addr: M24SR I2C address
+  * @param  Addr: M24SR I2C address   (do we really need to add?)
   * @param  pBuffer : Pointer on the buffer to retrieve M24SR response
   * @param  Length: Length of the data
   * @retval Status: Success or Timeout
@@ -735,7 +735,7 @@ uint16_t NFC_IO_ReadMultiple (uint8_t Addr, uint8_t *pBuffer, uint16_t Length )
 
 /**
   * @brief  This functions sends the command buffer 
-  * @param  Addr: M24SR I2C address
+  * @param  Addr: M24SR I2C address   (do we really need to add?)
   * @param  pBuffer : pointer to the buffer to send to the M24SR
   * @param  Length: Length of the data
   * @retval Status: Success or Timeout
@@ -761,7 +761,7 @@ uint16_t  NFC_IO_WriteMultiple (uint8_t Addr, uint8_t *pBuffer, uint16_t Length)
 
 /**
   * @brief  Checks if target device is ready for communication.
-  * @param  Addr: M24SR I2C address
+  * @param  Addr: M24SR I2C address   (do we really need to add?)
   * @param  Trials: Number of trials (currently not present in M24sr)
   * @retval Status: Success or Timeout
   */

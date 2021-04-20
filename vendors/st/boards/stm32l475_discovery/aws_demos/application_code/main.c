@@ -1,30 +1,80 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
+/*
+* FreeRTOS
+ * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * http://aws.amazon.com/freertos
+ * http://www.FreeRTOS.org
+ */
 
-/* Includes ------------------------------------------------------------------*/
+
+/*
+ * Debug setup instructions:
+ * 1) Open the debug configuration dialog.
+ * 2) Go to the Debugger tab.
+ * 3) If the 'Mode Setup' options are not visible, click the 'Show Generator' button.
+ * 4) In the Mode Setup|Reset Mode drop down ensure that
+ *    'Software System Reset' is selected.
+ */
+
 #include "main.h"
-#include "cmsis_os.h"
-#include "rng.h"
-#include "rtc.h"
-#include "usart.h"
-#include "gpio.h"
+#include "stdint.h"
+#include "stdarg.h"
+
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#include "task.h"
+
+/* Test includes */
+//#include "aws_test_runner.h"
+#include "iot_system_init.h"
+#include "iot_network_types.h"
+#include "iot_logging_task.h"
+#include "iot_uart.h"
+#include "aws_dev_mode_key_provisioning.h"
+#include "iot_logging_setup.h"
+
+// Print log messages up to the "info" level.
+#define LIBRARY_LOG_LEVEL    IOT_LOG_DEBUG
+// Print library name "SAMPLE".
+#define LIBRARY_LOG_NAME     "MAIN"
+// Including this header defines the logging macros using LIBRARY_LOG_LEVEL and
+// LIBRARY_LOG_NAME.
+
+/* The SPI driver polls at a high priority. The logging task's priority must also
+ * be high to be not be starved of CPU time. */
+#define mainLOGGING_TASK_PRIORITY           ( configMAX_PRIORITIES - 1 )
+#define mainLOGGING_TASK_STACK_SIZE         ( configMINIMAL_STACK_SIZE * 4 )
+#define mainLOGGING_MESSAGE_QUEUE_LENGTH    ( 15 )
+
+#define mainTEST_RUNNER_TASK_STACK_SIZE     ( configMINIMAL_STACK_SIZE * 4 )
+
+/* Number of times to retry to join an AP before giving up. */
+#define mainWIFI_JOIN_AP_RETRIES            ( 2 )
+
+/* Heap 2 size for malloc. */
+#define HEAP2_SIZE                          ( 10 * 1024)
+
+void vApplicationDaemonTaskStartupHook( void );
+
+/* Defined in es_wifi_io.c. */
+extern SPI_HandleTypeDef hspi;
 
 /**********************
 * Global Variables
@@ -32,46 +82,72 @@
 RTC_HandleTypeDef xHrtc;
 RNG_HandleTypeDef xHrng;
 
-
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
 /* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
+static UART_HandleTypeDef  xConsoleUart;
 
 /* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
-/* USER CODE BEGIN PFP */
+static void SystemClock_Config( void );
+static void Console_UART_Init( void );
+static void RTC_Init( void );
 
-/* USER CODE END PFP */
+/**
+ * @brief Initializes the STM32L475 IoT node board.
+ *
+ * Initialization of clock, LEDs, RNG, RTC, and WIFI module.
+ */
+static void prvMiscInitialization( void );
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
+/**
+ * @brief Initializes the FreeRTOS heap.
+ *
+ * Heap_5 is being used because the RAM is not contiguous, therefore the heap
+ * needs to be initialized.  See http://www.freertos.org/a00111.html
+ */
+static void prvInitializeHeap( void );
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Application runtime entry point.
+ */
+int main( void )
+{
+    /* Perform any hardware initialization that does not require the RTOS to be
+     * running.  */
+    prvMiscInitialization();
 
 
+    /* Create tasks that are not dependent on the WiFi being initialized. */
+    xLoggingTaskInitialize( mainLOGGING_TASK_STACK_SIZE,
+                            mainLOGGING_TASK_PRIORITY,
+                            mainLOGGING_MESSAGE_QUEUE_LENGTH );
+    /* Start the scheduler.  Initialization that requires the OS to be running,
+     * including the WiFi initialization, is performed in the RTOS daemon task
+     * startup hook. */
+    vTaskStartScheduler();
 
+    return 0;
+}
+
+/*-----------------------------------------------------------*/
+
+void vApplicationDaemonTaskStartupHook( void )
+{
+        /* A simple example to demonstrate key and certificate provisioning in
+         * microcontroller flash using PKCS#11 interface. This should be replaced
+         * by production ready key provisioning mechanism. */
+//        vDevModeKeyProvisioning();
+
+        if( SYSTEM_Init() == pdPASS )
+        {
+            /* Start demos. */
+            DEMO_RUNNER_RunDemos();
+        }
+		else
+		{
+			IotLogError ( "System failed to initialize.\r\n"  );
+		}
+}
+/*-----------------------------------------------------------*/
 /* configUSE_STATIC_ALLOCATION is set to 1, so the application must provide an
  * implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
  * used by the Idle task. */
@@ -126,211 +202,433 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
 }
 /*-----------------------------------------------------------*/
 
-
-
-/* USER CODE END 0 */
-
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
-int main(void)
+ * @brief Publishes a character to the STM32L475 UART
+ *
+ * This is used to implement the tinyprintf created by Spare Time Labs
+ * http://www.sparetimelabs.com/tinyprintf/tinyprintf.php
+ *
+ * @param pv    unused void pointer for compliance with tinyprintf
+ * @param ch    character to be printed
+ */
+void vSTM32L475putc( void * pv,
+                     char ch )
 {
-  /* USER CODE BEGIN 1 */
+    while( HAL_OK != HAL_UART_Transmit( &xConsoleUart, ( uint8_t * ) &ch, 1, 30000 ) )
+    {
+    }
 
-  /* USER CODE END 1 */
-
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_RTC_Init();
-  MX_USART1_UART_Init();
-  /* Disable initialization of Modem-UART.
-   * It will be enabled only when requested by upper layers.
-   * MX_UART4_Init();
-   */
-  MX_RNG_Init();
-  MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
 }
 
+/*-----------------------------------------------------------*/
+
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
-void SystemClock_Config(void)
+ * @brief Initializes the board.
+ */
+static void prvMiscInitialization( void )
 {
-  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+    /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+    HAL_Init();
 
-  /** Configure LSE Drive Capability
-  */
-  HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
-  /** Initializes the CPU, AHB and APB busses clocks
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSI;
-  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
-  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
-  RCC_OscInitStruct.MSICalibrationValue = 0;
-  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
-  RCC_OscInitStruct.PLL.PLLM = 1;
-  RCC_OscInitStruct.PLL.PLLN = 40;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
-  RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Initializes the CPU, AHB and APB busses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+    /* Configure the system clock. */
+    SystemClock_Config();
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USART1
-                              |RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_UART4
-                              |RCC_PERIPHCLK_RNG;
-  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
-  PeriphClkInit.Uart4ClockSelection = RCC_UART4CLKSOURCE_PCLK1;
-  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-  PeriphClkInit.RngClockSelection = RCC_RNGCLKSOURCE_PLLSAI1;
-  PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_MSI;
-  PeriphClkInit.PLLSAI1.PLLSAI1M = 1;
-  PeriphClkInit.PLLSAI1.PLLSAI1N = 16;
-  PeriphClkInit.PLLSAI1.PLLSAI1P = RCC_PLLP_DIV7;
-  PeriphClkInit.PLLSAI1.PLLSAI1Q = RCC_PLLQ_DIV2;
-  PeriphClkInit.PLLSAI1.PLLSAI1R = RCC_PLLR_DIV2;
-  PeriphClkInit.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_48M2CLK;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /** Configure the main internal regulator output voltage
-  */
-  if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
-  {
-    Error_Handler();
-  }
+    /* Heap_5 is being used because the RAM is not contiguous in memory, so the
+     * heap must be initialized. */
+    prvInitializeHeap();
 
-    /**Configure the Systick interrupt time
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+    BSP_LED_Init( LED_GREEN );
+    BSP_PB_Init( BUTTON_USER, BUTTON_MODE_EXTI );
 
-    /**Configure the Systick
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+    /* RNG init function. */
+    xHrng.Instance = RNG;
 
-    /**Enable MSI Auto calibration
-    */
-  HAL_RCCEx_EnableMSIPLLMode();
+    if( HAL_RNG_Init( &xHrng ) != HAL_OK )
+    {
+        Error_Handler();
+    }
 
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 15, 0);
+    /* RTC init. */
+    RTC_Init();
+
+    /* UART console init. */
+    Console_UART_Init();
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Initializes the system clock.
+ */
+static void SystemClock_Config( void )
+{
+    RCC_OscInitTypeDef xRCC_OscInitStruct;
+    RCC_ClkInitTypeDef xRCC_ClkInitStruct;
+    RCC_PeriphCLKInitTypeDef xPeriphClkInit;
+
+    xRCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_MSI;
+    xRCC_OscInitStruct.LSEState = RCC_LSE_ON;
+    xRCC_OscInitStruct.MSIState = RCC_MSI_ON;
+    xRCC_OscInitStruct.MSICalibrationValue = 0;
+    xRCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_11;
+    xRCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    xRCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+    xRCC_OscInitStruct.PLL.PLLM = 6;
+    xRCC_OscInitStruct.PLL.PLLN = 20;
+    xRCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV7;
+    xRCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
+    xRCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+
+    if( HAL_RCC_OscConfig( &xRCC_OscInitStruct ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2
+     * clocks dividers. */
+    xRCC_ClkInitStruct.ClockType = ( RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK
+                                     | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 );
+    xRCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    xRCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    xRCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+    xRCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+    if( HAL_RCC_ClockConfig( &xRCC_ClkInitStruct, FLASH_LATENCY_4 ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    xPeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC
+                                          | RCC_PERIPHCLK_USART1 | RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_I2C2
+                                          | RCC_PERIPHCLK_RNG;
+    xPeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+    xPeriphClkInit.Usart3ClockSelection = RCC_USART3CLKSOURCE_PCLK1;
+    xPeriphClkInit.I2c2ClockSelection = RCC_I2C2CLKSOURCE_PCLK1;
+    xPeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+    xPeriphClkInit.RngClockSelection = RCC_RNGCLKSOURCE_MSI;
+
+    if( HAL_RCCEx_PeriphCLKConfig( &xPeriphClkInit ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    __HAL_RCC_PWR_CLK_ENABLE();
+
+    if( HAL_PWREx_ControlVoltageScaling( PWR_REGULATOR_VOLTAGE_SCALE1 ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    /* Enable MSI PLL mode. */
+    HAL_RCCEx_EnableMSIPLLMode();
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief UART console initialization function.
+ */
+static void Console_UART_Init( void )
+{
+    xConsoleUart.Instance = USART1;
+    xConsoleUart.Init.BaudRate = 115200;
+    xConsoleUart.Init.WordLength = UART_WORDLENGTH_8B;
+    xConsoleUart.Init.StopBits = UART_STOPBITS_1;
+    xConsoleUart.Init.Parity = UART_PARITY_NONE;
+    xConsoleUart.Init.Mode = UART_MODE_TX_RX;
+    xConsoleUart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    xConsoleUart.Init.OverSampling = UART_OVERSAMPLING_16;
+    xConsoleUart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+    xConsoleUart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+    BSP_COM_Init( COM1, &xConsoleUart );
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief RTC init function.
+ */
+static void RTC_Init( void )
+{
+    RTC_TimeTypeDef xsTime;
+    RTC_DateTypeDef xsDate;
+
+    /* Initialize RTC Only. */
+    xHrtc.Instance = RTC;
+    xHrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+    xHrtc.Init.AsynchPrediv = 127;
+    xHrtc.Init.SynchPrediv = 255;
+    xHrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+    xHrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+    xHrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+    xHrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+
+    if( HAL_RTC_Init( &xHrtc ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    /* Initialize RTC and set the Time and Date. */
+    xsTime.Hours = 0x12;
+    xsTime.Minutes = 0x0;
+    xsTime.Seconds = 0x0;
+    xsTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+    xsTime.StoreOperation = RTC_STOREOPERATION_RESET;
+
+    if( HAL_RTC_SetTime( &xHrtc, &xsTime, RTC_FORMAT_BCD ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+
+    xsDate.WeekDay = RTC_WEEKDAY_FRIDAY;
+    xsDate.Month = RTC_MONTH_JANUARY;
+    xsDate.Date = 0x24;
+    xsDate.Year = 0x17;
+
+    if( HAL_RTC_SetDate( &xHrtc, &xsDate, RTC_FORMAT_BCD ) != HAL_OK )
+    {
+        Error_Handler();
+    }
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ */
+void Error_Handler( void )
+{
+    while( 1 )
+    {
+        BSP_LED_Toggle( LED_GREEN );
+        HAL_Delay( 200 );
+    }
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Warn user if pvPortMalloc fails.
+ *
+ * Called if a call to pvPortMalloc() fails because there is insufficient
+ * free memory available in the FreeRTOS heap.  pvPortMalloc() is called
+ * internally by FreeRTOS API functions that create tasks, queues, software
+ * timers, and semaphores.  The size of the FreeRTOS heap is set by the
+ * configTOTAL_HEAP_SIZE configuration constant in FreeRTOSConfig.h.
+ *
+ */
+void vApplicationMallocFailedHook()
+{
+    /* The TCP tests will test behavior when the entire heap is allocated. In
+     * order to avoid interfering with those tests, this function does nothing. */
 }
 
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
+/*-----------------------------------------------------------*/
 
 /**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM3 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
+ * @brief Loop forever if stack overflow is detected.
+ *
+ * If configCHECK_FOR_STACK_OVERFLOW is set to 1,
+ * this hook provides a location for applications to
+ * define a response to a stack overflow.
+ *
+ * Use this hook to help identify that a stack overflow
+ * has occurred.
+ *
+ */
+void vApplicationStackOverflowHook( TaskHandle_t xTask,
+                                    char * pcTaskName )
+{
+    portDISABLE_INTERRUPTS();
+    IotLogInfo("stack overflow %x %s\r\n", xTask, (portCHAR *)pcTaskName);
+    /* Loop forever */
+    for( ; ; );
+}
+
+/*-----------------------------------------------------------*/
+
+void vApplicationIdleHook( void )
+{
+    static TickType_t xLastPrint = 0;
+    TickType_t xTimeNow;
+    const TickType_t xPrintFrequency = pdMS_TO_TICKS( 2000 );
+
+    xTimeNow = xTaskGetTickCount();
+
+    if( ( xTimeNow - xLastPrint ) > xPrintFrequency )
+    {
+        IotLogInfo( "." );
+        xLastPrint = xTimeNow;
+    }
+}
+/*-----------------------------------------------------------*/
+
+void * malloc( size_t xSize )
+{
+    configASSERT( xSize == ~0 );
+
+    return NULL;
+}
+/*-----------------------------------------------------------*/
+
+
+void vOutputChar( const char cChar,
+                  const TickType_t xTicksToWait )
+{
+    ( void ) cChar;
+    ( void ) xTicksToWait;
+}
+/*-----------------------------------------------------------*/
+
+void vMainUARTPrintString( char * pcString )
+{
+    const uint32_t ulTimeout = 3000UL;
+//	iot_uart_write_sync( xConsoleUart, ( uint8_t * ) pcString, strlen( pcString ) );
+    HAL_UART_Transmit( &xConsoleUart,
+                       ( uint8_t * ) pcString,
+                       strlen( pcString ),
+                       ulTimeout );
+}
+/*-----------------------------------------------------------*/
+
+void prvGetRegistersFromStack( uint32_t * pulFaultStackAddress )
+{
+    /* These are volatile to try and prevent the compiler/linker optimising them
+     * away as the variables never actually get used.  If the debugger won't show the
+     * values of the variables, make them global my moving their declaration outside
+     * of this function. */
+    volatile uint32_t r0;
+    volatile uint32_t r1;
+    volatile uint32_t r2;
+    volatile uint32_t r3;
+    volatile uint32_t r12;
+    volatile uint32_t lr;  /* Link register. */
+    volatile uint32_t pc;  /* Program counter. */
+    volatile uint32_t psr; /* Program status register. */
+
+    r0 = pulFaultStackAddress[ 0 ];
+    r1 = pulFaultStackAddress[ 1 ];
+    r2 = pulFaultStackAddress[ 2 ];
+    r3 = pulFaultStackAddress[ 3 ];
+
+    r12 = pulFaultStackAddress[ 4 ];
+    lr = pulFaultStackAddress[ 5 ];
+    pc = pulFaultStackAddress[ 6 ];
+    psr = pulFaultStackAddress[ 7 ];
+
+    /* Remove compiler warnings about the variables not being used. */
+    ( void ) r0;
+    ( void ) r1;
+    ( void ) r2;
+    ( void ) r3;
+    ( void ) r12;
+    ( void ) lr;  /* Link register. */
+    ( void ) pc;  /* Program counter. */
+    ( void ) psr; /* Program status register. */
+
+    /* When the following line is hit, the variables contain the register values. */
+    for( ; ; )
+    {
+    }
+}
+/*-----------------------------------------------------------*/
+
+/* The fault handler implementation calls a function called
+ * prvGetRegistersFromStack(). */
+void HardFault_Handler( void )
+{
+    __asm volatile
+    (
+        " tst lr, #4                                                \n"
+        " ite eq                                                    \n"
+        " mrseq r0, msp                                             \n"
+        " mrsne r0, psp                                             \n"
+        " ldr r1, [r0, #24]                                         \n"
+        " ldr r2, handler2_address_const                            \n"
+        " bx r2                                                     \n"
+        " handler2_address_const: .word prvGetRegistersFromStack    \n"
+    );
+}
+/*-----------------------------------------------------------*/
+
+/* Psuedo random number generator.  Just used by demos so does not need to be
+ * secure.  Do not use the standard C library rand() function as it can cause
+ * unexpected behaviour, such as calls to malloc(). */
+int iMainRand32( void )
+{
+    static UBaseType_t uxlNextRand; /*_RB_ Not seeded. */
+    const uint32_t ulMultiplier = 0x015a4e35UL, ulIncrement = 1UL;
+
+    /* Utility function to generate a pseudo random number. */
+
+    uxlNextRand = ( ulMultiplier * uxlNextRand ) + ulIncrement;
+
+    return( ( int ) ( uxlNextRand >> 16UL ) & 0x7fffUL );
+}
+/*-----------------------------------------------------------*/
+
+static void prvInitializeHeap( void )
+{
+    static uint8_t ucHeap1[ configTOTAL_HEAP_SIZE ];
+    static uint8_t ucHeap2[ HEAP2_SIZE ] __attribute__( ( section( ".freertos_heap2" ) ) );
+
+    HeapRegion_t xHeapRegions[] =
+    {
+        { ( unsigned char * ) ucHeap2, sizeof( ucHeap2 ) },
+        { ( unsigned char * ) ucHeap1, sizeof( ucHeap1 ) },
+        { NULL, 0 }
+    };
+
+    vPortDefineHeapRegions( xHeapRegions );
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief  EXTI line detection callback..
+ *
+ * @param  GPIO_Pin: Specifies the port pin connected to corresponding EXTI line.
+ */
+void HAL_GPIO_EXTI_Callback( uint16_t GPIO_Pin )
+{
+    switch( GPIO_Pin )
+    {
+        /* Pin number 1 is connected to Inventek Module Cmd-Data
+         * ready pin. */
+        case( GPIO_PIN_1 ):
+        {
+//            SPI_WIFI_ISR();
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief SPI Interrupt Handler.
+ *
+ * @note Inventek module is configured to use SPI3.
+ */
+void SPI3_IRQHandler( void )
+{
+//    HAL_SPI_IRQHandler( &( hspi ) );
+}
+/*-----------------------------------------------------------*/
+
+/**
+ * @brief Period elapsed callback in non blocking mode
+ *
+ * @note This function is called  when TIM1 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ *
+ * @param  htim : TIM handle
+ * @retval None
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  /* USER CODE BEGIN Callback 0 */
-
-  /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM3) {
-    HAL_IncTick();
-  }
-  /* USER CODE BEGIN Callback 1 */
-
-  /* USER CODE END Callback 1 */
+    if( htim->Instance == TIM6 )
+    {
+        HAL_IncTick();
+    }
 }
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void)
-{
-  /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */
-  while(1)
-  {
-  }
-  /* USER CODE END Error_Handler_Debug */
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(char *file, uint32_t line)
-{
-  /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,
-     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* USER CODE END 6 */
-}
-#endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+/*-----------------------------------------------------------*/
