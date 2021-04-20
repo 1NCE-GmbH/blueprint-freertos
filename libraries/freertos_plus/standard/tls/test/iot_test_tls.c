@@ -34,7 +34,6 @@
 #include "iot_secure_sockets.h"
 
 /* Credential includes. */
-#include "aws_clientcredential.h"
 #include "aws_clientcredential_keys.h"
 #include "iot_test_tls.h"
 
@@ -249,7 +248,7 @@ static void prvExpectFailAfterDataSentWithProvisioning( ProvisioningParams_t * p
 
             /* The AWS IoT broker endpoint should have close the connection with the receipt of the data above. */
             xResult = SOCKETS_Recv( xSocket, ucRecvBuffer, testrunnerBUFFER_SIZE, 0 );
-            configPRINTF( ( "A negative result is expected from SOCKETS_Recv and we got: %d\r\n", xResult ) );
+            IotLogInfo ( "A negative result is expected from SOCKETS_Recv and we got: %d\r\n", xResult );
             TEST_ASSERT_LESS_THAN_INT32_MESSAGE( 0, xResult, "SOCKETS_Recv passed or timed out when it should have failed." );
         }
 

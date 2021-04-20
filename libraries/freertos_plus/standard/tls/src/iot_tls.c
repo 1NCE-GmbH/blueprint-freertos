@@ -31,8 +31,6 @@
 #include "core_pkcs11_config.h"
 #include "core_pkcs11.h"
 #include "task.h"
-//#include "aws_clientcredential_keys.h"
-#include "iot_default_root_certificates.h"
 #include "core_pki_utils.h"
 
 /* mbedTLS includes. */
@@ -44,7 +42,6 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/pk_internal.h"
 #include "mbedtls/debug.h"
-#include "nce_onboarding.h"
 #ifdef MBEDTLS_DEBUG_C
     #define tlsDEBUG_VERBOSE    4
 #endif
@@ -57,7 +54,6 @@
 #include <time.h>
 #include <stdio.h>
 
-#include "mbedtls/timing_alt.h"
 
 
 /**
@@ -125,24 +121,18 @@ typedef struct TLSContext
     /* mbedTLS. */
     mbedtls_ssl_context xMbedSslCtx;
     mbedtls_ssl_config xMbedSslConfig;
-    mbedtls_x509_crt xMbedX509CA;
-    mbedtls_x509_crt xMbedX509Cli;
-    mbedtls_pk_context xMbedPkCtx;
-    mbedtls_pk_info_t xMbedPkInfo;
     mbedtls_ctr_drbg_context xMbedDrbgCtx;
 
     /* PKCS#11. */
     CK_FUNCTION_LIST_PTR pxP11FunctionList;
     CK_SESSION_HANDLE xP11Session;
-    CK_OBJECT_HANDLE xP11PrivateKey;
-    CK_KEY_TYPE xKeyType;
 } TLSContext_t;
 
 #define TLS_HANDSHAKE_NOT_STARTED    ( 0 )      /* Must be 0 */
 #define TLS_HANDSHAKE_STARTED        ( 1 )
 #define TLS_HANDSHAKE_SUCCESSFUL     ( 2 )
 
-#define TLS_PRINT( X )    configPRINTF( X )
+#define TLS_PRINT( X )    configPRINTF(X)
 
 /*-----------------------------------------------------------*/
 
@@ -252,274 +242,6 @@ static int prvGenerateRandomBytes( void * pvCtx,
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Callback that enforces a worst-case expiration check on TLS server
- * certificates.
- *
- * @param[in] pvCtx Caller context.
- * @param[in] pxCertificate Certificate to check.
- * @param[in] lPathCount Location of this certificate in the chain.
- * @param[in] pulFlags Verification status flags.
- *
- * @return Zero on success.
- */
-static int prvCheckCertificate( void * pvCtx,
-                                mbedtls_x509_crt * pxCertificate,
-                                int lPathCount,
-                                uint32_t * pulFlags )
-{
-    int lCompilationYear = 0;
-
-#define tlsCOMPILER_DATE_STRING_MONTH_LENGTH    4
-#define tlsDATE_STRING_FIELD_COUNT              3
-    char cCompilationMonth[ tlsCOMPILER_DATE_STRING_MONTH_LENGTH ];
-    int lCompilationMonth = 0;
-    int lCompilationDay = 0;
-    const char cMonths[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-    /* Unreferenced parameters. */
-    ( void ) ( pvCtx );
-    ( void ) ( lPathCount );
-
-    /* Parse the date string fields. */
-    if( tlsDATE_STRING_FIELD_COUNT == sscanf( __DATE__,
-                                              "%3s %d %d",
-                                              cCompilationMonth,
-                                              &lCompilationDay,
-                                              &lCompilationYear ) )
-    {
-        cCompilationMonth[ tlsCOMPILER_DATE_STRING_MONTH_LENGTH - 1 ] = '\0';
-
-        /* Check for server expiration. First check the year. */
-        if( pxCertificate->valid_to.year < lCompilationYear )
-        {
-            *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
-        }
-        else if( pxCertificate->valid_to.year == lCompilationYear )
-        {
-            /* Convert the month. */
-            lCompilationMonth =
-                ( ( strstr( cMonths, cCompilationMonth ) - cMonths ) /
-                  ( tlsCOMPILER_DATE_STRING_MONTH_LENGTH - 1 ) ) + 1;
-
-            /* Check the month. */
-            if( pxCertificate->valid_to.mon < lCompilationMonth )
-            {
-                *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
-            }
-            else if( pxCertificate->valid_to.mon == lCompilationMonth )
-            {
-                /* Check the day. */
-                if( pxCertificate->valid_to.day < lCompilationDay )
-                {
-                    *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
-                }
-            }
-        }
-    }
-    else
-    {
-        *pulFlags |= MBEDTLS_X509_BADCERT_EXPIRED;
-    }
-
-    return 0;
-}
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief Sign a cryptographic hash with the private key.
- *
- * @param[in] pvContext Crypto context.
- * @param[in] xMdAlg Unused.
- * @param[in] pucHash Length in bytes of hash to be signed.
- * @param[in] uiHashLen Byte array of hash to be signed.
- * @param[out] pucSig RSA signature bytes.
- * @param[in] pxSigLen Length in bytes of signature buffer.
- * @param[in] piRng Unused.
- * @param[in] pvRng Unused.
- *
- * @return Zero on success.
- */
-static int prvPrivateKeySigningCallback( void * pvContext,
-                                         mbedtls_md_type_t xMdAlg,
-                                         const unsigned char * pucHash,
-                                         size_t xHashLen,
-                                         unsigned char * pucSig,
-                                         size_t * pxSigLen,
-                                         int ( * piRng )( void *,
-                                                          unsigned char *,
-                                                          size_t ), /*lint !e955 This parameter is unused. */
-                                         void * pvRng )
-{
-    CK_RV xResult = CKR_OK;
-    int lFinalResult = 0;
-    TLSContext_t * pxTLSContext = ( TLSContext_t * ) pvContext;
-    CK_MECHANISM xMech = { 0 };
-    CK_BYTE xToBeSigned[ 256 ];
-    CK_ULONG xToBeSignedLen = sizeof( xToBeSigned );
-
-    /* Unreferenced parameters. */
-    ( void ) ( piRng );
-    ( void ) ( pvRng );
-    ( void ) ( xMdAlg );
-
-    /* Sanity check buffer length. */
-    if( xHashLen > sizeof( xToBeSigned ) )
-    {
-        xResult = CKR_ARGUMENTS_BAD;
-    }
-
-    /* Format the hash data to be signed. */
-    if( CKK_RSA == pxTLSContext->xKeyType )
-    {
-        xMech.mechanism = CKM_RSA_PKCS;
-
-        /* mbedTLS expects hashed data without padding, but PKCS #11 C_Sign function performs a hash
-         * & sign if hash algorithm is specified.  This helper function applies padding
-         * indicating data was hashed with SHA-256 while still allowing pre-hashed data to
-         * be provided. */
-        xResult = vAppendSHA256AlgorithmIdentifierSequence( ( uint8_t * ) pucHash, xToBeSigned );
-        xToBeSignedLen = pkcs11RSA_SIGNATURE_INPUT_LENGTH;
-    }
-    else if( CKK_EC == pxTLSContext->xKeyType )
-    {
-        xMech.mechanism = CKM_ECDSA;
-        memcpy( xToBeSigned, pucHash, xHashLen );
-        xToBeSignedLen = xHashLen;
-    }
-    else
-    {
-        xResult = CKR_ARGUMENTS_BAD;
-    }
-
-    if( CKR_OK == xResult )
-    {
-        /* Use the PKCS#11 module to sign. */
-        xResult = pxTLSContext->pxP11FunctionList->C_SignInit( pxTLSContext->xP11Session,
-                                                               &xMech,
-                                                               pxTLSContext->xP11PrivateKey );
-    }
-
-    if( CKR_OK == xResult )
-    {
-        *pxSigLen = sizeof( xToBeSigned );
-        xResult = pxTLSContext->pxP11FunctionList->C_Sign( ( CK_SESSION_HANDLE ) pxTLSContext->xP11Session,
-                                                           xToBeSigned,
-                                                           xToBeSignedLen,
-                                                           pucSig,
-                                                           ( CK_ULONG_PTR ) pxSigLen );
-    }
-
-    if( ( xResult == CKR_OK ) && ( CKK_EC == pxTLSContext->xKeyType ) )
-    {
-        /* PKCS #11 for P256 returns a 64-byte signature with 32 bytes for R and 32 bytes for S.
-         * This must be converted to an ASN.1 encoded array. */
-        if( *pxSigLen != pkcs11ECDSA_P256_SIGNATURE_LENGTH )
-        {
-            xResult = CKR_FUNCTION_FAILED;
-        }
-
-        if( xResult == CKR_OK )
-        {
-            PKI_pkcs11SignatureTombedTLSSignature( pucSig, pxSigLen );
-        }
-    }
-
-    if( xResult != CKR_OK )
-    {
-        TLS_PRINT( ( "ERROR: Failure in signing callback: %d \r\n", xResult ) );
-        lFinalResult = TLS_ERROR_SIGN;
-    }
-
-    return lFinalResult;
-}
-
-/*-----------------------------------------------------------*/
-
-/**
- * @brief Helper for reading the specified certificate object, if present,
- * out of storage, into RAM, and then into an mbedTLS certificate context
- * object.
- *
- * @param[in] pxTlsContext Caller TLS context.
- * @param[in] pcLabelName PKCS #11 certificate object label.
- * @param[in] xClass PKCS #11 certificate object class.
- * @param[out] pxCertificateContext Certificate context.
- *
- * @return Zero on success.
- */
-static int prvReadCertificateIntoContext( TLSContext_t * pxTlsContext,
-                                          char * pcLabelName,
-                                          CK_OBJECT_CLASS xClass,
-                                          mbedtls_x509_crt * pxCertificateContext )
-{
-    BaseType_t xResult = CKR_OK;
-    CK_ATTRIBUTE xTemplate = { 0 };
-    CK_OBJECT_HANDLE xCertObj = 0;
-
-    /* Get the handle of the certificate. */
-    xResult = xFindObjectWithLabelAndClass( pxTlsContext->xP11Session,
-                                            pcLabelName,
-                                            xClass,
-                                            &xCertObj );
-
-    if( ( CKR_OK == xResult ) && ( xCertObj == CK_INVALID_HANDLE ) )
-    {
-        xResult = CKR_OBJECT_HANDLE_INVALID;
-    }
-
-    /* Query the certificate size. */
-    if( 0 == xResult )
-    {
-        xTemplate.type = CKA_VALUE;
-        xTemplate.ulValueLen = 0;
-        xTemplate.pValue = NULL;
-        xResult = ( BaseType_t ) pxTlsContext->pxP11FunctionList->C_GetAttributeValue( pxTlsContext->xP11Session,
-                                                                                       xCertObj,
-                                                                                       &xTemplate,
-                                                                                       1 );
-    }
-
-    /* Create a buffer for the certificate. */
-    if( 0 == xResult )
-    {
-        xTemplate.pValue = pvPortMalloc( xTemplate.ulValueLen ); /*lint !e9079 Allow casting void* to other types. */
-
-        if( NULL == xTemplate.pValue )
-        {
-            xResult = ( BaseType_t ) CKR_HOST_MEMORY;
-        }
-    }
-
-    /* Export the certificate. */
-    if( 0 == xResult )
-    {
-        xResult = ( BaseType_t ) pxTlsContext->pxP11FunctionList->C_GetAttributeValue( pxTlsContext->xP11Session,
-                                                                                       xCertObj,
-                                                                                       &xTemplate,
-                                                                                       1 );
-    }
-
-    /* Decode the certificate. */
-    if( 0 == xResult )
-    {
-        xResult = mbedtls_x509_crt_parse( pxCertificateContext,
-                                          ( const unsigned char * ) xTemplate.pValue,
-                                          xTemplate.ulValueLen );
-    }
-
-    /* Free memory. */
-    if( NULL != xTemplate.pValue )
-    {
-        vPortFree( xTemplate.pValue );
-    }
-
-    return xResult;
-}
-
-/*-----------------------------------------------------------*/
-
-/**
  * @brief Helper for setting up potentially hardware-based cryptographic context
  * for the client TLS certificate and private key.
  *
@@ -527,148 +249,26 @@ static int prvReadCertificateIntoContext( TLSContext_t * pxTlsContext,
  *
  * @return Zero on success.
  */
+
 static int prvInitializeClientCredential( TLSContext_t * pxCtx )
 {
 
     BaseType_t xResult = CKR_OK;
-    CK_ATTRIBUTE xTemplate[ 2 ];
-    mbedtls_pk_type_t xKeyAlgo = ( mbedtls_pk_type_t ) ~0;
-//    char * pcJitrCertificate = keyJITR_DEVICE_CERTIFICATE_AUTHORITY_PEM;
-#ifndef DTLS
-    /* Initialize the mbed contexts. */
-    mbedtls_x509_crt_init( &pxCtx->xMbedX509Cli );
 
-    if( pxCtx->xP11Session == CK_INVALID_HANDLE )
-    {
-        xResult = CKR_SESSION_HANDLE_INVALID;
-        TLS_PRINT( ( "Error: PKCS #11 session was not initialized.\r\n" ) );
-    }
-
-    /* Put the module in authenticated mode. */
-    if( CKR_OK == xResult )
-    {
-        pxCtx->xTLSHandshakeState = TLS_HANDSHAKE_STARTED;
-        xResult = ( BaseType_t ) pxCtx->pxP11FunctionList->C_Login( pxCtx->xP11Session,
-                                                                    CKU_USER,
-                                                                    ( CK_UTF8CHAR_PTR ) configPKCS11_DEFAULT_USER_PIN,
-                                                                    sizeof( configPKCS11_DEFAULT_USER_PIN ) - 1 );
-    }
-
-    if( CKR_OK == xResult )
-    {
-        /* Get the handle of the device private key. */
-        xResult = xFindObjectWithLabelAndClass( pxCtx->xP11Session,
-                                                pkcs11configLABEL_DEVICE_PRIVATE_KEY_FOR_TLS,
-                                                CKO_PRIVATE_KEY,
-                                                &pxCtx->xP11PrivateKey );
-    }
-
-    if( ( CKR_OK == xResult ) && ( pxCtx->xP11PrivateKey == CK_INVALID_HANDLE ) )
-    {
-        xResult = TLS_ERROR_NO_PRIVATE_KEY;
-        TLS_PRINT( ( "ERROR: Private key not found. " ) );
-    }
-
-    /* Query the device private key type. */
-    if( xResult == CKR_OK )
-    {
-        xTemplate[ 0 ].type = CKA_KEY_TYPE;
-        xTemplate[ 0 ].pValue = &pxCtx->xKeyType;
-        xTemplate[ 0 ].ulValueLen = sizeof( CK_KEY_TYPE );
-        xResult = pxCtx->pxP11FunctionList->C_GetAttributeValue( pxCtx->xP11Session,
-                                                                 pxCtx->xP11PrivateKey,
-                                                                 xTemplate,
-                                                                 1 );
-    }
-
-    /* Map the PKCS #11 key type to an mbedTLS algorithm. */
-    if( xResult == CKR_OK )
-    {
-        switch( pxCtx->xKeyType )
-        {
-            case CKK_RSA:
-                xKeyAlgo = MBEDTLS_PK_RSA;
-                break;
-
-            case CKK_EC:
-                xKeyAlgo = MBEDTLS_PK_ECKEY;
-                break;
-
-            default:
-                xResult = CKR_ATTRIBUTE_VALUE_INVALID;
-                break;
-        }
-    }
-
-    /* Map the mbedTLS algorithm to its internal metadata. */
-    if( xResult == CKR_OK )
-    {
-        memcpy( &pxCtx->xMbedPkInfo, mbedtls_pk_info_from_type( xKeyAlgo ), sizeof( mbedtls_pk_info_t ) );
-
-        pxCtx->xMbedPkInfo.sign_func = prvPrivateKeySigningCallback;
-        pxCtx->xMbedPkCtx.pk_info = &pxCtx->xMbedPkInfo;
-        pxCtx->xMbedPkCtx.pk_ctx = pxCtx;
-    }
-
-    /* Get the handle of the device client certificate. */
-    if( xResult == CKR_OK )
-    {
-        xResult = prvReadCertificateIntoContext( pxCtx,
-                                                 pkcs11configLABEL_DEVICE_CERTIFICATE_FOR_TLS,
-                                                 CKO_CERTIFICATE,
-                                                 &pxCtx->xMbedX509Cli );
-    }
-
-    /* Add a Just-in-Time Registration (JITR) device issuer certificate, if
-     * present, to the TLS context handle. */
-    if( xResult == CKR_OK )
-    {
-        /* Prioritize a statically defined certificate over one in storage. */
-        if( ( NULL != pcJitrCertificate ) &&
-            ( 0 != strcmp( "", pcJitrCertificate ) ) )
-        {
-            xResult = mbedtls_x509_crt_parse( &pxCtx->xMbedX509Cli,
-                                              ( const unsigned char * ) pcJitrCertificate,
-                                              1 + strlen( pcJitrCertificate ) );
-        }
-        else
-        {
-            /* Check for a device JITR certificate in storage. */
-            xResult = prvReadCertificateIntoContext( pxCtx,
-                                                     pkcs11configLABEL_JITP_CERTIFICATE,
-                                                     CKO_CERTIFICATE,
-                                                     &pxCtx->xMbedX509Cli );
-
-            /* It is optional to have a JITR certificate in storage. */
-            if( CKR_OBJECT_HANDLE_INVALID == xResult )
-            {
-                xResult = CKR_OK;
-            }
-        }
-    }
-#endif
-    /* Attach the client certificate(s) and private key to the TLS configuration. */
+    /* Attach the client PSK the DTLS configuration. */
     if( 0 == xResult )
     {
-#ifndef DTLS
-        xResult = mbedtls_ssl_conf_own_cert( &pxCtx->xMbedSslConfig,
-                                             &pxCtx->xMbedX509Cli,
-                                             &pxCtx->xMbedPkCtx );
-#else
-
-
         /*Use PSK */
-		size_t psk_len  = strlen(PSK);
+        size_t psk_len  = strlen(PSK);
 		size_t psk_identity_len  = strlen(psk_identity);
 
         xResult = mbedtls_ssl_conf_psk( &pxCtx->xMbedSslConfig,
                 &PSK,strlen(PSK),&psk_identity,psk_identity_len);
 
     }
-#endif
+
     return xResult;
 }
-
 /*-----------------------------------------------------------*/
 
 /**
@@ -736,30 +336,28 @@ BaseType_t TLS_Init( void ** ppvContext,
 
         /* Initialize the context. */
         pxCtx->pcDestination = pxParams->pcDestination;
-        pxCtx->pcServerCertificate = pxParams->pcServerCertificate;
-        pxCtx->ulServerCertificateLength = pxParams->ulServerCertificateLength;
         pxCtx->ppcAlpnProtocols = pxParams->ppcAlpnProtocols;
         pxCtx->ulAlpnProtocolsCount = pxParams->ulAlpnProtocolsCount;
         pxCtx->xNetworkRecv = pxParams->pxNetworkRecv;
         pxCtx->xNetworkSend = pxParams->pxNetworkSend;
         pxCtx->pvCallerContext = pxParams->pvCallerContext;
 
-
         /* Get the function pointer list for the PKCS#11 module. */
-        xCkGetFunctionList = C_GetFunctionList;
-        xResult = ( BaseType_t ) xCkGetFunctionList( &pxCtx->pxP11FunctionList );
+             xCkGetFunctionList = C_GetFunctionList;
+             xResult = ( BaseType_t ) xCkGetFunctionList( &pxCtx->pxP11FunctionList );
 
-        /* Ensure that the PKCS #11 module is initialized and create a session. */
-        if( xResult == CKR_OK )
-        {
-            xResult = xInitializePkcs11Session( &pxCtx->xP11Session );
+             /* Ensure that the PKCS #11 module is initialized and create a session. */
+             if( xResult == CKR_OK )
+             {
+                 xResult = xInitializePkcs11Session( &pxCtx->xP11Session );
 
-            /* It is ok if the module was previously initialized. */
-            if( xResult == CKR_CRYPTOKI_ALREADY_INITIALIZED )
-            {
-                xResult = CKR_OK;
-            }
-        }
+                 /* It is ok if the module was previously initialized. */
+                 if( xResult == CKR_CRYPTOKI_ALREADY_INITIALIZED )
+                 {
+                     xResult = CKR_OK;
+                 }
+             }
+
 
         if( xResult == CKR_OK )
         {
@@ -807,7 +405,6 @@ BaseType_t TLS_Init( void ** ppvContext,
 #endif /* ifdef MBEDTLS_DEBUG_C */
 
 /*-----------------------------------------------------------*/
-
 BaseType_t TLS_Connect( void * pvContext )
 {
     BaseType_t xResult = 0;
@@ -878,11 +475,6 @@ BaseType_t TLS_Connect( void * pvContext )
         }
     #endif
 
-    /* Set the hostname, if requested. */
-    if( ( 0 == xResult ) && ( NULL != pxCtx->pcDestination ) )
-    {
-        xResult = mbedtls_ssl_set_hostname( &pxCtx->xMbedSslCtx, pxCtx->pcDestination );
-    }
 
     /* Set the socket callbacks. */
     if( 0 == xResult )
@@ -930,13 +522,8 @@ BaseType_t TLS_Connect( void * pvContext )
         xResult = TLS_ERROR_HANDSHAKE_FAILED;
     }
 
-    /* Free up allocated memory. */
-    mbedtls_x509_crt_free( &pxCtx->xMbedX509CA );
-    mbedtls_x509_crt_free( &pxCtx->xMbedX509Cli );
-
     return xResult;
 }
-
 /*-----------------------------------------------------------*/
 
 BaseType_t TLS_Recv( void * pvContext,
@@ -953,7 +540,7 @@ BaseType_t TLS_Recv( void * pvContext,
          * immediately unless MBEDTLS_ERR_SSL_WANT_READ is returned, in which case we try again. */
         do
         {
-            xResult = mbedtls_ssl_read( &pxCtx->xMbedSslCtx,
+            xResult = mbedtls_ssl_read( &(pxCtx->xMbedSslCtx),
                                         pucReadBuffer + xRead,
                                         xReadLength - xRead );
 
