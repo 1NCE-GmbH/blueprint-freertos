@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Platform V1.1.1
+ * FreeRTOS Platform V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -45,13 +45,6 @@
 /* FreeRTOS network include. */
 #include "platform/iot_network_freertos.h"
 
-#include "cellular_service.h"
-#include "com_sockets_ip_modem.h"
-#include "cmsis_os_misrac2012.h"
-
-
-CS_Status_t cs_status;
-
 /* Configure logs for the functions in this file. */
 #ifdef IOT_LOG_LEVEL_NETWORK
     #define LIBRARY_LOG_LEVEL        IOT_LOG_LEVEL_NETWORK
@@ -90,10 +83,6 @@ CS_Status_t cs_status;
 
 /*-----------------------------------------------------------*/
 
-uint8_t expected_bytes = 0;
-
-/*-----------------------------------------------------------*/
-
 typedef struct _networkConnection
 {
     Socket_t socket;                             /**< @brief FreeRTOS Secure Sockets handle. */
@@ -124,13 +113,6 @@ const IotNetworkInterface_t IotNetworkAfr =
 
 /*-----------------------------------------------------------*/
 
-
-static void CST_cellular_direct_cmd_callback(CS_direct_cmd_rx_t direct_cmd_rx)
-{
-  UNUSED(direct_cmd_rx);
-}
-
-
 /**
  * @brief Destroys a network connection.
  *
@@ -143,7 +125,7 @@ static void _destroyConnection( _networkConnection_t * pNetworkConnection )
 
     if( socketStatus != SOCKETS_ERROR_NONE )
     {
-        PRINT_FORCE( "Failed to destroy connection." );
+        IotLogWarn( "Failed to destroy connection." );
     }
 
     /* Free the network connection. */
@@ -168,21 +150,6 @@ static void _networkReceiveTask( void * pArgument )
 
     while( true )
     {
-
-    	  socket_desc_t *socket_desc;
-
-    	  socket_desc = com_ip_modem_find_socket(0,
-    	                                         false);
-
-    	  while (socket_desc->state == COM_SOCKET_SENDING)
-    	  {
-    		  (void) osDelay(1000U);
-    		  socket_desc = com_ip_modem_find_socket(0,
-    		                                         false);
-
-    	  }
-
-		//(void) osMessageGet(socket_desc->queue, RTOS_WAIT_FOREVER);
         /* No buffered byte should be in the connection. */
         configASSERT( pNetworkConnection->bufferedByteValid == false );
 
@@ -191,13 +158,10 @@ static void _networkReceiveTask( void * pArgument )
          * MULTIPLE CALLS OF RECEIVE. */
         do
         {
-
-        	expected_bytes = 1;
             socketStatus = SOCKETS_Recv( pNetworkConnection->socket,
                                          &( pNetworkConnection->bufferedByte ),
-										 expected_bytes,
+                                         1,
                                          0 );
-//            PRINT_INFO("########################################## rec %d ",socketStatus)
 
             connectionFlags = xEventGroupGetBits( ( EventGroupHandle_t ) &( pNetworkConnection->connectionFlags ) );
 
@@ -232,7 +196,7 @@ static void _networkReceiveTask( void * pArgument )
         }
     }
 
-    PRINT_DBG( "Network receive task terminating." );
+    IotLogDebug( "Network receive task terminating." );
 
     /* If necessary, destroy the network connection before exiting. */
     if( destroyConnection == true )
@@ -273,7 +237,6 @@ static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredenti
     const char * ppcALPNProtos[] = { socketsAWS_IOT_ALPN_MQTT };
 
     /* Set secured option. */
-/*d*/ /*5.6.2020*/
     socketStatus = SOCKETS_SetSockOpt( tcpSocket,
                                        0,
                                        SOCKETS_SO_REQUIRE_TLS,
@@ -282,7 +245,7 @@ static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredenti
 
     if( socketStatus != SOCKETS_ERROR_NONE )
     {
-        PRINT_ERR( "Failed to set secured option for new connection." );
+        IotLogError( "Failed to set secured option for new connection." );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
@@ -297,7 +260,7 @@ static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredenti
 
         if( socketStatus != SOCKETS_ERROR_NONE )
         {
-            PRINT_ERR( "Failed to set ALPN option for new connection." );
+            IotLogError( "Failed to set ALPN option for new connection." );
             IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
         }
     }
@@ -313,7 +276,7 @@ static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredenti
 
         if( socketStatus != SOCKETS_ERROR_NONE )
         {
-            PRINT_ERR( "Failed to set SNI option for new connection." );
+            IotLogError( "Failed to set SNI option for new connection." );
             IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
         }
     }
@@ -329,7 +292,7 @@ static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredenti
 
         if( socketStatus != SOCKETS_ERROR_NONE )
         {
-            PRINT_ERR( "Failed to set server certificate option for new connection." );
+            IotLogError( "Failed to set server certificate option for new connection." );
             IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
         }
     }
@@ -349,7 +312,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
     SocketsSockaddr_t serverAddress = { 0 };
     EventGroupHandle_t pConnectionFlags = NULL;
     SemaphoreHandle_t pConnectionMutex = NULL;
-    const TickType_t receiveTimeout = pdMS_TO_TICKS( 59 * IOT_NETWORK_SOCKET_POLL_MS );
+    const TickType_t receiveTimeout = pdMS_TO_TICKS( IOT_NETWORK_SOCKET_POLL_MS );
     _networkConnection_t * pNewNetworkConnection = NULL;
 
     /* Cast function parameters to correct types. */
@@ -363,7 +326,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
 
     if( hostnameLength > ( size_t ) securesocketsMAX_DNS_NAME_LENGTH )
     {
-        PRINT_ERR( "Host name length exceeds %d, which is the maximum allowed.",
+        IotLogError( "Host name length exceeds %d, which is the maximum allowed.",
                      securesocketsMAX_DNS_NAME_LENGTH );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_BAD_PARAMETER );
     }
@@ -372,7 +335,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
 
     if( pNewNetworkConnection == NULL )
     {
-        PRINT_ERR( "Failed to allocate memory for new network connection." );
+        IotLogError( "Failed to allocate memory for new network connection." );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_NO_MEMORY );
     }
 
@@ -386,12 +349,12 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
 
     if( tcpSocket == SOCKETS_INVALID_SOCKET )
     {
-        PRINT_ERR( "Failed to create new socket." );
+        IotLogError( "Failed to create new socket." );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
     /* Set up connection encryption if credentials are provided. */
-    if( pAfrCredentials != NULL ) /*+server root*/
+    if( pAfrCredentials != NULL )
     {
         status = _tlsSetup( pAfrCredentials, tcpSocket, pServerInfo->pHostName, hostnameLength );
 
@@ -409,7 +372,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
     /* Check for errors from DNS lookup. */
     if( serverAddress.ulAddress == 0 )
     {
-        PRINT_ERR( "Failed to resolve %s.", pServerInfo->pHostName );
+        IotLogError( "Failed to resolve %s.", pServerInfo->pHostName );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
@@ -419,7 +382,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
 
     if( socketStatus != SOCKETS_ERROR_NONE )
     {
-        PRINT_ERR( "Failed to establish new connection. Socket status: %d.", socketStatus );
+        IotLogError( "Failed to establish new connection. Socket status: %d.", socketStatus );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
@@ -432,7 +395,7 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
 
     if( socketStatus != SOCKETS_ERROR_NONE )
     {
-        PRINT_ERR( "Failed to set socket receive timeout. Socket status %d.", socketStatus );
+        IotLogError( "Failed to set socket receive timeout. Socket status %d.", socketStatus );
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
@@ -499,7 +462,7 @@ IotNetworkError_t IotNetworkAfr_SetReceiveCallback( void * pConnection,
                      IOT_NETWORK_RECEIVE_TASK_PRIORITY,
                      &( pNetworkConnection->receiveTask ) ) != pdPASS )
     {
-        PRINT_ERR( "Failed to create network receive task." );
+        IotLogError( "Failed to create network receive task." );
 
         status = IOT_NETWORK_SYSTEM_ERROR;
     }
@@ -513,7 +476,7 @@ size_t IotNetworkAfr_Send( void * pConnection,
                            const uint8_t * pMessage,
                            size_t messageLength )
 {
-    size_t bytesSent = 0;
+    size_t bytesSent = 0U, bytesRemaining = messageLength;
     int32_t socketStatus = SOCKETS_ERROR_NONE;
 
     /* Cast network connection to the correct type. */
@@ -524,18 +487,25 @@ size_t IotNetworkAfr_Send( void * pConnection,
     if( xSemaphoreTake( ( QueueHandle_t ) &( pNetworkConnection->socketMutex ),
                         portMAX_DELAY ) == pdTRUE )
     {
-        socketStatus = SOCKETS_Send( pNetworkConnection->socket,
-                                     pMessage,
-                                     messageLength,
-                                     0 );
+        while( bytesRemaining > 0U )
+        {
+            socketStatus = SOCKETS_Send( pNetworkConnection->socket,
+                                         pMessage,
+                                         bytesRemaining,
+                                         0 );
 
-        if( socketStatus > 0 )
-        {
-            bytesSent = ( size_t ) socketStatus;
-        }
-        else
-        {
-            PRINT_ERR( "Error %ld while sending data.", ( long int ) socketStatus );
+            if( socketStatus > 0 )
+            {
+                bytesSent += ( size_t ) socketStatus;
+                pMessage += ( size_t ) socketStatus;
+                bytesRemaining -= ( size_t ) socketStatus;
+                configASSERT( bytesSent + bytesRemaining == messageLength );
+            }
+            else
+            {
+                IotLogError( "Error %ld while sending data.", ( long int ) socketStatus );
+                break;
+            }
         }
 
         xSemaphoreGive( ( QueueHandle_t ) &( pNetworkConnection->socketMutex ) );
@@ -572,8 +542,6 @@ size_t IotNetworkAfr_Receive( void * pConnection,
     /* Block and wait for incoming data. */
     while( bytesRemaining > 0 )
     {
-
-    	expected_bytes = bytesRemaining;
         socketStatus = SOCKETS_Recv( pNetworkConnection->socket,
                                      pBuffer + bytesReceived,
                                      bytesRemaining,
@@ -587,7 +555,7 @@ size_t IotNetworkAfr_Receive( void * pConnection,
         }
         else if( socketStatus < 0 )
         {
-            PRINT_ERR( "Error %ld while receiving data.", ( long int ) socketStatus );
+            IotLogError( "Error %ld while receiving data.", ( long int ) socketStatus );
             break;
         }
         else
@@ -601,13 +569,13 @@ size_t IotNetworkAfr_Receive( void * pConnection,
 
     if( bytesReceived < bytesRequested )
     {
-        PRINT_FORCE( "Receive requested %lu bytes, but %lu bytes received instead.",
+        IotLogWarn( "Receive requested %lu bytes, but %lu bytes received instead.",
                     ( unsigned long ) bytesRequested,
                     ( unsigned long ) bytesReceived );
     }
     else
     {
-        PRINT_DBG( "Successfully received %lu bytes.",
+        IotLogDebug( "Successfully received %lu bytes.",
                      ( unsigned long ) bytesRequested );
     }
 
@@ -641,17 +609,14 @@ size_t IotNetworkAfr_ReceiveUpto( void * pConnection,
     if( bufferSize - bytesReceived > 0 )
     {
         /* Block and wait for incoming data. */
-
-    	expected_bytes = bufferSize - bytesReceived;
-
         socketStatus = SOCKETS_Recv( pNetworkConnection->socket,
                                      pBuffer + bytesReceived,
-									 expected_bytes ,
+                                     bufferSize - bytesReceived,
                                      0 );
 
         if( socketStatus <= 0 )
         {
-            PRINT_ERR( "Error %ld while receiving data.", ( long int ) socketStatus );
+            IotLogError( "Error %ld while receiving data.", ( long int ) socketStatus );
         }
         else
         {
@@ -659,7 +624,7 @@ size_t IotNetworkAfr_ReceiveUpto( void * pConnection,
         }
     }
 
-    PRINT_DBG( "Received %lu bytes.",
+    IotLogDebug( "Received %lu bytes.",
                  ( unsigned long ) bytesReceived );
 
     return bytesReceived;
@@ -680,7 +645,7 @@ IotNetworkError_t IotNetworkAfr_Close( void * pConnection )
 
     if( socketStatus != SOCKETS_ERROR_NONE )
     {
-        PRINT_FORCE( "Failed to close connection." );
+        IotLogWarn( "Failed to close connection." );
     }
 
     /* Set the shutdown flag. */

@@ -60,7 +60,6 @@ function(afr_module)
         afr_cache_append(AFR_MODULES_PUBLIC ${module_name})
     endif()
 
-    # All modules implicitly depends on kernel unless INTERFACE or KERNEL is provided.
     if(NOT (ARG_INTERFACE OR ARG_KERNEL))
         afr_module_dependencies(
             ${module_name}
@@ -335,7 +334,11 @@ function(afr_resolve_dependencies)
     # If neither demos nor tests are enabled, then don't search the aws_demos/aws_tests targets.
     if(AFR_ENABLE_DEMOS OR AFR_ENABLE_TESTS)
         __search_afr_dependencies(${exe_target} dependencies)
-        afr_module_dependencies(${exe_base} INTERFACE ${dependencies})
+	afr_module_dependencies(${exe_base} INTERFACE ${dependencies})
+    endif()
+
+    if (AFR_ENABLE_UNIT_TESTS)
+	return()
     endif()
 
     # Make sure kernel can be enabled first.
@@ -393,7 +396,7 @@ function(afr_resolve_dependencies)
     # Disable all other modules that are not required.
     set(__dg_disabled "" CACHE INTERNAL "")
     foreach(module IN LISTS AFR_MODULES)
-        string(REGEX MATCH "(demo_|test_)" match "${module}")
+        string(REGEX MATCH "^(demo_|test_)" match "${module}")
         if("${match}" STREQUAL "" AND NOT ${module} IN_LIST AFR_MODULES_ENABLED)
             afr_cache_append(__dg_disabled ${module})
         endif()
@@ -401,7 +404,7 @@ function(afr_resolve_dependencies)
 
     # Enable available demos/tests.
     foreach(module IN LISTS AFR_MODULES)
-        string(REGEX MATCH "(demo_|test_)" match "${module}")
+        string(REGEX MATCH "^(demo_|test_)" match "${module}")
         if(NOT "${match}" STREQUAL "")
             __resolve_dependencies(${module} QUIET)
             if(NOT ${module} IN_LIST __dg_disabled)

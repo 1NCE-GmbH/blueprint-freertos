@@ -36,8 +36,6 @@
 
 /* Crypto includes. */
 #include "iot_crypto.h"
-#include "aws_clientcredential.h"
-#include "iot_default_root_certificates.h"
 #include "core_pkcs11_config.h"
 #include "core_pkcs11.h"
 #include "aws_dev_mode_key_provisioning.h"
@@ -140,7 +138,7 @@ TEST_TEAR_DOWN( Full_PKCS11_StartFinish )
         /* Give the print buffer time to empty */
         vTaskDelay( 500 );
         xHeapAfter = xPortGetFreeHeapSize();
-        configPRINTF( ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) ) );
+        IotLogInfo ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore )  );
     #endif
 }
 
@@ -184,7 +182,7 @@ TEST_TEAR_DOWN( Full_PKCS11_Capabilities )
         /* Give the print buffer time to empty */
         vTaskDelay( 500 );
         xHeapAfter = xPortGetFreeHeapSize();
-        configPRINTF( ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) ) );
+        IotLogInfo ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore )  );
     #endif
 }
 
@@ -226,7 +224,7 @@ TEST_TEAR_DOWN( Full_PKCS11_NoObject )
         /* Give the print buffer time to empty */
         vTaskDelay( 500 );
         xHeapAfter = xPortGetFreeHeapSize();
-        configPRINTF( ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) ) );
+        IotLogInfo ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore  ) );
     #endif
 }
 
@@ -273,7 +271,7 @@ TEST_TEAR_DOWN( Full_PKCS11_RSA )
         /* Give the print buffer time to empty */
         vTaskDelay( 500 );
         xHeapAfter = xPortGetFreeHeapSize();
-        configPRINTF( ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) ) );
+        IotLogInfo ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore )  );
     #endif
 }
 
@@ -345,7 +343,7 @@ TEST_TEAR_DOWN( Full_PKCS11_EC )
         /* Give the print buffer time to empty */
         vTaskDelay( 500 );
         xHeapAfter = xPortGetFreeHeapSize();
-        configPRINTF( ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) ) );
+        IotLogInfo ( "Heap before %d, Heap After %d, Difference %d \r\n", xHeapBefore, xHeapAfter, ( xHeapAfter - xHeapBefore ) );
     #endif
 }
 
@@ -563,7 +561,7 @@ static void prvMultiThreadHelper( void * pvTaskFxnPtr )
                                  pdTRUE,
                                  pkcs11testEVENT_GROUP_TIMEOUT_MS ) != pkcs11testALL_BITS )
         {
-            configPRINTF( ( "Timed out waiting for tasks to finish in multi thread test.\r\n" ) );
+            IotLogInfo ( "Timed out waiting for tasks to finish in multi thread test.\r\n" );
         }
 
         vEventGroupDelete( xSyncEventGroup );
@@ -576,8 +574,8 @@ static void prvMultiThreadHelper( void * pvTaskFxnPtr )
         {
             if( xGlobalTaskParams[ xTaskNumber ].xTestResult != 0 )
             {
-                configPRINTF( ( "Multi thread task %d returned failure.\r\n",
-                                xGlobalTaskParams[ xTaskNumber ].xTaskNumber ) );
+                IotLogInfo ( "Multi thread task %d returned failure.\r\n",
+                                xGlobalTaskParams[ xTaskNumber ].xTaskNumber );
                 TEST_FAIL();
             }
         }
@@ -849,7 +847,7 @@ TEST( Full_PKCS11_Capabilities, AFQP_Capabilities )
             TEST_FAIL_MESSAGE( "Static and runtime configuration for key generation support are inconsistent." );
         #endif
 
-        configPRINTF( ( "The PKCS #11 module supports RSA signing.\r\n" ) );
+        IotLogInfo ( "The PKCS #11 module supports RSA signing.\r\n"  );
     }
 
     /* Check for ECDSA support, if applicable. */
@@ -868,7 +866,7 @@ TEST( Full_PKCS11_Capabilities, AFQP_Capabilities )
             TEST_FAIL_MESSAGE( "Static and runtime configuration for key generation support are inconsistent." );
         #endif
 
-        configPRINTF( ( "The PKCS #11 module supports ECDSA.\r\n" ) );
+        IotLogInfo ( "The PKCS #11 module supports ECDSA.\r\n"  );
     }
 
     #if ( pkcs11testPREPROVISIONED_SUPPORT != 1 )
@@ -884,7 +882,7 @@ TEST( Full_PKCS11_Capabilities, AFQP_Capabilities )
                               MechanismInfo.ulMinKeySize <= pkcs11ECDSA_P256_KEY_BITS );
 
             xSupportsKeyGen = CK_TRUE;
-            configPRINTF( ( "The PKCS #11 module supports elliptic-curve key generation.\r\n" ) );
+            IotLogInfo ( "The PKCS #11 module supports elliptic-curve key generation.\r\n"  );
         }
 
         /* Check for consistency between static configuration and runtime key
@@ -912,7 +910,7 @@ TEST( Full_PKCS11_Capabilities, AFQP_Capabilities )
 
     /* Report on static configuration for key import support. */
     #if ( 1 == pkcs11testIMPORT_PRIVATE_KEY_SUPPORT )
-        configPRINTF( ( "The PKCS #11 module supports private key import.\r\n" ) );
+        IotLogInfo ( "The PKCS #11 module supports private key import.\r\n"  );
     #endif
 }
 
@@ -1079,17 +1077,17 @@ TEST( Full_PKCS11_NoObject, AFQP_GenerateRandom )
 
     if( ( xSameSession > 1 ) || ( xDifferentSessions > 1 ) )
     {
-        configPRINTF( ( "First Random Bytes: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        IotLogInfo ( "First Random Bytes: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
                         xBuf1[ 0 ], xBuf1[ 1 ], xBuf1[ 2 ], xBuf1[ 3 ], xBuf1[ 4 ],
-                        xBuf1[ 5 ], xBuf1[ 6 ], xBuf1[ 7 ], xBuf1[ 8 ], xBuf1[ 9 ] ) );
+                        xBuf1[ 5 ], xBuf1[ 6 ], xBuf1[ 7 ], xBuf1[ 8 ], xBuf1[ 9 ]  );
 
-        configPRINTF( ( "Second Set of Random Bytes: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        IotLogInfo ( "Second Set of Random Bytes: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
                         xBuf2[ 0 ], xBuf2[ 1 ], xBuf2[ 2 ], xBuf2[ 3 ], xBuf2[ 4 ],
-                        xBuf2[ 5 ], xBuf2[ 6 ], xBuf2[ 7 ], xBuf2[ 8 ], xBuf2[ 9 ] ) );
+                        xBuf2[ 5 ], xBuf2[ 6 ], xBuf2[ 7 ], xBuf2[ 8 ], xBuf2[ 9 ]  );
 
-        configPRINTF( ( "Third Set of Random Bytes:  %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
+        IotLogInfo ( "Third Set of Random Bytes:  %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\r\n",
                         xBuf3[ 0 ], xBuf3[ 1 ], xBuf3[ 2 ], xBuf3[ 3 ], xBuf3[ 4 ],
-                        xBuf3[ 5 ], xBuf3[ 6 ], xBuf3[ 7 ], xBuf3[ 8 ], xBuf3[ 9 ] ) );
+                        xBuf3[ 5 ], xBuf3[ 6 ], xBuf3[ 7 ], xBuf3[ 8 ], xBuf3[ 9 ]  );
     }
 
     TEST_ASSERT_LESS_THAN( 2, xSameSession );
@@ -1115,7 +1113,7 @@ static void prvGenerateRandomMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "GenerateRandom multi-thread task failed.  Error: %d \r\n", xResult ) );
+            IotLogInfo ( "GenerateRandom multi-thread task failed.  Error: %d \r\n", xResult  );
             break;
         }
     }
@@ -2035,7 +2033,7 @@ TEST( Full_PKCS11_EC, AFQP_GetAttributeValue )
 
     if( lConversionReturn != 0 )
     {
-        configPRINTF( ( "Failed to convert the EC certificate from PEM to DER. Error code %d \r\n", lConversionReturn ) );
+        IotLogInfo ( "Failed to convert the EC certificate from PEM to DER. Error code %d \r\n", lConversionReturn  );
     }
 
     prvFindObjectTest( &xPrivateKey, &xCertificate, &xPublicKey );
@@ -2191,13 +2189,13 @@ static void prvFindObjectMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "FindObject multithreaded task failed to find private key.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "FindObject multithreaded task failed to find private key.  Error: %d  Count: %d \r\n", xResult, xCount  );
             break;
         }
 
         if( ( xHandle == CK_INVALID_HANDLE ) )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find private key.  Invalid object handle returned.  Count: %d \r\n", xCount ) );
+            IotLogInfo ( "FindObject multi-thread task failed to find private key.  Invalid object handle returned.  Count: %d \r\n", xCount  );
             xResult = CKR_OBJECT_HANDLE_INVALID; /* Mark xResult so that test fails. */
             break;
         }
@@ -2206,13 +2204,13 @@ static void prvFindObjectMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "FindObject multithreaded task failed to find certificate.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "FindObject multithreaded task failed to find certificate.  Error: %d  Count: %d \r\n", xResult, xCount  );
             break;
         }
 
         if( ( xHandle == CK_INVALID_HANDLE ) )
         {
-            configPRINTF( ( "FindObject multi-thread task failed to find certificate.  Invalid object handle returned. Count: %d \r\n", xCount ) );
+            IotLogInfo ( "FindObject multi-thread task failed to find certificate.  Invalid object handle returned. Count: %d \r\n", xCount  );
             xResult = CKR_OBJECT_HANDLE_INVALID; /* Mark xResult so that test fails. */
             break;
         }
@@ -2314,7 +2312,7 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
     if( ( xResult != CKR_OK ) || ( xPrivateKey == CK_INVALID_HANDLE ) )
     {
         xResult = 1;
-        configPRINTF( ( "Failed to find private key.  Return Value: %d  Handle: %d \r\n", xResult, xPrivateKey ) );
+        IotLogInfo ( "Failed to find private key.  Return Value: %d  Handle: %d \r\n", xResult, xPrivateKey  );
     }
 
     xResult = xFindObjectWithLabelAndClass( xSession, pkcs11testLABEL_DEVICE_CERTIFICATE_FOR_TLS, CKO_CERTIFICATE, &xCertificate );
@@ -2322,7 +2320,7 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
     if( ( xResult != CKR_OK ) || ( xCertificate == CK_INVALID_HANDLE ) )
     {
         xResult = 1;
-        configPRINTF( ( "Failed to find certificate key.  Return Value: %d  Handle: %d \r\n", xResult, xCertificate ) );
+        IotLogInfo ( "Failed to find certificate key.  Return Value: %d  Handle: %d \r\n", xResult, xCertificate  );
     }
 
     if( xResult == CKR_OK )
@@ -2337,13 +2335,13 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
 
             if( xResult != CKR_OK )
             {
-                configPRINTF( ( "GetAttributeValue multithread test failed to get private key's EC Params.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+                IotLogInfo ( "GetAttributeValue multithread test failed to get private key's EC Params.  Error: %d  Count: %d \r\n", xResult, xCount  );
                 break;
             }
 
             if( memcmp( xEcParams, xEcParamsExpected, sizeof( xEcParams ) ) )
             {
-                configPRINTF( ( "GetAttributeValue multithread test returned an incorrect value for EC Params.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+                IotLogInfo ( "GetAttributeValue multithread test returned an incorrect value for EC Params.  Error: %d  Count: %d \r\n", xResult, xCount  );
                 xResult = 1;
                 break;
             }
@@ -2355,7 +2353,7 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
 
             if( xResult != CKR_OK )
             {
-                configPRINTF( ( "GetAttributeValue multi-thread task failed to get certificate.  Error: %d  Count: %d \r\n", xResult, xCount ) );
+                IotLogInfo ( "GetAttributeValue multi-thread task failed to get certificate.  Error: %d  Count: %d \r\n", xResult, xCount );
                 xResult = 1;
                 break;
             }
@@ -2367,8 +2365,8 @@ static void prvECGetAttributeValueMultiThreadTask( void * pvParameters )
 
             if( lMbedReturn != 0 )
             {
-                configPRINTF( ( "GetAttributeValue multi-thread task found an invalid certificate value. Parse error: %d,  Count: %d \r\n", lMbedReturn, xCount ) );
-                configPRINTF( ( "First 3 bytes of invalid certificate found are %d, %d, %d \r\n", ( int ) xCertificateValue[ 0 ], ( int ) xCertificateValue[ 1 ], ( int ) xCertificateValue[ 2 ] ) );
+                IotLogInfo ( "GetAttributeValue multi-thread task found an invalid certificate value. Parse error: %d,  Count: %d \r\n", lMbedReturn, xCount  );
+                IotLogInfo ( "First 3 bytes of invalid certificate found are %d, %d, %d \r\n", ( int ) xCertificateValue[ 0 ], ( int ) xCertificateValue[ 1 ], ( int ) xCertificateValue[ 2 ]  );
                 xResult = 1;
                 break;
             }
@@ -2452,7 +2450,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Sign multi-threaded test failed to SignInit. Error: %d  Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "Sign multi-threaded test failed to SignInit. Error: %d  Count: %d \r\n", xResult, xCount  );
             break;
         }
 
@@ -2461,7 +2459,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Sign multi-threaded test failed to Sign. Error: %d  Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "Sign multi-threaded test failed to Sign. Error: %d  Count: %d \r\n", xResult, xCount  );
             break;
         }
 
@@ -2469,7 +2467,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Multithread VerifyInit failed.  Error: %d, Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "Multithread VerifyInit failed.  Error: %d, Count: %d \r\n", xResult, xCount  );
             break;
         }
 
@@ -2477,7 +2475,7 @@ static void prvECSignVerifyMultiThreadTask( void * pvParameters )
 
         if( xResult != CKR_OK )
         {
-            configPRINTF( ( "Multithread Verify failed.  Error: %d, Count: %d \r\n", xResult, xCount ) );
+            IotLogInfo ( "Multithread Verify failed.  Error: %d, Count: %d \r\n", xResult, xCount  );
             break;
         }
     }

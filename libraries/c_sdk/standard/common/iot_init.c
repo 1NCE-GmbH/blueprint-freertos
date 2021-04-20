@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Common V1.1.1
+ * FreeRTOS Common V1.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -80,7 +80,7 @@ bool IotSdk_Init( void )
 
         if( genericAtomicInitialized == false )
         {
-            PRINT_ERR( "Failed to initialize atomic operations." );
+            IotLogError( "Failed to initialize atomic operations." );
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
     #endif
@@ -91,7 +91,7 @@ bool IotSdk_Init( void )
 
         if( staticMemoryInitialized == false )
         {
-            PRINT_ERR( "Failed to initialize static memory." );
+            IotLogError( "Failed to initialize static memory." );
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
     #endif
@@ -101,7 +101,7 @@ bool IotSdk_Init( void )
 
     if( taskPoolStatus != IOT_TASKPOOL_SUCCESS )
     {
-        PRINT_ERR( "Failed to create system task pool." );
+        IotLogError( "Failed to create system task pool." );
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
 
@@ -124,7 +124,7 @@ bool IotSdk_Init( void )
     }
     else
     {
-        PRINT_INFO( "SDK successfully initialized." );
+        IotLogInfo( "SDK successfully initialized." );
     }
 
     IOT_FUNCTION_CLEANUP_END();
@@ -138,7 +138,7 @@ void IotSdk_Cleanup( void )
 
     /* This log message must be printed before static memory management is
      * cleaned up. */
-    PRINT_INFO( "SDK cleanup done." );
+    IotLogInfo( "SDK cleanup done." );
 
     /* Cleanup static memory if dynamic memory allocation is disabled. */
     #if IOT_STATIC_MEMORY_ONLY == 1

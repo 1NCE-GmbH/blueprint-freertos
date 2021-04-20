@@ -46,9 +46,7 @@
 #endif
 
 /* Credential includes. */
-#include "aws_clientcredential.h"
 #include "aws_clientcredential_keys.h"
-#include "iot_default_root_certificates.h"
 
 #if ( pkcs11configOTA_SUPPORTED == 1 )
     #include "aws_ota_codesigner_certificate.h"

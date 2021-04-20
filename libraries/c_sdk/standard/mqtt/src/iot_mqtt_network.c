@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -186,7 +186,7 @@ static IotMqttError_t _getIncomingPacket( void * pNetworkConnection,
     /* Check that the incoming packet type is valid. */
     if( _incomingPacketValid( pIncomingPacket->type ) == false )
     {
-        PRINT_ERR( "(MQTT connection %p) Unknown packet type %02x received.",
+        IotLogError( "(MQTT connection %p) Unknown packet type %02x received.",
                      pMqttConnection,
                      pIncomingPacket->type );
 
@@ -217,7 +217,7 @@ static IotMqttError_t _getIncomingPacket( void * pNetworkConnection,
 
         if( pIncomingPacket->pRemainingData == NULL )
         {
-            PRINT_ERR( "(MQTT connection %p) Failed to allocate buffer of length "
+            IotLogError( "(MQTT connection %p) Failed to allocate buffer of length "
                          "%lu for incoming packet type %lu.",
                          pMqttConnection,
                          ( unsigned long ) pIncomingPacket->remainingLength,
@@ -294,7 +294,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
     switch( ( pIncomingPacket->type & 0xf0 ) )
     {
         case MQTT_PACKET_TYPE_CONNACK:
-            PRINT_DBG( "(MQTT connection %p) CONNACK in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) CONNACK in data stream.", pMqttConnection );
 
             /* Choose CONNACK deserializer. */
             deserialize = _IotMqtt_DeserializeConnack;
@@ -336,14 +336,14 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
             break;
 
         case MQTT_PACKET_TYPE_PUBLISH:
-            PRINT_DBG( "(MQTT connection %p) PUBLISH in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) PUBLISH in data stream.", pMqttConnection );
 
             /* Allocate memory to handle the incoming PUBLISH. */
             pOperation = IotMqtt_MallocOperation( sizeof( _mqttOperation_t ) );
 
             if( pOperation == NULL )
             {
-                PRINT_FORCE( "Failed to allocate memory for incoming PUBLISH." );
+                IotLogWarn( "Failed to allocate memory for incoming PUBLISH." );
                 status = IOT_MQTT_NO_MEMORY;
 
                 break;
@@ -460,7 +460,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
             break;
 
         case MQTT_PACKET_TYPE_PUBACK:
-            PRINT_DBG( "(MQTT connection %p) PUBACK in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) PUBACK in data stream.", pMqttConnection );
 
             /* Choose PUBACK deserializer. */
             deserialize = _IotMqtt_DeserializePuback;
@@ -502,7 +502,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
             break;
 
         case MQTT_PACKET_TYPE_SUBACK:
-            PRINT_DBG( "(MQTT connection %p) SUBACK in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) SUBACK in data stream.", pMqttConnection );
 
             /* Choose SUBACK deserializer. */
             deserialize = _IotMqtt_DeserializeSuback;
@@ -545,7 +545,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
             break;
 
         case MQTT_PACKET_TYPE_UNSUBACK:
-            PRINT_DBG( "(MQTT connection %p) UNSUBACK in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) UNSUBACK in data stream.", pMqttConnection );
 
             /* Choose UNSUBACK deserializer. */
             deserialize = _IotMqtt_DeserializeUnsuback;
@@ -589,7 +589,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
         default:
             /* The only remaining valid type is PINGRESP. */
             IotMqtt_Assert( ( pIncomingPacket->type & 0xf0 ) == MQTT_PACKET_TYPE_PINGRESP );
-            PRINT_DBG( "(MQTT connection %p) PINGRESP in data stream.", pMqttConnection );
+            IotLogDebug( "(MQTT connection %p) PINGRESP in data stream.", pMqttConnection );
 
             /* Choose PINGRESP deserializer. */
             deserialize = _IotMqtt_DeserializePingresp;
@@ -621,12 +621,12 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
 
                 if( pMqttConnection->keepAliveFailure == false )
                 {
-                    PRINT_FORCE( "(MQTT connection %p) Unexpected PINGRESP received.",
+                    IotLogWarn( "(MQTT connection %p) Unexpected PINGRESP received.",
                                 pMqttConnection );
                 }
                 else
                 {
-                    PRINT_DBG( "(MQTT connection %p) PINGRESP successfully parsed.",
+                    IotLogDebug( "(MQTT connection %p) PINGRESP successfully parsed.",
                                  pMqttConnection );
 
                     pMqttConnection->keepAliveFailure = false;
@@ -644,7 +644,7 @@ static IotMqttError_t _deserializeIncomingPacket( _mqttConnection_t * pMqttConne
 
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "(MQTT connection %p) Packet parser status %s.",
+        IotLogError( "(MQTT connection %p) Packet parser status %s.",
                      pMqttConnection,
                      IotMqtt_strerror( status ) );
     }
@@ -671,7 +671,7 @@ static void _sendPuback( _mqttConnection_t * pMqttConnection,
                                           size_t * ) = _IotMqtt_SerializePuback;
     void ( * freePacket )( uint8_t * ) = _IotMqtt_FreePacket;
 
-    PRINT_DBG( "(MQTT connection %p) Sending PUBACK for received PUBLISH %hu.",
+    IotLogDebug( "(MQTT connection %p) Sending PUBACK for received PUBLISH %hu.",
                  pMqttConnection,
                  packetIdentifier );
 
@@ -718,7 +718,7 @@ static void _sendPuback( _mqttConnection_t * pMqttConnection,
 
     if( serializeStatus != IOT_MQTT_SUCCESS )
     {
-        PRINT_FORCE( "(MQTT connection %p) Failed to generate PUBACK packet for "
+        IotLogWarn( "(MQTT connection %p) Failed to generate PUBACK packet for "
                     "received PUBLISH %hu.",
                     pMqttConnection,
                     packetIdentifier );
@@ -731,14 +731,14 @@ static void _sendPuback( _mqttConnection_t * pMqttConnection,
 
         if( bytesSent != pubackSize )
         {
-            PRINT_FORCE( "(MQTT connection %p) Failed to send PUBACK for received"
+            IotLogWarn( "(MQTT connection %p) Failed to send PUBACK for received"
                         " PUBLISH %hu.",
                         pMqttConnection,
                         packetIdentifier );
         }
         else
         {
-            PRINT_DBG( "(MQTT connection %p) PUBACK for received PUBLISH %hu sent.",
+            IotLogDebug( "(MQTT connection %p) PUBACK for received PUBLISH %hu sent.",
                          pMqttConnection,
                          packetIdentifier );
         }
@@ -845,7 +845,7 @@ void _IotMqtt_CloseNetworkConnection( IotMqttDisconnectReason_t disconnectReason
              * destroy the connection is not done here. */
             pMqttConnection->references--;
 
-            PRINT_DBG( "(MQTT connection %p) Keep-alive job canceled and cleaned up.",
+            IotLogDebug( "(MQTT connection %p) Keep-alive job canceled and cleaned up.",
                          pMqttConnection );
         }
         else
@@ -867,18 +867,18 @@ void _IotMqtt_CloseNetworkConnection( IotMqttDisconnectReason_t disconnectReason
 
         if( closeStatus == IOT_NETWORK_SUCCESS )
         {
-            PRINT_INFO( "(MQTT connection %p) Network connection closed.", pMqttConnection );
+            IotLogInfo( "(MQTT connection %p) Network connection closed.", pMqttConnection );
         }
         else
         {
-            PRINT_FORCE( "(MQTT connection %p) Failed to close network connection, error %d.",
+            IotLogWarn( "(MQTT connection %p) Failed to close network connection, error %d.",
                         pMqttConnection,
                         closeStatus );
         }
     }
     else
     {
-        PRINT_FORCE( "(MQTT connection %p) No network close function was set. Network connection"
+        IotLogWarn( "(MQTT connection %p) No network close function was set. Network connection"
                     " not closed.", pMqttConnection );
     }
 
@@ -938,7 +938,7 @@ void IotMqtt_ReceiveCallback( void * pNetworkConnection,
     /* Close the network connection on a bad response. */
     if( status == IOT_MQTT_BAD_RESPONSE )
     {
-        PRINT_ERR( "(MQTT connection %p) Error processing incoming data. Closing connection.",
+        IotLogError( "(MQTT connection %p) Error processing incoming data. Closing connection.",
                      pMqttConnection );
 
         _IotMqtt_CloseNetworkConnection( IOT_MQTT_BAD_PACKET_RECEIVED,

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -30,7 +30,7 @@
  */
 
 /* The config header is always included first. */
-//#include "iot_config.h"
+#include "iot_config.h"
 
 /* Standard includes. */
 #include <string.h>

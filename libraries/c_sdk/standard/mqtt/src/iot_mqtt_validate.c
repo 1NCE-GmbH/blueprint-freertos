@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -42,11 +42,12 @@
 bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
 {
     IOT_FUNCTION_ENTRY( bool, true );
+    uint16_t adjustedKeepAliveSec = 0;
 
     /* Check for NULL. */
     if( pConnectInfo == NULL )
     {
-        PRINT_ERR( "MQTT connection information cannot be NULL." );
+        IotLogError( "MQTT connection information cannot be NULL." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -58,7 +59,7 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
     /* Check that a client identifier was set. */
     if( pConnectInfo->pClientIdentifier == NULL )
     {
-        PRINT_ERR( "Client identifier must be set." );
+        IotLogError( "Client identifier must be set." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -71,11 +72,11 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
      * are not allowed with clean sessions. */
     if( pConnectInfo->clientIdentifierLength == 0 )
     {
-        PRINT_FORCE( "A zero-length client identifier was provided." );
+        IotLogWarn( "A zero-length client identifier was provided." );
 
         if( pConnectInfo->cleanSession == true )
         {
-            PRINT_ERR( "A zero-length client identifier cannot be used with a clean session." );
+            IotLogError( "A zero-length client identifier cannot be used with a clean session." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -96,7 +97,7 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
         {
             if( pConnectInfo->previousSubscriptionCount == 0 )
             {
-                PRINT_ERR( "Previous subscription count cannot be 0." );
+                IotLogError( "Previous subscription count cannot be 0." );
 
                 IOT_SET_AND_GOTO_CLEANUP( false );
             }
@@ -119,7 +120,7 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
      * than 23 characters. */
     if( pConnectInfo->clientIdentifierLength > 23 )
     {
-        PRINT_FORCE( "A client identifier length of %hu is longer than 23, which is "
+        IotLogWarn( "A client identifier length of %hu is longer than 23, which is "
                     "the longest client identifier a server must accept.",
                     pConnectInfo->clientIdentifierLength );
     }
@@ -128,13 +129,15 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
         EMPTY_ELSE_MARKER;
     }
 
+    adjustedKeepAliveSec = pConnectInfo->keepAliveSeconds;
+
     /* Check for compatibility with the AWS IoT MQTT service limits. */
     if( pConnectInfo->awsIotMqttMode == true )
     {
         /* Check that client identifier is within the service limit. */
         if( pConnectInfo->clientIdentifierLength > AWS_IOT_MQTT_SERVER_MAX_CLIENTID )
         {
-            PRINT_ERR( "AWS IoT does not support client identifiers longer than %d bytes.",
+            IotLogError( "AWS IoT does not support client identifiers longer than %d bytes.",
                          AWS_IOT_MQTT_SERVER_MAX_CLIENTID );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
@@ -147,23 +150,55 @@ bool _IotMqtt_ValidateConnect( const IotMqttConnectInfo_t * pConnectInfo )
         /* Check for compliance with AWS IoT keep-alive limits. */
         if( pConnectInfo->keepAliveSeconds == 0 )
         {
-            PRINT_FORCE( "AWS IoT does not support disabling keep-alive. Default keep-alive "
+            IotLogWarn( "AWS IoT does not support disabling keep-alive. Default keep-alive "
                         "of %d seconds will be used.",
                         AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE );
+
+            adjustedKeepAliveSec = AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE;
         }
         else if( pConnectInfo->keepAliveSeconds < AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE )
         {
-            PRINT_FORCE( "AWS IoT does not support keep-alive intervals less than %d seconds. "
+            IotLogWarn( "AWS IoT does not support keep-alive intervals less than %d seconds. "
                         "An interval of %d seconds will be used.",
                         AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE,
                         AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE );
+
+            adjustedKeepAliveSec = AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE;
         }
         else if( pConnectInfo->keepAliveSeconds > AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE )
         {
-            PRINT_FORCE( "AWS IoT does not support keep-alive intervals greater than %d seconds. "
+            IotLogWarn( "AWS IoT does not support keep-alive intervals greater than %d seconds. "
                         "An interval of %d seconds will be used.",
                         AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE,
                         AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE );
+
+            adjustedKeepAliveSec = AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE;
+        }
+        else
+        {
+            EMPTY_ELSE_MARKER;
+        }
+    }
+    else
+    {
+        EMPTY_ELSE_MARKER;
+    }
+
+    /* Check that keep alive is not too short. */
+    if( adjustedKeepAliveSec != 0 )
+    {
+        /* After sending a PINGREQ, we wait for IOT_MQTT_RESPONSE_WAIT_MS to
+         * receive the corresponding PINGRESP. If the PINGRESP is received within
+         * IOT_MQTT_RESPONSE_WAIT_MS, we schedule another job to send PINGREQ.
+         * If the IOT_MQTT_RESPONSE_WAIT_MS is longer than keep alive interval,
+         * we will fail to send PINGRESP on time. */
+        if( ( adjustedKeepAliveSec * 1000 ) <= IOT_MQTT_RESPONSE_WAIT_MS )
+        {
+            IotLogError( "Keep alive interval %d ms must be longer than response wait time %d ms.",
+                         adjustedKeepAliveSec * 1000,
+                         IOT_MQTT_RESPONSE_WAIT_MS );
+
+            IOT_SET_AND_GOTO_CLEANUP( false );
         }
         else
         {
@@ -188,7 +223,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
     /* Check for NULL. */
     if( pPublishInfo == NULL )
     {
-        PRINT_ERR( "Publish information cannot be NULL." );
+        IotLogError( "Publish information cannot be NULL." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -200,7 +235,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
     /* Check topic name for NULL or zero-length. */
     if( pPublishInfo->pTopicName == NULL )
     {
-        PRINT_ERR( "Publish topic name must be set." );
+        IotLogError( "Publish topic name must be set." );
     }
     else
     {
@@ -209,7 +244,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
 
     if( pPublishInfo->topicNameLength == 0 )
     {
-        PRINT_ERR( "Publish topic name length cannot be 0." );
+        IotLogError( "Publish topic name length cannot be 0." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -223,7 +258,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
     {
         if( pPublishInfo->payloadLength != 0 )
         {
-            PRINT_ERR( "Nonzero payload length cannot have a NULL payload." );
+            IotLogError( "Nonzero payload length cannot have a NULL payload." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -242,7 +277,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
     {
         if( pPublishInfo->qos != IOT_MQTT_QOS_1 )
         {
-            PRINT_ERR( "Publish QoS must be either 0 or 1." );
+            IotLogError( "Publish QoS must be either 0 or 1." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -261,7 +296,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
     {
         if( pPublishInfo->retryMs == 0 )
         {
-            PRINT_ERR( "Publish retry time must be positive." );
+            IotLogError( "Publish retry time must be positive." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -281,7 +316,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
         /* Check for retained message. */
         if( pPublishInfo->retain == true )
         {
-            PRINT_ERR( "AWS IoT does not support retained publish messages." );
+            IotLogError( "AWS IoT does not support retained publish messages." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -293,7 +328,7 @@ bool _IotMqtt_ValidatePublish( bool awsIotMqttMode,
         /* Check topic name length. */
         if( pPublishInfo->topicNameLength > AWS_IOT_MQTT_SERVER_MAX_TOPIC_LENGTH )
         {
-            PRINT_ERR( "AWS IoT does not support topic names longer than %d bytes.",
+            IotLogError( "AWS IoT does not support topic names longer than %d bytes.",
                          AWS_IOT_MQTT_SERVER_MAX_TOPIC_LENGTH );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
@@ -320,7 +355,7 @@ bool _IotMqtt_ValidateOperation( IotMqttOperation_t operation )
     /* Check for NULL. */
     if( operation == NULL )
     {
-        PRINT_ERR( "Operation reference cannot be NULL." );
+        IotLogError( "Operation reference cannot be NULL." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -332,7 +367,7 @@ bool _IotMqtt_ValidateOperation( IotMqttOperation_t operation )
     /* Check that reference is waitable. */
     if( ( operation->u.operation.flags & IOT_MQTT_FLAG_WAITABLE ) != IOT_MQTT_FLAG_WAITABLE )
     {
-        PRINT_ERR( "Operation is not waitable." );
+        IotLogError( "Operation is not waitable." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -363,7 +398,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
     /* Check for empty list. */
     if( pListStart == NULL )
     {
-        PRINT_ERR( "Subscription list pointer cannot be NULL." );
+        IotLogError( "Subscription list pointer cannot be NULL." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -374,7 +409,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
 
     if( listSize == 0 )
     {
-        PRINT_ERR( "Empty subscription list." );
+        IotLogError( "Empty subscription list." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -388,7 +423,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
     {
         if( listSize > AWS_IOT_MQTT_SERVER_MAX_TOPIC_FILTERS_PER_SUBSCRIBE )
         {
-            PRINT_ERR( "AWS IoT does not support more than %d topic filters per "
+            IotLogError( "AWS IoT does not support more than %d topic filters per "
                          "subscription request.",
                          AWS_IOT_MQTT_SERVER_MAX_TOPIC_FILTERS_PER_SUBSCRIBE );
 
@@ -415,7 +450,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
             {
                 if( pListElement->qos != IOT_MQTT_QOS_1 )
                 {
-                    PRINT_ERR( "Subscription QoS must be either 0 or 1." );
+                    IotLogError( "Subscription QoS must be either 0 or 1." );
 
                     IOT_SET_AND_GOTO_CLEANUP( false );
                 }
@@ -431,7 +466,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
 
             if( pListElement->callback.function == NULL )
             {
-                PRINT_ERR( "Callback function must be set." );
+                IotLogError( "Callback function must be set." );
 
                 IOT_SET_AND_GOTO_CLEANUP( false );
             }
@@ -448,7 +483,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
         /* Check subscription topic filter. */
         if( pListElement->pTopicFilter == NULL )
         {
-            PRINT_ERR( "Subscription topic filter cannot be NULL." );
+            IotLogError( "Subscription topic filter cannot be NULL." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -459,7 +494,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
 
         if( pListElement->topicFilterLength == 0 )
         {
-            PRINT_ERR( "Subscription topic filter length cannot be 0." );
+            IotLogError( "Subscription topic filter length cannot be 0." );
 
             IOT_SET_AND_GOTO_CLEANUP( false );
         }
@@ -474,7 +509,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
             /* Check topic filter length. */
             if( pListElement->topicFilterLength > AWS_IOT_MQTT_SERVER_MAX_TOPIC_LENGTH )
             {
-                PRINT_ERR( "AWS IoT does not support topic filters longer than %d bytes.",
+                IotLogError( "AWS IoT does not support topic filters longer than %d bytes.",
                              AWS_IOT_MQTT_SERVER_MAX_TOPIC_LENGTH );
 
                 IOT_SET_AND_GOTO_CLEANUP( false );
@@ -502,7 +537,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
                     {
                         if( pListElement->pTopicFilter[ j - 1 ] != '/' )
                         {
-                            PRINT_ERR( "Invalid topic filter %.*s -- '+' must be preceded by '/'.",
+                            IotLogError( "Invalid topic filter %.*s -- '+' must be preceded by '/'.",
                                          pListElement->topicFilterLength,
                                          pListElement->pTopicFilter );
 
@@ -523,7 +558,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
                     {
                         if( pListElement->pTopicFilter[ j + 1 ] != '/' )
                         {
-                            PRINT_ERR( "Invalid topic filter %.*s -- '+' must be succeeded by '/'.",
+                            IotLogError( "Invalid topic filter %.*s -- '+' must be succeeded by '/'.",
                                          pListElement->topicFilterLength,
                                          pListElement->pTopicFilter );
 
@@ -547,7 +582,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
                     /* '#' must be the last character in the filter. */
                     if( j != pListElement->topicFilterLength - 1 )
                     {
-                        PRINT_ERR( "Invalid topic filter %.*s -- '#' must be the last character.",
+                        IotLogError( "Invalid topic filter %.*s -- '#' must be the last character.",
                                      pListElement->topicFilterLength,
                                      pListElement->pTopicFilter );
 
@@ -563,7 +598,7 @@ bool _IotMqtt_ValidateSubscriptionList( IotMqttOperationType_t operation,
                     {
                         if( pListElement->pTopicFilter[ j - 1 ] != '/' )
                         {
-                            PRINT_ERR( "Invalid topic filter %.*s -- '#' must be preceded by '/'.",
+                            IotLogError( "Invalid topic filter %.*s -- '#' must be preceded by '/'.",
                                          pListElement->topicFilterLength,
                                          pListElement->pTopicFilter );
 

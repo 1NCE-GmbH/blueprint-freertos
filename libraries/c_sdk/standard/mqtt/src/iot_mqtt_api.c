@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -282,7 +282,7 @@ static bool _createKeepAliveJob( const IotMqttNetworkInfo_t * pNetworkInfo,
 
     if( serializeStatus != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "Failed to allocate PINGREQ packet for new connection." );
+        IotLogError( "Failed to allocate PINGREQ packet for new connection." );
 
         status = false;
     }
@@ -298,7 +298,7 @@ static bool _createKeepAliveJob( const IotMqttNetworkInfo_t * pNetworkInfo,
          * Abort the program if it does. */
         if( jobStatus != IOT_TASKPOOL_SUCCESS )
         {
-            PRINT_ERR( "Failed to create keep-alive job for new connection." );
+            IotLogError( "Failed to create keep-alive job for new connection." );
 
             IotMqtt_Assert( false );
         }
@@ -329,7 +329,7 @@ static _mqttConnection_t * _createMqttConnection( bool awsIotMqttMode,
 
     if( pMqttConnection == NULL )
     {
-        PRINT_ERR( "Failed to allocate memory for new connection." );
+        IotLogError( "Failed to allocate memory for new connection." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -351,7 +351,7 @@ static _mqttConnection_t * _createMqttConnection( bool awsIotMqttMode,
 
     if( referencesMutexCreated == false )
     {
-        PRINT_ERR( "Failed to create references mutex for new connection." );
+        IotLogError( "Failed to create references mutex for new connection." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -365,7 +365,7 @@ static _mqttConnection_t * _createMqttConnection( bool awsIotMqttMode,
 
     if( subscriptionMutexCreated == false )
     {
-        PRINT_ERR( "Failed to create subscription mutex for new connection." );
+        IotLogError( "Failed to create subscription mutex for new connection." );
 
         IOT_SET_AND_GOTO_CLEANUP( false );
     }
@@ -383,15 +383,15 @@ static _mqttConnection_t * _createMqttConnection( bool awsIotMqttMode,
      * Adjust the user-provided keep-alive interval based on these requirements. */
     if( awsIotMqttMode == true )
     {
-        if( keepAliveSeconds < AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE )
+        if( keepAliveSeconds == 0 )
+        {
+            keepAliveSeconds = AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE;
+        }
+        else if( keepAliveSeconds < AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE )
         {
             keepAliveSeconds = AWS_IOT_MQTT_SERVER_MIN_KEEPALIVE;
         }
         else if( keepAliveSeconds > AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE )
-        {
-            keepAliveSeconds = AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE;
-        }
-        else if( keepAliveSeconds == 0 )
         {
             keepAliveSeconds = AWS_IOT_MQTT_SERVER_MAX_KEEPALIVE;
         }
@@ -474,7 +474,7 @@ static void _destroyMqttConnection( _mqttConnection_t * pMqttConnection )
     /* Clean up keep-alive if still allocated. */
     if( pMqttConnection->keepAliveMs != 0 )
     {
-        PRINT_DBG( "(MQTT connection %p) Cleaning up keep-alive.", pMqttConnection );
+        IotLogDebug( "(MQTT connection %p) Cleaning up keep-alive.", pMqttConnection );
 
         _IotMqtt_FreePacket( pMqttConnection->pPingreqPacket );
 
@@ -514,12 +514,12 @@ static void _destroyMqttConnection( _mqttConnection_t * pMqttConnection )
 
         if( networkStatus != IOT_NETWORK_SUCCESS )
         {
-            PRINT_FORCE( "(MQTT connection %p) Failed to destroy network connection.",
+            IotLogWarn( "(MQTT connection %p) Failed to destroy network connection.",
                         pMqttConnection );
         }
         else
         {
-            PRINT_DBG( "(MQTT connection %p) Network connection destroyed.",
+            IotLogInfo( "(MQTT connection %p) Network connection destroyed.",
                         pMqttConnection );
         }
     }
@@ -532,7 +532,7 @@ static void _destroyMqttConnection( _mqttConnection_t * pMqttConnection )
     IotMutex_Destroy( &( pMqttConnection->referencesMutex ) );
     IotMutex_Destroy( &( pMqttConnection->subscriptionMutex ) );
 
-    PRINT_DBG( "(MQTT connection %p) Connection destroyed.", pMqttConnection );
+    IotLogDebug( "(MQTT connection %p) Connection destroyed.", pMqttConnection );
 
     /* Free connection. */
     IotMqtt_FreeConnection( pMqttConnection );
@@ -580,7 +580,7 @@ static IotMqttError_t _subscriptionCommon( IotMqttOperationType_t operation,
     {
         if( pOperationReference == NULL )
         {
-            PRINT_ERR( "Reference must be provided for a waitable %s.",
+            IotLogError( "Reference must be provided for a waitable %s.",
                          IotMqtt_OperationType( operation ) );
 
             IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_BAD_PARAMETER );
@@ -712,7 +712,7 @@ static IotMqttError_t _subscriptionCommon( IotMqttOperationType_t operation,
 
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "(MQTT connection %p) Failed to schedule %s for sending.",
+        IotLogError( "(MQTT connection %p) Failed to schedule %s for sending.",
                      mqttConnection,
                      IotMqtt_OperationType( operation ) );
 
@@ -746,7 +746,7 @@ static IotMqttError_t _subscriptionCommon( IotMqttOperationType_t operation,
     {
         status = IOT_MQTT_STATUS_PENDING;
 
-        PRINT_DBG( "(MQTT connection %p) %s operation scheduled.",
+        IotLogInfo( "(MQTT connection %p) %s operation scheduled.",
                     mqttConnection,
                     IotMqtt_OperationType( operation ) );
     }
@@ -773,14 +773,14 @@ bool _IotMqtt_IncrementConnectionReferences( _mqttConnection_t * pMqttConnection
     if( disconnected == false )
     {
         ( pMqttConnection->references )++;
-        PRINT_DBG( "(MQTT connection %p) Reference count changed from %ld to %ld.",
+        IotLogDebug( "(MQTT connection %p) Reference count changed from %ld to %ld.",
                      pMqttConnection,
                      ( long int ) pMqttConnection->references - 1,
                      ( long int ) pMqttConnection->references );
     }
     else
     {
-        PRINT_FORCE( "(MQTT connection %p) Attempt to use closed connection.", pMqttConnection );
+        IotLogWarn( "(MQTT connection %p) Attempt to use closed connection.", pMqttConnection );
     }
 
     IotMutex_Unlock( &( pMqttConnection->referencesMutex ) );
@@ -801,7 +801,7 @@ void _IotMqtt_DecrementConnectionReferences( _mqttConnection_t * pMqttConnection
     ( pMqttConnection->references )--;
     IotMqtt_Assert( pMqttConnection->references >= 0 );
 
-    PRINT_DBG( "(MQTT connection %p) Reference count changed from %ld to %ld.",
+    IotLogDebug( "(MQTT connection %p) Reference count changed from %ld to %ld.",
                  pMqttConnection,
                  ( long int ) pMqttConnection->references + 1,
                  ( long int ) pMqttConnection->references );
@@ -821,7 +821,7 @@ void _IotMqtt_DecrementConnectionReferences( _mqttConnection_t * pMqttConnection
     /* Destroy an unreferenced MQTT connection. */
     if( destroyConnection == true )
     {
-        PRINT_DBG( "(MQTT connection %p) Connection will be destroyed now.",
+        IotLogDebug( "(MQTT connection %p) Connection will be destroyed now.",
                      pMqttConnection );
         _destroyMqttConnection( pMqttConnection );
     }
@@ -855,11 +855,11 @@ IotMqttError_t IotMqtt_Init( void )
     /* Log initialization status. */
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "Failed to initialize MQTT library serializer. " );
+        IotLogError( "Failed to initialize MQTT library serializer. " );
     }
     else
     {
-        PRINT_DBG( "MQTT library successfully initialized." );
+        IotLogInfo( "MQTT library successfully initialized." );
     }
 
     return status;
@@ -877,7 +877,7 @@ void IotMqtt_Cleanup( void )
         #endif
     #endif
 
-    PRINT_DBG( "MQTT library cleanup done." );
+    IotLogInfo( "MQTT library cleanup done." );
 }
 
 /*-----------------------------------------------------------*/
@@ -932,7 +932,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
         {
             /* Will message payloads cannot be larger than 65535. This restriction
              * applies only to will messages, and not normal PUBLISH messages. */
-            PRINT_ERR( "Will payload cannot be larger than 65535." );
+            IotLogError( "Will payload cannot be larger than 65535." );
 
             IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_BAD_PARAMETER );
         }
@@ -1000,7 +1000,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
         networkCreated = true;
     }
 
-    PRINT_DBG( "Establishing new MQTT connection." );
+    IotLogInfo( "Establishing new MQTT connection." );
 
     /* Initialize a new MQTT connection object. */
     pNewMqttConnection = _createMqttConnection( pConnectInfo->awsIotMqttMode,
@@ -1030,7 +1030,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
 
     if( networkStatus != IOT_NETWORK_SUCCESS )
     {
-        PRINT_ERR( "Failed to set MQTT network receive callback." );
+        IotLogError( "Failed to set MQTT network receive callback." );
 
         IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_NETWORK_ERROR );
     }
@@ -1133,7 +1133,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
 
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "Failed to enqueue CONNECT for sending." );
+        IotLogError( "Failed to enqueue CONNECT for sending." );
     }
     else
     {
@@ -1152,7 +1152,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
         /* Check if a keep-alive job should be scheduled. */
         if( pNewMqttConnection->keepAliveMs != 0 )
         {
-            PRINT_DBG( "Scheduling first MQTT keep-alive job." );
+            IotLogDebug( "Scheduling first MQTT keep-alive job." );
 
             taskPoolStatus = IotTaskPool_ScheduleDeferred( IOT_SYSTEM_TASKPOOL,
                                                            pNewMqttConnection->keepAliveJob,
@@ -1181,7 +1181,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
 
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "Failed to establish new MQTT connection, error %s.",
+        IotLogError( "Failed to establish new MQTT connection, error %s.",
                      IotMqtt_strerror( status ) );
 
         /* The network connection must be closed if it was created. */
@@ -1191,11 +1191,11 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
 
             if( networkStatus != IOT_NETWORK_SUCCESS )
             {
-                PRINT_FORCE( "Failed to close network connection." );
+                IotLogWarn( "Failed to close network connection." );
             }
             else
             {
-                PRINT_DBG( "Network connection closed on error." );
+                IotLogInfo( "Network connection closed on error." );
             }
         }
         else
@@ -1223,7 +1223,7 @@ IotMqttError_t IotMqtt_Connect( const IotMqttNetworkInfo_t * pNetworkInfo,
     }
     else
     {
-        PRINT_DBG( "New MQTT connection %p established.", pMqttConnection );
+        IotLogInfo( "New MQTT connection %p established.", pMqttConnection );
 
         /* Set the output parameter. */
         *pMqttConnection = pNewMqttConnection;
@@ -1241,7 +1241,7 @@ void IotMqtt_Disconnect( IotMqttConnection_t mqttConnection,
     IotMqttError_t status = IOT_MQTT_STATUS_PENDING;
     _mqttOperation_t * pOperation = NULL;
 
-    PRINT_DBG( "(MQTT connection %p) Disconnecting connection.", mqttConnection );
+    IotLogInfo( "(MQTT connection %p) Disconnecting connection.", mqttConnection );
 
     /* Read the connection status. */
     IotMutex_Lock( &( mqttConnection->referencesMutex ) );
@@ -1315,7 +1315,7 @@ void IotMqtt_Disconnect( IotMqttConnection_t mqttConnection,
                                                 _IotMqtt_ProcessSend,
                                                 0 ) != IOT_MQTT_SUCCESS )
                 {
-                    PRINT_FORCE( "(MQTT connection %p) Failed to schedule DISCONNECT for sending.",
+                    IotLogWarn( "(MQTT connection %p) Failed to schedule DISCONNECT for sending.",
                                 mqttConnection );
                     _IotMqtt_DestroyOperation( pOperation );
                 }
@@ -1329,14 +1329,14 @@ void IotMqtt_Disconnect( IotMqttConnection_t mqttConnection,
                      * or NETWORK ERROR. */
                     if( status == IOT_MQTT_SUCCESS )
                     {
-                        PRINT_DBG( "(MQTT connection %p) Connection disconnected.", mqttConnection );
+                        IotLogInfo( "(MQTT connection %p) Connection disconnected.", mqttConnection );
                     }
                     else
                     {
                         IotMqtt_Assert( ( status == IOT_MQTT_TIMEOUT ) ||
                                         ( status == IOT_MQTT_NETWORK_ERROR ) );
 
-                        PRINT_FORCE( "(MQTT connection %p) DISCONNECT not sent, error %s.",
+                        IotLogWarn( "(MQTT connection %p) DISCONNECT not sent, error %s.",
                                     mqttConnection,
                                     IotMqtt_strerror( status ) );
                     }
@@ -1529,13 +1529,13 @@ IotMqttError_t IotMqtt_Publish( IotMqttConnection_t mqttConnection,
     {
         if( pCallbackInfo != NULL )
         {
-            PRINT_ERR( "QoS 0 PUBLISH should not have notification parameters set." );
+            IotLogError( "QoS 0 PUBLISH should not have notification parameters set." );
 
             IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_BAD_PARAMETER );
         }
         else if( ( flags & IOT_MQTT_FLAG_WAITABLE ) != 0 )
         {
-            PRINT_ERR( "QoS 0 PUBLISH should not have notification parameters set." );
+            IotLogError( "QoS 0 PUBLISH should not have notification parameters set." );
 
             IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_BAD_PARAMETER );
         }
@@ -1546,7 +1546,7 @@ IotMqttError_t IotMqtt_Publish( IotMqttConnection_t mqttConnection,
 
         if( pPublishOperation != NULL )
         {
-            PRINT_FORCE( "Ignoring reference parameter for QoS 0 publish." );
+            IotLogWarn( "Ignoring reference parameter for QoS 0 publish." );
         }
         else
         {
@@ -1563,7 +1563,7 @@ IotMqttError_t IotMqtt_Publish( IotMqttConnection_t mqttConnection,
     {
         if( pPublishOperation == NULL )
         {
-            PRINT_ERR( "Reference must be provided for a waitable PUBLISH." );
+            IotLogError( "Reference must be provided for a waitable PUBLISH." );
 
             IOT_SET_AND_GOTO_CLEANUP( IOT_MQTT_BAD_PARAMETER );
         }
@@ -1688,7 +1688,7 @@ IotMqttError_t IotMqtt_Publish( IotMqttConnection_t mqttConnection,
 
     if( status != IOT_MQTT_SUCCESS )
     {
-        PRINT_ERR( "(MQTT connection %p) Failed to enqueue PUBLISH for sending.",
+        IotLogError( "(MQTT connection %p) Failed to enqueue PUBLISH for sending.",
                      mqttConnection );
 
         /* Clear the previously set (and now invalid) reference. */
@@ -1741,7 +1741,7 @@ IotMqttError_t IotMqtt_Publish( IotMqttConnection_t mqttConnection,
             EMPTY_ELSE_MARKER;
         }
 
-        PRINT_DBG( "(MQTT connection %p) MQTT PUBLISH operation queued.",
+        IotLogInfo( "(MQTT connection %p) MQTT PUBLISH operation queued.",
                     mqttConnection );
     }
 
@@ -1825,7 +1825,7 @@ IotMqttError_t IotMqtt_Wait( IotMqttOperation_t operation,
 
         if( pMqttConnection->disconnected == true )
         {
-            PRINT_ERR( "(MQTT connection %p, %s operation %p) MQTT connection is closed. "
+            IotLogError( "(MQTT connection %p, %s operation %p) MQTT connection is closed. "
                          "Operation cannot be waited on.",
                          pMqttConnection,
                          IotMqtt_OperationType( operation->u.operation.type ),
@@ -1835,7 +1835,7 @@ IotMqttError_t IotMqtt_Wait( IotMqttOperation_t operation,
         }
         else
         {
-            PRINT_DBG( "(MQTT connection %p, %s operation %p) Waiting for operation completion.",
+            IotLogInfo( "(MQTT connection %p, %s operation %p) Waiting for operation completion.",
                         pMqttConnection,
                         IotMqtt_OperationType( operation->u.operation.type ),
                         operation );
@@ -1857,7 +1857,7 @@ IotMqttError_t IotMqtt_Wait( IotMqttOperation_t operation,
                 /* Clean up lingering subscriptions from a timed-out SUBSCRIBE. */
                 if( operation->u.operation.type == IOT_MQTT_SUBSCRIBE )
                 {
-                    PRINT_DBG( "(MQTT connection %p, SUBSCRIBE operation %p) Cleaning up"
+                    IotLogDebug( "(MQTT connection %p, SUBSCRIBE operation %p) Cleaning up"
                                  " subscriptions of timed-out SUBSCRIBE.",
                                  pMqttConnection,
                                  operation );
@@ -1877,7 +1877,7 @@ IotMqttError_t IotMqtt_Wait( IotMqttOperation_t operation,
                 status = operation->u.operation.status;
             }
 
-            PRINT_DBG( "(MQTT connection %p, %s operation %p) Wait complete with result %s.",
+            IotLogInfo( "(MQTT connection %p, %s operation %p) Wait complete with result %s.",
                         pMqttConnection,
                         IotMqtt_OperationType( operation->u.operation.type ),
                         operation,

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Platform V1.1.1
+ * FreeRTOS Platform V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -149,7 +149,7 @@ bool IotClock_TimerCreate( IotTimer_t * pNewTimer,
     configASSERT( pNewTimer != NULL );
     configASSERT( expirationRoutine != NULL );
 
-    PRINT_DBG( "Creating new timer %p.", pNewTimer );
+    IotLogDebug( "Creating new timer %p.", pNewTimer );
 
     /* Set the timer expiration routine, argument and period */
     pxTimer->threadRoutine = expirationRoutine;
@@ -178,7 +178,7 @@ void IotClock_TimerDestroy( IotTimer_t * pTimer )
     configASSERT( pTimerInfo != NULL );
     configASSERT( pTimerInfo->timer != NULL );
 
-    PRINT_DBG( "Destroying timer %p.", pTimer );
+    IotLogDebug( "Destroying timer %p.", pTimer );
 
     if( xTimerIsTimerActive( pTimerInfo->timer ) == pdTRUE )
     {
@@ -207,7 +207,7 @@ bool IotClock_TimerArm( IotTimer_t * pTimer,
 
     TimerHandle_t xTimerHandle = pTimerInfo->timer;
 
-    PRINT_DBG( "Arming timer %p with timeout %llu and period %llu.",
+    IotLogDebug( "Arming timer %p with timeout %llu and period %llu.",
                  pTimer,
                  relativeTimeoutMs,
                  periodMs );

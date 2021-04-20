@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -37,7 +37,6 @@
 #include "iot_serializer.h"
 #include "private/iot_mqtt_internal.h"
 #include "iot_ble_mqtt_serialize.h"
-#include "aws_clientcredential.h"
 
 /* Test framework includes. */
 #include "unity_fixture.h"

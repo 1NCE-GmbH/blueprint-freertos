@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Platform V1.1.1
+ * FreeRTOS Platform V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -32,7 +32,6 @@
 #include "iot_config.h"
 
 #include "semphr.h"
-#include "mqttdemo.h"
 
 /* Platform threads include. */
 #include "platform/iot_platform_types_freertos.h"
@@ -58,22 +57,22 @@
  * the usage of dynamic memory allocation.
  */
 #ifndef IotThreads_Malloc
-    #include <stdlib.h>
+    #include "FreeRTOS.h"
 
 /**
  * @brief Memory allocation. This function should have the same signature
  * as [malloc](http://pubs.opengroup.org/onlinepubs/9699919799/functions/malloc.html).
  */
-    #define IotThreads_Malloc    malloc
+    #define IotThreads_Malloc    pvPortMalloc
 #endif
 #ifndef IotThreads_Free
-    #include <stdlib.h>
+    #include "FreeRTOS.h"
 
 /**
  * @brief Free memory. This function should have the same signature as
  * [free](http://pubs.opengroup.org/onlinepubs/9699919799/functions/free.html).
  */
-    #define IotThreads_Free    free
+    #define IotThreads_Free    pvPortFree
 #endif
 
 /*-----------------------------------------------------------*/
@@ -100,12 +99,12 @@ bool Iot_CreateDetachedThread( IotThreadRoutine_t threadRoutine,
 
     configASSERT( threadRoutine != NULL );
 
-    //PRINT_DBG( "Creating new thread." );
+    IotLogDebug( "Creating new thread." );
     threadInfo_t * pThreadInfo = IotThreads_Malloc( sizeof( threadInfo_t ) );
 
     if( pThreadInfo == NULL )
     {
-        //PRINT_DBG( "Unable to allocate memory for threadRoutine %p.", threadRoutine );
+        IotLogDebug( "Unable to allocate memory for threadRoutine %p.", threadRoutine );
         status = false;
     }
 
@@ -123,8 +122,8 @@ bool Iot_CreateDetachedThread( IotThreadRoutine_t threadRoutine,
                          NULL ) != pdPASS )
         {
             /* Task creation failed. */
-            //PRINT_FORCE( "Failed to create thread." );
-//            IotThreads_Free( pThreadInfo );
+            IotLogWarn( "Failed to create thread." );
+            IotThreads_Free( pThreadInfo );
             status = false;
         }
     }
@@ -141,7 +140,7 @@ bool IotMutex_Create( IotMutex_t * pNewMutex,
 
     configASSERT( internalMutex != NULL );
 
-    //PRINT_DBG( "Creating new mutex %p.", pNewMutex );
+    IotLogDebug( "Creating new mutex %p.", pNewMutex );
 
     if( recursive )
     {
@@ -186,7 +185,7 @@ bool prIotMutexTimedLock( IotMutex_t * pMutex,
 
     configASSERT( internalMutex != NULL );
 
-    //PRINT_DBG( "Locking mutex %p.", internalMutex );
+    IotLogDebug( "Locking mutex %p.", internalMutex );
 
     /* Call the correct FreeRTOS mutex take function based on mutex type. */
     if( internalMutex->recursive == pdTRUE )
@@ -223,7 +222,7 @@ void IotMutex_Unlock( IotMutex_t * pMutex )
 
     configASSERT( internalMutex != NULL );
 
-    //PRINT_DBG( "Unlocking mutex %p.", internalMutex );
+    IotLogDebug( "Unlocking mutex %p.", internalMutex );
 
     /* Call the correct FreeRTOS mutex unlock function based on mutex type. */
     if( internalMutex->recursive == pdTRUE )
@@ -246,7 +245,7 @@ bool IotSemaphore_Create( IotSemaphore_t * pNewSemaphore,
 
     configASSERT( internalSemaphore != NULL );
 
-    //PRINT_DBG( "Creating new semaphore %p.", pNewSemaphore );
+    IotLogDebug( "Creating new semaphore %p.", pNewSemaphore );
 
     ( void ) xSemaphoreCreateCountingStatic( maxValue, initialValue, &internalSemaphore->xSemaphore );
 
@@ -264,7 +263,7 @@ uint32_t IotSemaphore_GetCount( IotSemaphore_t * pSemaphore )
 
     count = uxSemaphoreGetCount( ( SemaphoreHandle_t ) &internalSemaphore->xSemaphore );
 
-    //PRINT_DBG( "Semaphore %p has count %d.", pSemaphore, count );
+    IotLogDebug( "Semaphore %p has count %d.", pSemaphore, count );
 
     return ( uint32_t ) count;
 }
@@ -277,7 +276,7 @@ void IotSemaphore_Destroy( IotSemaphore_t * pSemaphore )
 
     configASSERT( internalSemaphore != NULL );
 
-    //PRINT_DBG( "Destroying semaphore %p.", internalSemaphore );
+    IotLogDebug( "Destroying semaphore %p.", internalSemaphore );
 
     vSemaphoreDelete( ( SemaphoreHandle_t ) &internalSemaphore->xSemaphore );
 }
@@ -290,14 +289,14 @@ void IotSemaphore_Wait( IotSemaphore_t * pSemaphore )
 
     configASSERT( internalSemaphore != NULL );
 
-    //PRINT_DBG( "Waiting on semaphore %p.", internalSemaphore );
+    IotLogDebug( "Waiting on semaphore %p.", internalSemaphore );
 
     /* Take the semaphore using the FreeRTOS API. */
     if( xSemaphoreTake( ( SemaphoreHandle_t ) &internalSemaphore->xSemaphore,
                         portMAX_DELAY ) != pdTRUE )
     {
-        //PRINT_FORCE( "Failed to wait on semaphore %p.",
-//                    pSemaphore );
+        IotLogWarn( "Failed to wait on semaphore %p.",
+                    pSemaphore );
 
         /* Assert here, debugging we always want to know that this happened because you think
          *   that you are waiting successfully on the semaphore but you are not   */
@@ -313,7 +312,7 @@ bool IotSemaphore_TryWait( IotSemaphore_t * pSemaphore )
 
     configASSERT( internalSemaphore != NULL );
 
-    //PRINT_DBG( "Attempting to wait on semaphore %p.", internalSemaphore );
+    IotLogDebug( "Attempting to wait on semaphore %p.", internalSemaphore );
 
     return IotSemaphore_TimedWait( pSemaphore, 0 );
 }
@@ -334,8 +333,8 @@ bool IotSemaphore_TimedWait( IotSemaphore_t * pSemaphore,
         /* Only warn if timeout > 0 */
         if( timeoutMs > 0 )
         {
-            //PRINT_FORCE( "Timeout waiting on semaphore %p.",
-//                        internalSemaphore );
+            IotLogWarn( "Timeout waiting on semaphore %p.",
+                        internalSemaphore );
         }
 
         return false;
@@ -352,13 +351,13 @@ void IotSemaphore_Post( IotSemaphore_t * pSemaphore )
 
     configASSERT( internalSemaphore != NULL );
 
-    //PRINT_DBG( "Posting to semaphore %p.", internalSemaphore );
+    IotLogDebug( "Posting to semaphore %p.", internalSemaphore );
     /* Give the semaphore using the FreeRTOS API. */
     BaseType_t result = xSemaphoreGive( ( SemaphoreHandle_t ) &internalSemaphore->xSemaphore );
 
     if( result == pdFALSE )
     {
-        //PRINT_DBG( "Unable to give semaphore over maximum", internalSemaphore );
+        IotLogDebug( "Unable to give semaphore over maximum", internalSemaphore );
     }
 }
 

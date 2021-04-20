@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -1076,7 +1076,7 @@ typedef struct IotMqttNetworkInfo
  * @note If this flag is set, @ref mqtt_function_wait <b>MUST</b> be called to clean up
  * resources.
  */
-#define IOT_MQTT_FLAG_WAITABLE        ( 0x00000001)
+#define IOT_MQTT_FLAG_WAITABLE        ( 0x00000001 )
 
 /**
  * @brief Causes @ref mqtt_function_disconnect to only free memory and not send
@@ -1086,6 +1086,6 @@ typedef struct IotMqttNetworkInfo
  * to @ref mqtt_function_disconnect if the network goes offline or is otherwise
  * unusable.
  */
-#define IOT_MQTT_FLAG_CLEANUP_ONLY    ( 0x00000000 )
+#define IOT_MQTT_FLAG_CLEANUP_ONLY    ( 0x00000001 )
 
 #endif /* ifndef IOT_MQTT_TYPES_H_ */

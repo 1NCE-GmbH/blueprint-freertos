@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Common V1.1.1
+ * FreeRTOS Common V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -35,12 +35,13 @@
 /**
  * @brief Network types supported by FreeRTOS.
  */
-#define AWSIOT_NETWORK_TYPE_NONE      0x00000000
-#define AWSIOT_NETWORK_TYPE_WIFI      0x00000001
-#define AWSIOT_NETWORK_TYPE_BLE       0x00000002
-#define AWSIOT_NETWORK_TYPE_ETH       0x00000004
-#define AWSIOT_NETWORK_TYPE_ALL       ( AWSIOT_NETWORK_TYPE_WIFI | AWSIOT_NETWORK_TYPE_BLE | AWSIOT_NETWORK_TYPE_ETH )
-#define AWSIOT_NETWORK_TYPE_TCP_IP    ( AWSIOT_NETWORK_TYPE_WIFI | AWSIOT_NETWORK_TYPE_ETH )
+#define AWSIOT_NETWORK_TYPE_NONE        0x00000000
+#define AWSIOT_NETWORK_TYPE_WIFI        0x00000001
+#define AWSIOT_NETWORK_TYPE_BLE         0x00000002
+#define AWSIOT_NETWORK_TYPE_ETH         0x00000004
+#define AWSIOT_NETWORK_TYPE_CELLULAR    0x00000008
+#define AWSIOT_NETWORK_TYPE_ALL         ( AWSIOT_NETWORK_TYPE_WIFI | AWSIOT_NETWORK_TYPE_BLE | AWSIOT_NETWORK_TYPE_ETH | AWSIOT_NETWORK_TYPE_CELLULAR )
+#define AWSIOT_NETWORK_TYPE_TCP_IP      ( AWSIOT_NETWORK_TYPE_WIFI | AWSIOT_NETWORK_TYPE_ETH | AWSIOT_NETWORK_TYPE_CELLULAR )
 
 /**
  * @brief Enum types representing states for different networks.

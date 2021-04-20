@@ -1,5 +1,5 @@
 /*
- * FreeRTOS MQTT V2.1.1
+ * FreeRTOS MQTT V2.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -39,7 +39,6 @@
 #include "task.h"
 #include "queue.h"
 #include "event_groups.h"
-#include "aws_clientcredential.h"
 #include "iot_mqtt.h"
 #include "iot_init.h"
 
@@ -76,7 +75,7 @@
 
 
 
-/* TCP Mqtt Demo tasks multitask example parameters. */
+/* TCP Echo Client tasks multitask example parameters. */
 #define  mqttagenttestMULTI_TASK_TEST_TASKS_STACK_SIZE    ( configMINIMAL_STACK_SIZE * 6 )
 #define  mqttagenttestMULTI_TASK_TEST_TASKS_PRIORITY      ( tskIDLE_PRIORITY )
 
@@ -222,6 +221,9 @@ static MQTTBool_t prvMultiTaskTestMQTTCallback( void * pvUserData,
 static MQTTBool_t prvMQTTCallback( void * pvUserData,
                                    const MQTTPublishData_t * const pxPublishParameters )
 {
+    /* Disable unused parameter warning. */
+    ( void ) pxPublishParameters;
+
     /* Give the semaphore to signal message receipt. */
     xSemaphoreGive( ( SemaphoreHandle_t ) pvUserData );
 
@@ -630,7 +632,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
     MQTTAgentUnsubscribeParams_t xUnSubscribeParams;
     BaseType_t xResult, xStatus, xAgentCreated = pdFALSE;
     size_t xRecvLoop, xPubSubIndex;
-    MQTTtestAgentTaskParams_t * pxTcptestMqttDemosTaskParams;
+    MQTTtestAgentTaskParams_t * pxTcptestEchoClientsTaskParams;
     EventGroupHandle_t * pxSyncEventRx;
     MQTTAgentHandle_t * pxMQTTHandle;
     MQTTAgentConnectParams_t xConnectParametersMultiTaskTest;
@@ -641,8 +643,8 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
     memcpy( &xConnectParametersMultiTaskTest, &xDefaultConnectParameters, sizeof( MQTTAgentConnectParams_t ) );
 
 
-    pxTcptestMqttDemosTaskParams = ( ( MQTTtestAgentTaskParams_t * ) pvParameters );
-    usTaskTag = pxTcptestMqttDemosTaskParams->usTaskTag;
+    pxTcptestEchoClientsTaskParams = ( ( MQTTtestAgentTaskParams_t * ) pvParameters );
+    usTaskTag = pxTcptestEchoClientsTaskParams->usTaskTag;
     pxSyncEventRx = &MQTTtestAgentMultiTestRxParam[ usTaskTag ].xSyncEventRx;
     pxMQTTHandle = &MQTTtestAgentMultiTestRxParam[ usTaskTag ].xMQTTHandle;
     xConnectParametersMultiTaskTest.pucClientId = MQTTtestAgentMultiTestRxParam[ usTaskTag ].cClientID;
@@ -658,7 +660,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
     xUnSubscribeParams.pucTopic = xSubscribeParams.pucTopic;
     xUnSubscribeParams.usTopicLength = xSubscribeParams.usTopicLength;
 
-    MQTTtestAgentCbParam.xSemaphore = ( SemaphoreHandle_t ) &( pxTcptestMqttDemosTaskParams->xSemaphore );
+    MQTTtestAgentCbParam.xSemaphore = ( SemaphoreHandle_t ) &( pxTcptestEchoClientsTaskParams->xSemaphore );
 
     /* Default is pass to avoid nesting. */
     xStatus = pdPASS;
@@ -713,7 +715,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
         if( xEventGroupSync( *pxSyncEventRx, /* The event group used for the rendezvous. */
                              ( 1 << usTaskTag ),
                              ( 1 << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK,
-                             mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( ( 1 << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK ) )
+                             mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( ( 1u << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK ) )
         {
             mqttagenttestFAILUREPRINTF( ( "%s: Timed out waiting for Transmit tasks.\r\n", __FUNCTION__ ) );
             xStatus = pdFAIL;
@@ -723,7 +725,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
         /* Take the semaphore to ensure the message is Received. */
         for( xPubSubIndex = 0; xPubSubIndex < mqttagenttestMULTI_TASK_TEST_PUBLISH_PER_LOOP * mqttagenttestMULTI_TASK_TEST_NUM_RX_TASKS; xPubSubIndex++ )
         {
-            if( pdFALSE == xSemaphoreTake( ( SemaphoreHandle_t ) &( pxTcptestMqttDemosTaskParams->xSemaphore ),
+            if( pdFALSE == xSemaphoreTake( ( SemaphoreHandle_t ) &( pxTcptestEchoClientsTaskParams->xSemaphore ),
                                            mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) )
             {
                 mqttagenttestFAILUREPRINTF( ( "%s: Timed out waiting for pub from Transmit tasks.\r\n", __FUNCTION__ ) );
@@ -750,7 +752,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
         if( xEventGroupSync( *pxSyncEventRx, /* The event group used for the rendezvous. */
                              ( 1 << usTaskTag ),
                              ( 1 << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK,
-                             mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( ( 1 << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK ) )
+                             mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( ( 1u << usTaskTag ) | mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK ) )
         {
             mqttagenttestFAILUREPRINTF( ( "%s: Timed out waiting for Transmit tasks.\r\n", __FUNCTION__ ) );
             xStatus = pdFAIL;
@@ -796,7 +798,7 @@ static void prvMultiTaskTest_Rx_Task( void * pvParameters )
         ( void ) MQTT_AGENT_Delete( *pxMQTTHandle );
     }
 
-    pxTcptestMqttDemosTaskParams->xStatus = xStatus;
+    pxTcptestEchoClientsTaskParams->xStatus = xStatus;
     xEventGroupSync( ( EventGroupHandle_t ) &xSyncEventGroup, /* The event group used for the rendezvous. */
                      ( 1 << usTaskTag ),
                      mqttagenttestMULTI_TASK_TEST_EVENT_MASK,
@@ -818,9 +820,9 @@ static void prvMultiTaskTest_Tx_Task( void * pvParameters )
     BaseType_t xStatus, xReturn;
     size_t xPubSubIndex, usIndex;
     MQTTAgentPublishParams_t xPublishParameters;
-    MQTTtestAgentTaskParams_t * xTcptestMqttDemosTaskParams;
+    MQTTtestAgentTaskParams_t * xTcptestEchoClientsTaskParams;
 
-    xTcptestMqttDemosTaskParams = ( ( MQTTtestAgentTaskParams_t * ) pvParameters );
+    xTcptestEchoClientsTaskParams = ( ( MQTTtestAgentTaskParams_t * ) pvParameters );
 
     xStatus = pdPASS;
 
@@ -840,10 +842,10 @@ static void prvMultiTaskTest_Tx_Task( void * pvParameters )
 
         for( usIndex = 0; usIndex < mqttagenttestMULTI_TASK_TEST_NUM_RX_TASKS; usIndex++ )
         {
-            if( xEventGroupSync( MQTTtestAgentMultiTestRxParam[ usIndex ].xSyncEventRx,             /* The event group used for the rendezvous. */
-                                 ( 1 << xTcptestMqttDemosTaskParams->usTaskTag ),                 /* The bit representing the Transmit task reaching the rendezvous. */
-                                 ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1 << usIndex ) ), /* Also wait for the Receive tasks. */
-                                 mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1 << usIndex ) ) )
+            if( xEventGroupSync( MQTTtestAgentMultiTestRxParam[ usIndex ].xSyncEventRx,              /* The event group used for the rendezvous. */
+                                 ( 1 << xTcptestEchoClientsTaskParams->usTaskTag ),                  /* The bit representing the Transmit task reaching the rendezvous. */
+                                 ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1u << usIndex ) ), /* Also wait for the Receive tasks. */
+                                 mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1u << usIndex ) ) )
             {
                 mqttagenttestFAILUREPRINTF( ( "%s: Failed synching with Transmit and Receive tasks.\r\n", __FUNCTION__ ) );
                 xStatus = pdFAIL;
@@ -861,7 +863,7 @@ static void prvMultiTaskTest_Tx_Task( void * pvParameters )
             /* Setup the publish parameters. */
             memset( &( xPublishParameters ), 0x00, sizeof( xPublishParameters ) );
             xPublishParameters.pucTopic = MQTTtestAgentMultiTestRxParam[ usIndex ].cTopic;
-            xPublishParameters.pvData = xTcptestMqttDemosTaskParams->pucTransmittedData;
+            xPublishParameters.pvData = xTcptestEchoClientsTaskParams->pucTransmittedData;
             xPublishParameters.usTopicLength = MQTTtestAgentMultiTestRxParam[ usIndex ].usTopicLength;
             xPublishParameters.ulDataLength = ( uint32_t ) mqttagenttestMULTI_TASK_TEST_PUB_DATA_SIZE;
             xPublishParameters.xQoS = eMQTTQoS1;
@@ -894,10 +896,10 @@ static void prvMultiTaskTest_Tx_Task( void * pvParameters )
 
         for( usIndex = 0; usIndex < mqttagenttestMULTI_TASK_TEST_NUM_RX_TASKS; usIndex++ )
         {
-            if( xEventGroupSync( MQTTtestAgentMultiTestRxParam[ usIndex ].xSyncEventRx,             /* The event group used for the rendezvous. */
-                                 ( 1 << xTcptestMqttDemosTaskParams->usTaskTag ),                 /* The bit representing the Transmit task reaching the rendezvous. */
-                                 ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1 << usIndex ) ), /* Also wait for the Receive tasks. */
-                                 mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1 << usIndex ) ) )
+            if( xEventGroupSync( MQTTtestAgentMultiTestRxParam[ usIndex ].xSyncEventRx,              /* The event group used for the rendezvous. */
+                                 ( 1u << xTcptestEchoClientsTaskParams->usTaskTag ),                 /* The bit representing the Transmit task reaching the rendezvous. */
+                                 ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1u << usIndex ) ), /* Also wait for the Receive tasks. */
+                                 mqttagenttestMULTI_TASK_TEST_SYNC_TIMEOUT_TICKS ) != ( mqttagenttestMULTI_TASK_TEST_TX_EVENT_MASK | ( 1u << usIndex ) ) )
             {
                 mqttagenttestFAILUREPRINTF( ( "%s: Failed synching with Transmit and Receive tasks.\r\n", __FUNCTION__ ) );
                 xStatus = pdFAIL;
@@ -906,9 +908,9 @@ static void prvMultiTaskTest_Tx_Task( void * pvParameters )
         }
     }
 
-    xTcptestMqttDemosTaskParams->xStatus = xStatus;
+    xTcptestEchoClientsTaskParams->xStatus = xStatus;
     xEventGroupSync( ( EventGroupHandle_t ) &xSyncEventGroup, /* The event group used for the rendezvous. */
-                     ( 1 << xTcptestMqttDemosTaskParams->usTaskTag ),
+                     ( 1 << xTcptestEchoClientsTaskParams->usTaskTag ),
                      mqttagenttestMULTI_TASK_TEST_EVENT_MASK,
                      mqttagenttestMULTI_TASK_TEST_COMPLETE_TIMEOUT_TICKS );
     vTaskSuspend( NULL ); /* Suspend this task. Will be deleted by the mainTask */

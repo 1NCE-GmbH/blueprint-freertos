@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Utils V1.1.2
+ * FreeRTOS Utils V1.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -28,7 +28,7 @@
 #include "FreeRTOS.h"
 #include "iot_system_init.h"
 #include "iot_secure_sockets.h"
-
+#include "iot_crypto.h"
 
 
 /*-----------------------------------------------------------*/
@@ -40,7 +40,7 @@ BaseType_t SYSTEM_Init( void )
 {
     BaseType_t xResult = pdPASS;
 
-//    CRYPTO_Init();
+    CRYPTO_Init();
 
     if( xResult == pdPASS )
     {

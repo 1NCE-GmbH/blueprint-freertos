@@ -1,5 +1,5 @@
 /*
- * FreeRTOS V202002.00
+ * FreeRTOS V202011.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -34,11 +34,6 @@
 /* Use platform types on FreeRTOS. */
 #include "platform/iot_platform_types_freertos.h"
 
-/* Used to get the cloud broker endpoint for FreeRTOS. */
-#include <aws_clientcredential.h>
-
-/* Used to get the certificate used by the device. */
-#include <aws_clientcredential_keys.h>
 
 /* SDK version. */
 #define IOT_SDK_VERSION    "4.0.0"
@@ -175,7 +170,7 @@
 #define IOT_CLOUD_ENDPOINT        clientcredentialMQTT_BROKER_ENDPOINT
 
 /* Certificate for the device. */
-#define IOT_DEVICE_CERTIFICATE    keyCLIENT_CERTIFICATE_PEM
+//#define IOT_DEVICE_CERTIFICATE    keyCLIENT_CERTIFICATE_PEM
 
 /**
  * @brief Unique identifier used to recognize a device by the cloud.
@@ -206,6 +201,6 @@ extern uint16_t getDeviceMetricsLength( void );
 #define AWS_IOT_DEFENDER_USE_LONG_TAG      ( 1 )
 
 /* Demo runner configuration. */
-//#include "aws_demo_config.h"
+#include "aws_demo_config.h"
 
 #endif /* ifndef IOT_CONFIG_COMMON_H_ */

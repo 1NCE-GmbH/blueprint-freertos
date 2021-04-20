@@ -196,7 +196,7 @@
     #undef CreateMutex /* This is a workaround because CreateMutex is redefined to CreateMutexW in synchapi.h in windows. :/ */
 #endif
 
-#include "pkcs11_cel.h"
+#include "pkcs11.h"
 
 /**
  * @ingroup pkcs11_datatypes

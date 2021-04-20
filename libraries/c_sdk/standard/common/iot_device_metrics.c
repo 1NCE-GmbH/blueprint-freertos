@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Common V1.1.1
+ * FreeRTOS Common V1.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -372,25 +372,25 @@ static void _generateUniqueIdentifier( const char * pInput,
  */
 const char * getDeviceIdentifier( void )
 {
-    const char * pCertificate = IOT_DEVICE_CERTIFICATE;
+//    const char * pCertificate = IOT_DEVICE_CERTIFICATE;
     static uint32_t lock = 0;
 
     if( deviceIdentifier[ 0 ] == '\0' )
     {
         _atomicSpinlock_lock( &lock );
 
-        if( deviceIdentifier[ 0 ] == '\0' )
-        {
-            if( ( pCertificate != NULL ) &&
-                ( strcmp( pCertificate, "" ) != 0 ) )
-            {
-                _generateUniqueIdentifier( pCertificate, strlen( pCertificate ), deviceIdentifier, sizeof( deviceIdentifier ) );
-            }
-            else
-            {
-                strncpy( deviceIdentifier, "Unknown", sizeof( deviceIdentifier ) );
-            }
-        }
+//        if( deviceIdentifier[ 0 ] == '\0' )
+//        {
+//            if( ( pCertificate != NULL ) &&
+//                ( strcmp( pCertificate, "" ) != 0 ) )
+//            {
+//                _generateUniqueIdentifier( pCertificate, strlen( pCertificate ), deviceIdentifier, sizeof( deviceIdentifier ) );
+//            }
+//            else
+//            {
+//                strncpy( deviceIdentifier, "Unknown", sizeof( deviceIdentifier ) );
+//            }
+//        }
 
         _atomicSpinlock_unlock( &lock );
     }

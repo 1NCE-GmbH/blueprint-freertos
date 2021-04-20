@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Secure Sockets V1.1.9
+ * FreeRTOS Secure Sockets V1.3.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -28,16 +28,16 @@
 
 /* This file redefines Secure Sockets functions to be called through a wrapper macro,
  * but only if metrics is enabled explicitly. */
-//#if AWS_IOT_SECURE_SOCKETS_METRICS_ENABLED == 1
-//
-///* This macro is included in aws_secure_socket.c and aws_secure_socket_wrapper_metrics.c.
-// * It will prevent the redefine in those source files. */
-//    #ifndef _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
-//        #define SOCKETS_Init        Sockets_MetricsInit
-//        #define SOCKETS_Connect     Sockets_MetricsConnect
-//        #define SOCKETS_Shutdown    Sockets_MetricsShutdown
-//    #endif
-//
-//#endif
+#if AWS_IOT_SECURE_SOCKETS_METRICS_ENABLED == 1
+
+/* This macro is included in aws_secure_socket.c and aws_secure_socket_wrapper_metrics.c.
+ * It will prevent the redefine in those source files. */
+    #ifndef _SECURE_SOCKETS_WRAPPER_NOT_REDEFINE
+        #define SOCKETS_Init        Sockets_MetricsInit
+        #define SOCKETS_Connect     Sockets_MetricsConnect
+        #define SOCKETS_Shutdown    Sockets_MetricsShutdown
+    #endif
+
+#endif
 
 #endif /* ifndef _AWS_SECURE_SOCKETS_WRAPPER_METRICS_ */

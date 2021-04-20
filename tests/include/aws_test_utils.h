@@ -1,5 +1,5 @@
 /*
- * FreeRTOS V202002.00
+ * FreeRTOS V202011.00
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -56,18 +56,18 @@
         int32_t lStatus;                                                 \
         for( ; lRetried <= lRetries; lRetried++ ) {                      \
             if( lRetried ) {                                             \
-                configPRINTF( ( "retrying \"%s\", %d of %d, in %d ms\n", \
+                IotLogInfo ( "retrying \"%s\", %d of %d, in %d ms\n", \
                                 # xCommand, lRetried,                    \
                                 lRetries, ulPeriodMs ) );                \
-                vTaskDelay( pdMS_TO_TICKS( ulPeriodMs ) );               \
+                vTaskDelay( pdMS_TO_TICKS( ulPeriodMs  );               \
                 ulPeriodMs *= 2;                                         \
             }                                                            \
             lStatus = xCommand;                                          \
             if( xSuccessStatus == lStatus ) {                            \
                 break;                                                   \
             }                                                            \
-            configPRINTF( ( "expected %d, got %d\n",                     \
-                            xSuccessStatus, lStatus ) );                 \
+            IotLogInfo ( "expected %d, got %d\n",                     \
+                            xSuccessStatus, lStatus );                 \
         }                                                                \
     }
 

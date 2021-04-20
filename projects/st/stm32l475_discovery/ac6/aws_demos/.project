@@ -27,54 +27,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>application_code/board_buttons.c</name>
+			<name>application_code/cellular_setup.c</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/board_buttons.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/board_interrupts.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/board_interrupts.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/board_leds.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/board_leds.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/freertos.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/freertos.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/gpio.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/gpio.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/cellular_setup.c</locationURI>
 		</link>
 		<link>
 			<name>application_code/main.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/main.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/mqttdemo.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/mqttdemo.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/rng.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/rng.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/rtc.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/rtc.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/usart.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/usart.c</locationURI>
 		</link>
 		<link>
 			<name>config_files/FreeRTOSConfig.h</name>
@@ -92,9 +52,24 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_bufferpool_config.h</locationURI>
 		</link>
 		<link>
+			<name>config_files/aws_cellular_config.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_cellular_config.h</locationURI>
+		</link>
+		<link>
+			<name>config_files/aws_cellular_demo.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_cellular_demo.h</locationURI>
+		</link>
+		<link>
 			<name>config_files/aws_demo_config.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_demo_config.h</locationURI>
+		</link>
+		<link>
+			<name>config_files/aws_ggd_config.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_ggd_config.h</locationURI>
 		</link>
 		<link>
 			<name>config_files/aws_iot_network_config.h</name>
@@ -117,14 +92,19 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_shadow_config.h</locationURI>
 		</link>
 		<link>
+			<name>config_files/aws_test_cellular.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_test_cellular.h</locationURI>
+		</link>
+		<link>
 			<name>config_files/aws_wifi_config.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/aws_wifi_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/cmsis_os_misrac2012.h</name>
+			<name>config_files/core_mqtt_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/cmsis_os_misrac2012.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/core_mqtt_config.h</locationURI>
 		</link>
 		<link>
 			<name>config_files/core_pkcs11_config.h</name>
@@ -132,9 +112,9 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/core_pkcs11_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/demo_config.h</name>
+			<name>config_files/iot_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/demo_config.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/iot_config.h</locationURI>
 		</link>
 		<link>
 			<name>config_files/iot_mqtt_agent_config.h</name>
@@ -142,74 +122,39 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/iot_mqtt_agent_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/iot_pkcs11_config.h</name>
+			<name>config_files/mqtt_demo_connection_sharing_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/iot_pkcs11_config.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/mqtt_demo_connection_sharing_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/ipc_config.h</name>
+			<name>config_files/mqtt_demo_mutual_auth_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/ipc_config.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/mqtt_demo_mutual_auth_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/logging_levels.h</name>
+			<name>config_files/mqtt_demo_plaintext_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/logging_levels.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/mqtt_demo_plaintext_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/logging_stack.h</name>
+			<name>config_files/shadow_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/logging_stack.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/shadow_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/plf_config.h</name>
+			<name>config_files/shadow_demo_config.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_config.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/shadow_demo_config.h</locationURI>
 		</link>
 		<link>
-			<name>config_files/plf_features.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_features.h</locationURI>
+			<name>demos/cellular_manager</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>config_files/plf_hw_config.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_hw_config.h</locationURI>
-		</link>
-		<link>
-			<name>config_files/plf_modem_config.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_modem_config.h</locationURI>
-		</link>
-		<link>
-			<name>config_files/plf_power_config.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_power_config.h</locationURI>
-		</link>
-		<link>
-			<name>config_files/plf_stack_size.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_stack_size.h</locationURI>
-		</link>
-		<link>
-			<name>config_files/plf_sw_config.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/plf_sw_config.h</locationURI>
-		</link>
-		<link>
-			<name>config_files/prj_config.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/config_files/prj_config.h</locationURI>
-		</link>
-		<link>
-			<name>freertos_kernel/cmsis_os.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/cmsis_os.c</locationURI>
-		</link>
-		<link>
-			<name>freertos_kernel/croutine.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/croutine.c</locationURI>
+			<name>demos/udp</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/event_groups.c</name>
@@ -227,6 +172,11 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/queue.c</locationURI>
 		</link>
 		<link>
+			<name>freertos_kernel/stream_buffer.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/stream_buffer.c</locationURI>
+		</link>
+		<link>
 			<name>freertos_kernel/tasks.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/tasks.c</locationURI>
@@ -235,6 +185,31 @@
 			<name>freertos_kernel/timers.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/timers.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/core_mqtt_demo_dependencies.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/core_mqtt_demo_dependencies.cmake</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>application_code/st_code/cmsis_os.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/cmsis_os.c</locationURI>
+		</link>
+		<link>
+			<name>application_code/st_code/cmsis_os.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/cmsis_os.h</locationURI>
 		</link>
 		<link>
 			<name>application_code/st_code/entropy_hardware_poll.c</name>
@@ -255,11 +230,6 @@
 			<name>application_code/st_code/flash_l4.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/flash_l4.c</locationURI>
-		</link>
-		<link>
-			<name>application_code/st_code/mqttdemo.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/mqttdemo.h</locationURI>
 		</link>
 		<link>
 			<name>application_code/st_code/mxconstants.h</name>
@@ -302,11 +272,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/syscalls.c</locationURI>
 		</link>
 		<link>
-			<name>application_code/st_code/sysctrl_specific.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/sysctrl_specific.c</locationURI>
-		</link>
-		<link>
 			<name>application_code/st_code/vl53l0x_platform.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/vl53l0x_platform.c</locationURI>
@@ -325,6 +290,126 @@
 			<name>application_code/st_code/vl53l0x_proximity.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/vl53l0x_proximity.h</locationURI>
+		</link>
+		<link>
+			<name>demos/cellular_manager/cellular_manager.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/cellular_manager/cellular_manager.c</locationURI>
+		</link>
+		<link>
+			<name>demos/cellular_manager/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>demos/coreMQTT/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/coreMQTT/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>demos/coreMQTT/mqtt_demo_connection_sharing.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/coreMQTT/mqtt_demo_connection_sharing.c</locationURI>
+		</link>
+		<link>
+			<name>demos/coreMQTT/mqtt_demo_mutual_auth.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/coreMQTT/mqtt_demo_mutual_auth.c</locationURI>
+		</link>
+		<link>
+			<name>demos/demo_runner/aws_demo.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/demo_runner/aws_demo.c</locationURI>
+		</link>
+		<link>
+			<name>demos/demo_runner/aws_demo_version.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/demo_runner/aws_demo_version.c</locationURI>
+		</link>
+		<link>
+			<name>demos/demo_runner/iot_demo_freertos.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/demo_runner/iot_demo_freertos.c</locationURI>
+		</link>
+		<link>
+			<name>demos/demo_runner/iot_demo_runner.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/demo_runner/iot_demo_runner.c</locationURI>
+		</link>
+		<link>
+			<name>demos/include/aws_application_version.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_application_version.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/aws_clientcredential.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_clientcredential.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/aws_demo.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_demo.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/aws_iot_demo_network.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_iot_demo_network.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/aws_ota_codesigner_certificate.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_ota_codesigner_certificate.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/iot_config_common.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/iot_config_common.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/iot_demo_logging.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/iot_demo_logging.h</locationURI>
+		</link>
+		<link>
+			<name>demos/include/iot_demo_runner.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/include/iot_demo_runner.h</locationURI>
+		</link>
+		<link>
+			<name>demos/network_manager/aws_iot_demo_network.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/network_manager/aws_iot_demo_network.c</locationURI>
+		</link>
+		<link>
+			<name>demos/network_manager/aws_iot_network_manager.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/network_manager/aws_iot_network_manager.c</locationURI>
+		</link>
+		<link>
+			<name>demos/network_manager/iot_network_manager_private.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/network_manager/iot_network_manager_private.h</locationURI>
+		</link>
+		<link>
+			<name>demos/tcp/aws_tcp_echo_client_single_task.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/tcp/aws_tcp_echo_client_single_task.c</locationURI>
+		</link>
+		<link>
+			<name>demos/tcp/aws_tcp_echo_client_single_tasks.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/tcp/aws_tcp_echo_client_single_tasks.h</locationURI>
+		</link>
+		<link>
+			<name>demos/udp/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/udp/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>demos/udp/iot_demo_udp.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/udp/iot_demo_udp.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/FreeRTOS.h</name>
@@ -417,119 +502,109 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/include/timers.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp</name>
+			<name>libraries/3rdparty/mbedtls</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>freertos_kernel/portable/MemMang/heap_4.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/MemMang/heap_4.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_interaction.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_interaction.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_interaction.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_interaction.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_main.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_main.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_main.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_main.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_message.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_message.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_message.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_message.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_options.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_options.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_options.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_options.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_resource.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_resource.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_resource.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_resource.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_socket.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_socket.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/coap_socket.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/coap_socket.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/diagnostic.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/diagnostic.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/diagnostic.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/diagnostic.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface</name>
+			<name>libraries/abstractions/cellular</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/liblobaro_coap.c</name>
+			<name>libraries/coreMQTT/mqttFilePaths.cmake</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/liblobaro_coap.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/mqttFilePaths.cmake</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/liblobaro_coap.h</name>
+			<name>libraries/logging/iot_logging.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/liblobaro_coap.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/iot_logging.c</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/option-types</name>
+			<name>libraries/logging/iot_logging_task_dynamic_buffers.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/iot_logging_task_dynamic_buffers.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</name>
+			<name>vendors/quectel/.DS_Store</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/.DS_Store</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/NCE_SDK/nce_onboarding.c</name>
+			<name>vendors/quectel/modules</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>demos/cellular_manager/include/cellular_manager.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_onboarding.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/cellular_manager/include/cellular_manager.h</locationURI>
+		</link>
+		<link>
+			<name>demos/cellular_manager/include/cellular_manager_types.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/cellular_manager/include/cellular_manager_types.h</locationURI>
+		</link>
+		<link>
+			<name>demos/dev_mode_key_provisioning/include/aws_dev_mode_key_provisioning.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/dev_mode_key_provisioning/include/aws_dev_mode_key_provisioning.h</locationURI>
+		</link>
+		<link>
+			<name>demos/dev_mode_key_provisioning/src/aws_dev_mode_key_provisioning.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/dev_mode_key_provisioning/src/aws_dev_mode_key_provisioning.c</locationURI>
+		</link>
+		<link>
+			<name>freertos_kernel/portable/MemMang/heap_5.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/MemMang/heap_5.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/.github</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/.gitignore</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.gitignore</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/.globalrc</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.globalrc</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/.pylintrc</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.pylintrc</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/.travis.yml</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.travis.yml</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/library</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/mbedtls_utils/mbedtls_error.c</name>
@@ -547,7 +622,7 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls_utils/mbedtls_utils.c</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/pkcs11/pkcs11_cel.h</name>
+			<name>libraries/3rdparty/pkcs11/pkcs11.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/pkcs11/pkcs11.h</locationURI>
 		</link>
@@ -562,6 +637,81 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/pkcs11/pkcs11t.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/abstractions/cellular/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/cellular/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/retry_utils/retry_utils.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/retry_utils/retry_utils.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/transport/transport_interface.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/transport/transport_interface.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/transport/transport_interface_secure_sockets.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/transport/transport_interface_secure_sockets.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/core_mqtt.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/core_mqtt.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/core_mqtt_serializer.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/core_mqtt_serializer.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/core_mqtt_state.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/core_mqtt_state.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/logging/include/iot_logging_task.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/include/iot_logging_task.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/logging/include/logging_levels.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/include/logging_levels.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/logging/include/logging_stack.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/include/logging_stack.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/port.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/GCC/ARM_CM4F/port.c</locationURI>
@@ -572,69 +722,34 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/interface/coap_interface.h</name>
+			<name>libraries/3rdparty/mbedtls/.github/issue_template.md</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/coap_interface.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.github/issue_template.md</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/interface/mem</name>
+			<name>libraries/3rdparty/mbedtls/.github/pull_request_template.md</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/.github/pull_request_template.md</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/include/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/include/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/include/.gitignore</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/include/.gitignore</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/mbedtls/include/mbedtls</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp/interface/network</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_ETag.c</name>
+			<name>libraries/3rdparty/mbedtls/library/.gitignore</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_ETag.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_ETag.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_ETag.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_blockwise.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_blockwise.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_blockwise.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_blockwise.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_cf.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_cf.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_cf.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_cf.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_observe.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_observe.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_observe.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_observe.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_uri.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_uri.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/option-types/coap_option_uri.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/option-types/coap_option_uri.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/library/.gitignore</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/mbedtls/library/CMakeLists.txt</name>
@@ -1047,6 +1162,131 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/library/xtea.c</locationURI>
 		</link>
 		<link>
+			<name>libraries/abstractions/cellular/include/cellular_api.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/include/cellular_api.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/cellular/include/cellular_comm_interface.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/include/cellular_comm_interface.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/cellular/include/cellular_config_defaults.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/include/cellular_config_defaults.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/cellular/include/cellular_types.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/include/cellular_types.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_adc.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_adc.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_battery.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_battery.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_efuse.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_efuse.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_flash.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_flash.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_gpio.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_gpio.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_hw.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_hw.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_i2c.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_i2c.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_i2s.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_i2s.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_perfcounter.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_perfcounter.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_power.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_power.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_pwm.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_pwm.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_reset.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_reset.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_rtc.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_rtc.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_sdio.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_sdio.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_spi.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_spi.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_timer.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_timer.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_tsensor.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_tsensor.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_uart.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_uart.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_usb_device.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_usb_device.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_usb_host.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_usb_host.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/common_io/include/iot_watchdog.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/common_io/include/iot_watchdog.h</locationURI>
+		</link>
+		<link>
 			<name>libraries/abstractions/platform/freertos/iot_clock_freertos.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/platform/freertos/iot_clock_freertos.c</locationURI>
@@ -1067,6 +1307,11 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/platform/freertos/iot_threads_freertos.c</locationURI>
 		</link>
 		<link>
+			<name>libraries/abstractions/retry_utils/freertos/retry_utils_freertos.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/retry_utils/freertos/retry_utils_freertos.c</locationURI>
+		</link>
+		<link>
 			<name>libraries/abstractions/secure_sockets/include/iot_secure_sockets.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/secure_sockets/include/iot_secure_sockets.h</locationURI>
@@ -1082,7 +1327,77 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/secure_sockets/include/iot_secure_sockets_wrapper_metrics.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/freertos_plus/standard/crypto/src</name>
+			<name>libraries/abstractions/transport/secure_sockets/transport_secure_sockets.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/transport/secure_sockets/transport_secure_sockets.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/transport/secure_sockets/transport_secure_sockets.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/transport/secure_sockets/transport_secure_sockets.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/abstractions/wifi/include/iot_wifi.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/wifi/include/iot_wifi.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/iot_device_metrics.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_device_metrics.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/iot_init.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_init.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/iot_static_memory_common.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_static_memory_common.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/include/core_mqtt.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/include/core_mqtt_config_defaults.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_config_defaults.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/include/core_mqtt_serializer.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_serializer.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/include/core_mqtt_state.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_state.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/coreMQTT/source/interface/transport_interface.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/interface/transport_interface.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1105,11 +1420,6 @@
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_dma.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_dma.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_dma_ex.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_dma_ex.c</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_flash.c</name>
@@ -1192,11 +1502,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_spi_ex.c</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_sram.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_sram.c</locationURI>
-		</link>
-		<link>
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_tim.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_tim.c</locationURI>
@@ -1217,210 +1522,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_uart_ex.c</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_ll_fmc.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_ll_fmc.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/mem/coap_mem.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/mem/coap_mem.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/mem/coap_mem.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/mem/coap_mem.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Endpoint.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Endpoint.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Endpoint.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Endpoint.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Packet.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Packet.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Packet.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Packet.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Socket.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Socket.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/CoAp/interface/network/net_Socket.h</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/libraries/3rdparty/CoAp/interface/network/net_Socket.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/cellular_runtime_custom.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/Src/cellular_runtime_custom.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/cellular_runtime_standard.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Common/Cellular_Runtime/Src/cellular_runtime_standard.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Common/Error_Handler/error_handler.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Common/Error_Handler/Src/error_handler.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Common/Trace_Interface/trace_interface.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Common/Trace_Interface/Src/trace_interface.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_core.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_core.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_datapack.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_datapack.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_modem_api.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_modem_api.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_modem_common.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_modem_common.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_modem_signalling.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_modem_signalling.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_modem_socket.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_modem_socket.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_parser.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_parser.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/at_util.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/at_util.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/AT_Core/sysctrl.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/AT_Core/Src/sysctrl.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service_config.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service_config.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service_int.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service_int.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service_os.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service_os.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service_power.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service_power.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/cellular_service_task.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Cellular_Service/Src/cellular_service_task.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Ipc/ipc_common.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Ipc/Src/ipc_common.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Ipc/ipc_rxfifo.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Ipc/Src/ipc_rxfifo.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Ipc/ipc_uart.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Ipc/Src/ipc_uart.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Core/Nifman/nifman.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Core/Nifman/Src/nifman.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Cellular_Mngt/cellular_mngt.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Cellular_Mngt/Src/cellular_mngt.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Com/Src/com_sockets.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_err_compat.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Com/Src/com_sockets_err_compat.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_ip_modem.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Com/Src/com_sockets_ip_modem.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_lwip_mcu.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Com/Src/com_sockets_lwip_mcu.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Com/com_sockets_statistic.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Com/Src/com_sockets_statistic.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/dc_common.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/Src/dc_common.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/dc_control.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/Src/dc_control.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/dc_time.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/bg96/Cellular_Interface/Data_Cache/Src/dc_time.c</locationURI>
-		</link>
 		<link>
 			<name>libraries/3rdparty/mbedtls/include/mbedtls/aes.h</name>
 			<type>1</type>
@@ -1852,6 +1953,26 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/platform/include/types/iot_platform_types.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/c_sdk/standard/common/include/iot_appversion32.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_appversion32.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/iot_init.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_init.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/iot_linear_containers.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_linear_containers.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/iot_taskpool.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_taskpool.h</locationURI>
+		</link>
+		<link>
 			<name>libraries/c_sdk/standard/common/taskpool/iot_taskpool.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/taskpool/iot_taskpool.c</locationURI>
@@ -1860,51 +1981,6 @@
 			<name>libraries/c_sdk/standard/common/taskpool/iot_taskpool_static_memory.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/taskpool/iot_taskpool_static_memory.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_init.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_init.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_agent.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_agent.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_api.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_api.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_network.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_network.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_operation.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_operation.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_serialize.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_serialize.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_static_memory.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_static_memory.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_subscription.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_subscription.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/c_sdk/standard/mqtt/src/iot_mqtt_validate.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/mqtt/src/iot_mqtt_validate.c</locationURI>
 		</link>
 		<link>
 			<name>libraries/freertos_plus/standard/crypto/include/iot_crypto.h</name>
@@ -1927,24 +2003,39 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/freertos_plus/standard/tls/src/iot_tls.c</locationURI>
 		</link>
 		<link>
-			<name>libraries/freertos_plus/standard/utils/include/iot_pki_utils.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/freertos_plus/standard/utils/include/iot_pki_utils.h</locationURI>
-		</link>
-		<link>
 			<name>libraries/freertos_plus/standard/utils/include/iot_system_init.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/freertos_plus/standard/utils/include/iot_system_init.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/freertos_plus/standard/utils/src/iot_pki_utils.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/freertos_plus/standard/utils/src/iot_pki_utils.c</locationURI>
-		</link>
-		<link>
 			<name>libraries/freertos_plus/standard/utils/src/iot_system_init.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/freertos_plus/standard/utils/src/iot_system_init.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01.c</name>
@@ -1955,76 +2046,6 @@
 			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_accelero.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_gyro.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_hsensor.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_magneto.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_psensor.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_qspi.h</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.c</locationURI>
-		</link>
-		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/B-L475E-IOT01/stm32l475e_iot01_tsensor.h</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/CMSIS/Include/arm_common_tables.h</name>
@@ -2612,6 +2633,101 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/platform/freertos/include/platform/iot_platform_types_freertos.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/c_sdk/standard/common/include/private/iot_taskpool_internal.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/private/iot_taskpool_internal.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/types/iot_network_types.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/types/iot_network_types.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/types/iot_taskpool_types.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/types/iot_taskpool_types.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular/cellular_bg96.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/cellular/cellular_bg96.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular/cellular_bg96.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/cellular/cellular_bg96.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_api.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_api.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_urc_handler.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_urc_handler.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_wrapper.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/quectel/modules/bg96/ports/cellular/cellular_bg96_wrapper.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if/.DS_Store</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/comm_if/.DS_Store</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/comm_if/comm_if_st.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if/device_control.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/comm_if/device_control.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if/iot_fifo.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/comm_if/iot_fifo.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/comm_if/iot_fifo.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/comm_if/iot_fifo.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/common_io/iot_i2c.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/common_io/iot_i2c.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/common_io/iot_spi.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/common_io/iot_spi.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/st/boards/stm32l475_discovery/ports/common_io/iot_uart.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/common_io/iot_uart.c</locationURI>
+		</link>
+		<link>
 			<name>vendors/st/boards/stm32l475_discovery/ports/pkcs11/core_pkcs11_pal.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/ports/pkcs11/core_pkcs11_pal.c</locationURI>
@@ -2847,29 +2963,94 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls/core_pkcs11_mbedtls.c</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_api.c</name>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/.DS_Store</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/at_custom_modem_api.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/.DS_Store</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_signalling.c</name>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/cellular_at_core.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/boards/stm32l475_discovery/aws_demos/application_code/st_code/at_custom_modem_signalling.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/cellular_at_core.h</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_socket.c</name>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/cellular_common.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Src/at_custom_modem_socket.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/cellular_common.h</locationURI>
 		</link>
 		<link>
-			<name>vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/at_custom_modem_specific.c</name>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/cellular_common_api.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/BSP/X_STMOD_PLUS_MODEMS/BG96/AT_modem_bg96/Src/at_custom_modem_specific.c</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/cellular_common_api.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/cellular_common_portable.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/cellular_common_portable.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/private</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_3gpp_api.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_3gpp_api.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_3gpp_urc_handler.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_3gpp_urc_handler.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_at_core.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_at_core.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_common.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_common.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_common_api.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_common_api.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_pkthandler.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_pkthandler.c</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/src/cellular_pktio.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/src/cellular_pktio.c</locationURI>
 		</link>
 		<link>
 			<name>libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls/include/threading_alt.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/pkcs11/corePKCS11/source/portable/mbedtls/include/threading_alt.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_common_internal.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_common_internal.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_internal.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_internal.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_pkthandler_internal.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_pkthandler_internal.h</locationURI>
+		</link>
+		<link>
+			<name>vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_pktio_internal.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/3gpp/ports/cellular/include/private/cellular_pktio_internal.h</locationURI>
 		</link>
 		<link>
 			<name>vendors/st/stm32l475_discovery/CMSIS/Device/ST/STM32L4xx/Include/stm32l475xx.h</name>

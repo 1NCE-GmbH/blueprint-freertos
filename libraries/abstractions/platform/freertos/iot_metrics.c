@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Platform V1.1.1
+ * FreeRTOS Platform V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -137,7 +137,7 @@
                                           pSocketContext ) == NULL )
         {
             /* Allocate memory for a new metrics connection. */
-            pTcpConnection = pvPortMalloc( sizeof( IotMetricsTcpConnection_t ) );
+            pTcpConnection = IotMetrics_MallocTcpConnection( sizeof( IotMetricsTcpConnection_t ) );
 
             if( pTcpConnection != NULL )
             {

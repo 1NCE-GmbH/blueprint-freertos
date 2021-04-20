@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Platform V1.1.1
+ * FreeRTOS Platform V1.1.2
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -41,9 +41,7 @@
 /* FreeRTOS Secure Sockets include. */
 #include "iot_secure_sockets.h"
 
-/* Credentials include. */
-#include "aws_clientcredential.h"
-#include "aws_clientcredential_keys.h"
+
 
 /**
  * @brief Represents a network connection that uses FreeRTOS Secure Sockets.
@@ -80,7 +78,11 @@ typedef struct _networkConnection IotNetworkConnectionAfr_t;
  * @note This initializer may change at any time in future versions, but its
  * name will remain the same.
  */
-
+#define AWS_IOT_NETWORK_SERVER_INFO_AFR_INITIALIZER        \
+    {                                                      \
+        .pHostName = clientcredentialMQTT_BROKER_ENDPOINT, \
+        .port = clientcredentialMQTT_BROKER_PORT           \
+    }
 
 /**
  * @brief Generic initializer for an #IotNetworkCredentials_t.
@@ -100,10 +102,14 @@ typedef struct _networkConnection IotNetworkConnectionAfr_t;
     {                                                          \
         .pAlpnProtos = socketsAWS_IOT_ALPN_MQTT,               \
         .maxFragmentLength = 0,                                \
-        .disableSni = false                                   \
+        .disableSni = false,                                   \
+        .pRootCa = NULL,                                       \
+        .rootCaSize = 0,                                       \
+        .pClientCert = keyCLIENT_CERTIFICATE_PEM,              \
+        .clientCertSize = sizeof( keyCLIENT_CERTIFICATE_PEM ), \
+        .pPrivateKey = keyCLIENT_PRIVATE_KEY_PEM,              \
+        .privateKeySize = sizeof( keyCLIENT_PRIVATE_KEY_PEM )  \
     }
-
-
 
 /**
  * @brief Provides a pointer to an #IotNetworkInterface_t that uses the functions
@@ -158,7 +164,7 @@ size_t IotNetworkAfr_ReceiveUpto( void * pConnection,
 IotNetworkError_t IotNetworkAfr_Close( void * pConnection );
 
 /**
- * @brief An implementation of #IotNetworkInterface_t::destroy for FreeRTOS,
+ * @brief An implementation of #IotNetworkInterface_t::destroy for FreeRTOS
  * Secure Sockets.
  */
 IotNetworkError_t IotNetworkAfr_Destroy( void * pConnection );
@@ -170,8 +176,6 @@ IotNetworkError_t IotNetworkAfr_Destroy( void * pConnection );
  * Declaration of a network interface struct using the functions in this file.
  */
 extern const IotNetworkInterface_t IotNetworkAfr;
-
-extern uint8_t expected_bytes ;
 /** @endcond */
 
 #endif /* ifndef _IOT_NETWORK_AFR_H_ */

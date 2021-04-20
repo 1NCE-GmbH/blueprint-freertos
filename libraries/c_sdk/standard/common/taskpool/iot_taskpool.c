@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Common V1.1.1
+ * FreeRTOS Common V1.2.0
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -397,7 +397,7 @@ IotTaskPoolError_t IotTaskPool_Destroy( IotTaskPool_t taskPoolHandle )
 
                 if( pTimerEvent->expirationTime <= now )
                 {
-                    PRINT_DBG( "Shutdown will be deferred to the timer thread" );
+                    IotLogDebug( "Shutdown will be deferred to the timer thread" );
 
                     /* Timer may have fired already! Let the timer thread destroy
                      * complete the taskpool destruction sequence. */
@@ -505,7 +505,7 @@ IotTaskPoolError_t IotTaskPool_SetMaxThreads( IotTaskPool_t taskPoolHandle,
          */
         if( maxThreads < previousMaxThreads )
         {
-            PRINT_DBG( "Setting max threads caused %d thread to exit.", count );
+            IotLogDebug( "Setting max threads caused %d thread to exit.", count );
 
             i = count;
 
@@ -581,7 +581,7 @@ IotTaskPoolError_t IotTaskPool_CreateRecyclableJob( IotTaskPool_t taskPoolHandle
 
         if( pTempJob == NULL )
         {
-            PRINT_INFO( "Failed to allocate a job." );
+            IotLogInfo( "Failed to allocate a job." );
 
             TASKPOOL_SET_AND_GOTO_CLEANUP( IOT_TASKPOOL_NO_MEMORY );
         }
@@ -620,7 +620,7 @@ IotTaskPoolError_t IotTaskPool_DestroyRecyclableJob( IotTaskPool_t taskPoolHandl
         /* Do not destroy statically allocated jobs. */
         else if( ( pJob1->flags & IOT_TASK_POOL_INTERNAL_STATIC ) == IOT_TASK_POOL_INTERNAL_STATIC )
         {
-            PRINT_FORCE( "Attempt to destroy a statically allocated job." );
+            IotLogWarn( "Attempt to destroy a statically allocated job." );
 
             status = IOT_TASKPOOL_ILLEGAL_OPERATION;
         }
@@ -670,7 +670,7 @@ IotTaskPoolError_t IotTaskPool_RecycleJob( IotTaskPool_t taskPoolHandle,
         }
         else
         {
-            PRINT_FORCE( "Attempt to recycle a statically allocated job." );
+            IotLogWarn( "Attempt to recycle a statically allocated job." );
 
             status = IOT_TASKPOOL_ILLEGAL_OPERATION;
         }
@@ -1070,7 +1070,7 @@ static IotTaskPoolError_t _createTaskPool( const IotTaskPoolInfo_t * const pInfo
                                       pTaskPool->priority,
                                       pTaskPool->stackSize ) == false )
         {
-            PRINT_ERR( "Could not create worker thread! Exiting..." );
+            IotLogError( "Could not create worker thread! Exiting..." );
 
             /* If creating one thread fails, set error condition and exit the loop. */
             TASKPOOL_SET_AND_GOTO_CLEANUP( IOT_TASKPOOL_NO_MEMORY );
@@ -1159,7 +1159,7 @@ static void _taskPoolWorker( void * pUserContext )
             /* If the exit condition is verified, update the number of active threads and exit the loop. */
             if( _IsShutdownStarted( pTaskPool ) )
             {
-                PRINT_DBG( "Worker thread exiting because shutdown condition was set." );
+                IotLogDebug( "Worker thread exiting because shutdown condition was set." );
 
                 /* Decrease the number of active threads. */
                 pTaskPool->activeThreads--;
@@ -1179,7 +1179,7 @@ static void _taskPoolWorker( void * pUserContext )
              * the high-priority task. */
             if( pTaskPool->activeThreads > pTaskPool->maxThreads )
             {
-                PRINT_DBG( "Worker thread will exit because maximum quota was exceeded." );
+                IotLogDebug( "Worker thread will exit because maximum quota was exceeded." );
 
                 /* Decrease the number of active threads pro-actively. */
                 pTaskPool->activeThreads--;
@@ -1196,7 +1196,7 @@ static void _taskPoolWorker( void * pUserContext )
                     /* After waking up from a timeout, the thread will try and pick up a new job.
                      * But if there is no job available, the thread will exit to ensure that
                      * the taskpool does not have more than minimum number of active threads. */
-                    PRINT_DBG( "Worker will exit because task pool is shrinking." );
+                    IotLogDebug( "Worker will exit because task pool is shrinking." );
 
                     /* Decrease the number of active threads pro-actively. */
                     pTaskPool->activeThreads--;
@@ -1338,7 +1338,7 @@ static _taskPoolJob_t * _fetchOrAllocateJob( _taskPoolCache_t * const pCache )
         else
         {
             /* Log allocation failure for troubleshooting purposes. */
-            PRINT_INFO( "Failed to allocate job." );
+            IotLogInfo( "Failed to allocate job." );
         }
     }
     /* If there was a job in the cache, then make sure we keep the counters up-to-date. */
@@ -1469,7 +1469,7 @@ static IotTaskPoolError_t _scheduleInternal( _taskPool_t * const pTaskPool,
 
         if( ( mustGrow == true ) || ( shouldGrow == true ) )
         {
-            PRINT_INFO( "Growing a Task pool with a new worker thread..." );
+            IotLogInfo( "Growing a Task pool with a new worker thread..." );
 
             if( Iot_CreateDetachedThread( _taskPoolWorker,
                                           pTaskPool,
@@ -1483,7 +1483,7 @@ static IotTaskPoolError_t _scheduleInternal( _taskPool_t * const pTaskPool,
             else
             {
                 /* Failure to create a worker thread may not hinder functional correctness, but rather just responsiveness. */
-                PRINT_FORCE( "Task pool failed to create a worker thread." );
+                IotLogWarn( "Task pool failed to create a worker thread." );
 
                 /* Failure to create a worker thread for a high priority job is considered a failure. */
                 if( mustGrow )
@@ -1502,7 +1502,7 @@ static IotTaskPoolError_t _scheduleInternal( _taskPool_t * const pTaskPool,
          * Put the job at the front, if it is a high priority job. */
         if( mustGrow == true )
         {
-            PRINT_DBG( "High priority job: placing job at the head of the queue." );
+            IotLogDebug( "High priority job: placing job at the head of the queue." );
 
             IotDeQueue_EnqueueHead( &pTaskPool->dispatchQueue, &pJob->link );
         }
@@ -1569,12 +1569,12 @@ static IotTaskPoolError_t _tryCancelInternal( _taskPool_t * const pTaskPool,
 
         case IOT_TASKPOOL_STATUS_COMPLETED:
             /* Log message for debugging purposes. */
-            PRINT_FORCE( "Attempt to cancel a job that is already executing, or canceled." );
+            IotLogWarn( "Attempt to cancel a job that is already executing, or canceled." );
             break;
 
         default:
             /* Log message for debugging purposes. */
-            PRINT_ERR( "Attempt to cancel a job with an undefined state." );
+            IotLogError( "Attempt to cancel a job with an undefined state." );
             break;
     }
 
@@ -1679,7 +1679,7 @@ static IotTaskPoolError_t _trySafeExtraction( _taskPool_t * const pTaskPool,
                 break;
 
             case IOT_TASKPOOL_CANCEL_FAILED:
-                PRINT_FORCE( "Removing a scheduled job failed because the job could not be canceled, error %s.",
+                IotLogWarn( "Removing a scheduled job failed because the job could not be canceled, error %s.",
                             IotTaskPool_strerror( status ) );
                 status = IOT_TASKPOOL_ILLEGAL_OPERATION;
                 break;
@@ -1751,7 +1751,7 @@ static void _rescheduleDeferredJobsTimer( IotTimer_t * const pTimer,
 
     if( IotClock_TimerArm( pTimer, ( uint32_t ) delta, 0 ) == false )
     {
-        PRINT_FORCE( "Failed to re-arm timer for task pool" );
+        IotLogWarn( "Failed to re-arm timer for task pool" );
     }
 }
 
@@ -1762,7 +1762,7 @@ static void _timerThread( void * pArgument )
     _taskPool_t * pTaskPool = ( _taskPool_t * ) pArgument;
     _taskPoolTimerEvent_t * pTimerEvent = NULL;
 
-    PRINT_DBG( "Timer thread started for task pool %p.", pTaskPool );
+    IotLogDebug( "Timer thread started for task pool %p.", pTaskPool );
 
     /* Attempt to lock the timer mutex. Return immediately if the mutex cannot be locked.
      * If this mutex cannot be locked it means that another thread is manipulating the
@@ -1817,12 +1817,12 @@ static void _timerThread( void * pArgument )
             /* If there are no timer events to process, terminate this thread. */
             else
             {
-                PRINT_DBG( "No further timer events to process. Exiting timer thread." );
+                IotLogDebug( "No further timer events to process. Exiting timer thread." );
 
                 break;
             }
 
-            PRINT_DBG( "Scheduling job from timer event." );
+            IotLogDebug( "Scheduling job from timer event." );
 
             /* Queue the job associated with the received timer event. */
             ( void ) _scheduleInternal( pTaskPool, pTimerEvent->pJob, 0 );
