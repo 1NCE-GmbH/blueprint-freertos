@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -23,19 +23,19 @@
  * http://www.FreeRTOS.org
  */
 
-#include "cellular_config.h"
+#include "iot_config.h"
+#include "aws_cellular_config.h"
 #include "cellular_config_defaults.h"
 
 /* Standard includes. */
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
-#include "cellular_platform.h"
 #include "cellular_types.h"
 #include "cellular_common.h"
 #include "cellular_common_api.h"
 #include "cellular_common_portable.h"
+#include "limits.h"
 #include "cellular_bg96.h"
 
 /*-----------------------------------------------------------*/
@@ -58,7 +58,7 @@ static void _Cellular_ProcessIndication( CellularContext_t * pContext,
 /*-----------------------------------------------------------*/
 
 /* Try to Keep this map in Alphabetical order. */
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
 {
@@ -71,10 +71,13 @@ CellularAtParseTokenMap_t CellularUrcHandlerTable[] =
     { "QIOPEN",            _Cellular_ProcessSocketOpen    },
     { "QIURC",             _Cellular_ProcessSocketurc     },
     { "QSIMSTAT",          _Cellular_ProcessSimstat       },
+    { "QSSLOPEN",            _Cellular_ProcessSocketOpen    },
+//    { "QSSLRECV",             _Cellular_ProcessSocketurc     },
+    { "QSSLURC",             _Cellular_ProcessSocketurc     },
     { "RDY",               _Cellular_ProcessModemRdy      }
 };
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcHandlerTableSize = sizeof( CellularUrcHandlerTable ) / sizeof( CellularAtParseTokenMap_t );
 
@@ -96,12 +99,12 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
         if( sockStatus != 0 )
         {
             pSocketData->socketState = SOCKETSTATE_DISCONNECTED;
-            CellularLogError( "_parseSocketOpen: Socket open failed, conn %d, status %d", sockIndex, sockStatus );
+            IotLogError( "_parseSocketOpen: Socket open failed, conn %d, status %d", sockIndex, sockStatus );
         }
         else
         {
             pSocketData->socketState = SOCKETSTATE_CONNECTED;
-            CellularLogDebug( "_parseSocketOpen: Socket open success, conn %d", sockIndex );
+            IotLogDebug( "_parseSocketOpen: Socket open success, conn %d", sockIndex );
         }
 
         /* Indicate the upper layer about the socket open status. */
@@ -120,7 +123,7 @@ static CellularPktStatus_t _parseSocketOpenNextTok( const char * pToken,
         }
         else
         {
-            CellularLogError( "_parseSocketOpen: Socket open callback for conn %d is not set!!", sockIndex );
+            IotLogError( "_parseSocketOpen: Socket open callback for conn %d is not set!!", sockIndex );
         }
     }
 
@@ -174,7 +177,7 @@ static void _Cellular_ProcessSocketOpen( CellularContext_t * pContext,
             }
             else
             {
-                CellularLogError( "Error processing in Socket index. token %s", pToken );
+                IotLogError( "Error processing in Socket index. token %s", pToken );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -206,7 +209,7 @@ static void _Cellular_ProcessSocketOpen( CellularContext_t * pContext,
 
     if( pktStatus != CELLULAR_PKT_STATUS_OK )
     {
-        CellularLogDebug( "Socket Open URC Parse failure" );
+        IotLogDebug( "Socket Open URC Parse failure" );
     }
 }
 
@@ -355,7 +358,7 @@ static void _Cellular_ProcessIndication( CellularContext_t * pContext,
 
     if( pktStatus != CELLULAR_PKT_STATUS_OK )
     {
-        CellularLogDebug( "UrcIndication Parse failure" );
+        IotLogDebug( "UrcIndication Parse failure" );
     }
 }
 
@@ -370,7 +373,7 @@ static void _informDataReadyToUpperLayer( CellularSocketContext_t * pSocketData 
     }
     else
     {
-        CellularLogError( "_parseSocketUrc: Data ready callback not set!!" );
+        IotLogError( "_parseSocketUrc: Data ready callback not set!!" );
     }
 }
 
@@ -401,7 +404,7 @@ static CellularPktStatus_t _parseSocketUrcRecv( const CellularContext_t * pConte
             }
             else
             {
-                CellularLogError( "Error in processing SockIndex. Token %s", pToken );
+                IotLogError( "Error in processing SockIndex. Token %s", pToken );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
@@ -416,7 +419,7 @@ static CellularPktStatus_t _parseSocketUrcRecv( const CellularContext_t * pConte
             if( pSocketData->dataMode == CELLULAR_ACCESSMODE_BUFFER )
             {
                 /* Data received indication in buffer mode, need to fetch the data. */
-                CellularLogDebug( "Data Received on socket Conn Id %d", sockIndex );
+                IotLogDebug( "Data Received on socket Conn Id %d", sockIndex );
                 _informDataReadyToUpperLayer( pSocketData );
             }
         }
@@ -462,7 +465,7 @@ static CellularPktStatus_t _parseSocketUrcClosed( const CellularContext_t * pCon
         }
         else
         {
-            CellularLogError( "Error in processing Socket Index. Token %s", pToken );
+            IotLogError( "Error in processing Socket Index. Token %s", pToken );
             atCoreStatus = CELLULAR_AT_ERROR;
         }
     }
@@ -474,7 +477,7 @@ static CellularPktStatus_t _parseSocketUrcClosed( const CellularContext_t * pCon
         if( pSocketData != NULL )
         {
             pSocketData->socketState = SOCKETSTATE_DISCONNECTED;
-            CellularLogDebug( "Socket closed. Conn Id %d", sockIndex );
+            IotLogDebug( "Socket closed. Conn Id %d", sockIndex );
 
             /* Indicate the upper layer about the socket close. */
             if( pSocketData->closedCallback != NULL )
@@ -483,7 +486,7 @@ static CellularPktStatus_t _parseSocketUrcClosed( const CellularContext_t * pCon
             }
             else
             {
-                CellularLogInfo( "_parseSocketUrc: Socket close callback not set!!" );
+                IotLogInfo( "_parseSocketUrc: Socket close callback not set!!" );
             }
         }
         else
@@ -528,7 +531,7 @@ static CellularPktStatus_t _parseSocketUrcAct( const CellularContext_t * pContex
 
             if( _Cellular_IsValidPdn( contextId ) == CELLULAR_SUCCESS )
             {
-                CellularLogDebug( "PDN deactivated. Context Id %d", contextId );
+                IotLogDebug( "PDN deactivated. Context Id %d", contextId );
                 /* Indicate the upper layer about the PDN deactivate. */
                 _Cellular_PdnEventCallback( pContext, CELLULAR_URC_EVENT_PDN_DEACTIVATED, contextId );
             }
@@ -540,7 +543,7 @@ static CellularPktStatus_t _parseSocketUrcAct( const CellularContext_t * pContex
         else
         {
             atCoreStatus = CELLULAR_AT_ERROR;
-            CellularLogError( "Error in processing Context Id. Token %s", pToken );
+            IotLogError( "Error in processing Context Id. Token %s", pToken );
         }
     }
 
@@ -584,7 +587,7 @@ static CellularPktStatus_t _parseSocketUrcDns( const CellularContext_t * pContex
         }
         else
         {
-            CellularLogDebug( "_parseSocketUrcDns: spurious DNS response!!" );
+            IotLogDebug( "_parseSocketUrcDns: spurious DNS response!!" );
             pktStatus = CELLULAR_PKT_STATUS_INVALID_DATA;
         }
     }
@@ -663,7 +666,7 @@ static void _Cellular_ProcessSocketurc( CellularContext_t * pContext,
 
     if( pktStatus != CELLULAR_PKT_STATUS_OK )
     {
-        CellularLogDebug( "Socketurc Parse failure" );
+        IotLogDebug( "Socketurc Parse failure" );
     }
 }
 
@@ -694,11 +697,11 @@ static void _Cellular_ProcessPowerDown( CellularContext_t * pContext,
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_ProcessPowerDown: Context not set" );
+        IotLogError( "_Cellular_ProcessPowerDown: Context not set" );
     }
     else
     {
-        CellularLogDebug( "_Cellular_ProcessPowerDown: Modem Power down event received" );
+        IotLogDebug( "_Cellular_ProcessPowerDown: Modem Power down event received" );
         _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_POWERED_DOWN );
     }
 }
@@ -715,11 +718,11 @@ static void _Cellular_ProcessPsmPowerDown( CellularContext_t * pContext,
 
     if( pContext == NULL )
     {
-        CellularLogError( "_Cellular_ProcessPowerDown: Context not set" );
+        IotLogError( "_Cellular_ProcessPowerDown: Context not set" );
     }
     else
     {
-        CellularLogDebug( "_Cellular_ProcessPsmPowerDown: Modem PSM power down event received" );
+        IotLogDebug( "_Cellular_ProcessPsmPowerDown: Modem PSM power down event received" );
         _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_PSM_ENTER );
     }
 }
@@ -736,11 +739,11 @@ static void _Cellular_ProcessModemRdy( CellularContext_t * pContext,
 
     if( pContext == NULL )
     {
-        CellularLogWarn( "_Cellular_ProcessModemRdy: Context not set" );
+        IotLogWarn( "_Cellular_ProcessModemRdy: Context not set" );
     }
     else
     {
-        CellularLogDebug( "_Cellular_ProcessModemRdy: Modem Ready event received" );
+        IotLogDebug( "_Cellular_ProcessModemRdy: Modem Ready event received" );
         _Cellular_ModemEventCallback( pContext, CELLULAR_MODEM_EVENT_BOOTUP_OR_REBOOT );
     }
 }
@@ -761,7 +764,7 @@ CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
     if( ( pInputStr == NULL ) || ( strlen( pInputStr ) == 0U ) ||
         ( strlen( pInputStr ) < 2U ) || ( pSimState == NULL ) )
     {
-        CellularLogError( "_Cellular_ProcessQsimstat Input data is invalid %s", pInputStr );
+        IotLogError( "_Cellular_ProcessQsimstat Input data is invalid %s", pInputStr );
         pktStatus = CELLULAR_PKT_STATUS_BAD_PARAM;
     }
     else
@@ -770,13 +773,13 @@ CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            CellularLogDebug( "QSIMSTAT URC Enable: %s", pToken );
+            IotLogDebug( "QSIMSTAT URC Enable: %s", pToken );
             atCoreStatus = Cellular_ATGetNextTok( &pLocalInputStr, &pToken );
         }
 
         if( atCoreStatus == CELLULAR_AT_SUCCESS )
         {
-            CellularLogDebug( " Sim insert status: %s", pToken );
+            IotLogDebug( " Sim insert status: %s", pToken );
             atCoreStatus = Cellular_ATStrtoi( pToken, 10, &tempValue );
         }
 
@@ -793,7 +796,7 @@ CellularPktStatus_t _Cellular_ParseSimstat( char * pInputStr,
             }
             else
             {
-                CellularLogError( "Error in processing SIM state. token %s", pToken );
+                IotLogError( "Error in processing SIM state. token %s", pToken );
                 atCoreStatus = CELLULAR_AT_ERROR;
             }
         }
