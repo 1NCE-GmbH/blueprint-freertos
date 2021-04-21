@@ -6,7 +6,8 @@ FreeRTOS is known as one of the most utilized RTOS in practice. This is becausei
 #### Required Hardware: 
 To install our project you will need:
   - B-L475E-IOT01A2 STM32 Discovery kit IoT node connected to BG96 (LTE Cat M1/Cat NB1/EGPRS modem) through X-NUCLEO-STMODA1 expansion board.
- ![Required Hardware](/images/material.png) 
+<p align="center"><img src="/images/material.png" width="70%"><br>
+Figure 1. Material Used</p>
 #### Required Software:
    - STM32CubeIDE from https://www.st.com/content/st_com/en/products/development-tools/software-development-tools/stm32-software-development-tools/stm32-ides/stm32cubeide.html
   - You will need to register/ login to access downloads.
@@ -22,46 +23,40 @@ To install our project you will need:
 #### STM32 Setup
 
   - Import the project.
-   ![imoport project](/images/import1.png) 
+<p align="center"><img src="/images/import1.png" width="70%"><br>
+Screenshot 1. Import project</p> 
   - Choose the Existing project into Workspace and click Next.
-  ![imoport project](/images/import2.png)
+ <p align="center"><img src="/images/impot2.png" width="70%"><br>
+Screenshot 2. Help</p>
   - Click browse and select the folder FreeRTOS cellular, a project with the title “aws_demos“ should be listed, then click Finish.
-    ![imoport project](/images/import3.png)
-  -  Edit the following parameter in config_files/demo_config.h : 
+<p align="center"><img src="/images/import3.png" width="70%"><br>
+Screenshot 3. Help2</p>
+  - Go to config_files/aws_demo_config.h --> choose the Demo you want to unable (MQTT Example)
+  
+  ```
+//  #define CONFIG_TROUBLESHOOTING_DEMO_ENABLED
+//#define CONFIG_UDP_DEMO_ENABLED
+//#define CONFIG_COAP_DEMO_ENABLED
+#define CONFIG_CORE_MQTT_MUTUAL_AUTH_DEMO_ENABLED
+  ```
 
-     -  clientcredentialMQTT_BROKER_ENDPOINT[] = "url of end point";
+  -  Edit the following parameter in config_files/nce_demo_config.h : 
 
-     -  PUBLISH_PAYLOAD_FORMAT "your message"
+```c
+/* MQTT Configuration */ 
+#define ONBOARDING_ENDPOINT  "device.connectivity-suite.cloud"
+#define PUBLISH_PAYLOAD_FORMAT                   "Welcome to 1NCE's Solution"
+#define SUB_TOPIC "/1nce_test"
+#define clientcredentialMQTT_BROKER_PORT 8883
+#define democonfigRANGE_SIZE 500 //(you can add the range request or comment this line )
+```
 
-     -  clientcredentialMQTT_BROKER_PORT “MQTT Port”
-     -  SUB_TOPIC "name of your topic iccid/sub_topic"
-  -  debug the code. 
-  ![debug project](/images/debug1.png)
+  -  debug the code.
+
+  <p align="center"><img src="/images/debug1.png" width="70%"><br>
+Screenshot 4. Debug</p>
+
   - Open a console on MPU Serial Device.
-# Thecnical Guide :
-#### System overview:
- ![Architecture](/images/architecture.png)
-  -  **Cellular library** with SSL offload uses the certificates stored in the modem file system to establish a secure connection between the board and AWS Cloud.
-
-  - **Secure socket** library is a standard from Amazon FreeRTOS and only supports TCP.
-
-  -  **COM_Socket Library** provides a collection of socket functions to open, configure, and send or receive the application to remote TCP or UDP applications.
-#### Secure Socket:
-  -  SOCKETS_Close: Closes the socket and frees the related resources. A socket cannot be used after it has been closed.
-
-  -  SOCKETS_Shutdown: Closes all or part of a full-duplex connection on the socket. Disable reads and writes on a connected TCP socket.
-
-  -  SOCKETS_Send: Transmit data to the remote socket.
-
-  -  SOCKETS_Recv: Receive data from a TCP socket.
-
-  -  SOCKETS_Connect: Connects the socket to the specified IP address and port.
-
-  -  SOCKETS_Socket: Creates a TCP socket.
-
-  -  SOCKETS_Init: To initialize the Secure Sockets library.
-
-  -  SOCKETS_SetSockOpt: Manipulates the options for the socket.
 
 #### Onboarding Service : 
 Our goal is to automate device onboarding and make the connection more simple, easy and fast to establish within Amazon FreeRTOS.
@@ -84,15 +79,15 @@ char send_packet[] = "GET /device-api/onboarding HTTP/1.1\r\n"
           "Accept: text/csv\r\n\r\n";
 int32_t SendVal = SOCKETS_Send(cert_socket, &send_packet,strlen(send_packet), NULL);
 ```
-In the BG96 we receive the response splitted in partitions with size of 1500 bytes  :
+In the BG96 we receive the response splitted in partitions with size of 1500 bytes (in case you did not precise the Range in nce_demo_config)  :
 ```c
 rec = SOCKETS_Recv(cert_socket, (com_char_t*) &PART[0],
     (int32_t) sizeof(PART),
-    COM_MSG_WAIT);
+    NULL);
 ```
 ##### Prepare the certificate: 
 
-for the preparation the certificate, we need to merge all the response in one variable because the response comes in multiple partitions. 
+For the preparation of the certificate, we need to merge all the response in one variable because the response comes in multiple partitions. 
 
 for the memory optimisation, we use just one variable when we receive the response we add to the variable.
 
@@ -138,53 +133,43 @@ In order to set up the MQTT client to use a secure connection.
 
 #### MQTT configuration: 
 To facilitate the understanding of our solution we try to give you some scenario.
- ![mqtt scenario](/images/mqtt.png)
 
-#### Resources needed :
-| RAM           | Flash Memory  | 
-| ------------- |:-------------:|
-| 7.1 KB  ( 2.1 KB Static + 5 KB Dynamic)      | 44.7 KB (14.5 KB SDK + 30.2 KB  Secure Socket) |
-
-**Note:** The code is based on SSL offloading so the SSL related functionality is done on the BG96 modem,  without this option the RAM requirements will increase by around 32 KB. 
-
-
-#### Dependencies :
-The blueprint uses the following : 
-
-* Amazon FreeRTOS MQTT Library : integrated using the Secure socket layer
-
-* STMicroelectronics BG96 Cellular Driver: customized to support modem file transfer functionality and SSL offloading. 
+<p align="center"><img src="/images/mqtt.png" width="70%"><br>
+Figure 2. Mqtt Scenario</p>
 
 ## UDP connection with our SDK:
 
 1NCE’s AWS FreeRTOS Version allows customers to communicate with the IoT core with MQTT (by default ) or UDP and use of all features as part of the 1NCE IoT Connectivity Suite.
 
 #### Configuration:
-The onboarding script configuration can be found in blueprint-freertos\vendors\st\boards\stm32l475_discovery\aws_demos\config_files\demo_config.h in the root folder of the blueprint or /aws_demos/config_files/demo_config.h in IDE.
+1.   - Go to config_files/aws_demo_config.h --> choose the Demo you want to unable (UDP Example)
+  ```
+//  #define CONFIG_TROUBLESHOOTING_DEMO_ENABLED
+#define CONFIG_UDP_DEMO_ENABLED
+//#define CONFIG_COAP_DEMO_ENABLED
+//#define CONFIG_CORE_MQTT_MUTUAL_AUTH_DEMO_ENABLED
+  ```
+2. The onboarding script configuration can be found in blueprint-freertos\vendors\st\boards\stm32l475_discovery\aws_demos\config_files\nce_demo_config.h in the root folder of the blueprint or /aws_demos/config_files/nce_demo_config.h in IDE.
 
 #### UDP Configuration:
-
-UDP_ENDPOINT: URL used to perform the onboarding call
-
-UDP_PORT: port to connect to the UDP endpoint. 
-
-IoT Core Configuration: 
-
-PUBLISH_PAYLOAD_FORMAT: the message you want to publish I'm IoT Core
-
-Active/Deactivate UDP:
-
- #define USE_UDP our SDK work by Default with MQTT if you want to use it with UDP communication you need to define USE_UDP.
+```
+/* UDP Configuration */ 
+//URL used to perform the onboarding call
+#define UDP_ENDPOINT "udp.connectivity-suite.cloud"
+//port to connect to the UDP endpoint.
+#define UDP_PORT 4445
+//the message you want to publish in IoT Core
+#define PUBLISH_PAYLOAD_FORMAT                   "Welcome to 1NCE's Solution"
+```
 
 
 #### Example:
 The bluePrint consists of an example to publish a message in IoT Core with UDP.
-
-
-
-#### Demo: 
 In IoT Core we subscribe in <ICCID>/messages and we run our solution : 
-![UDP Demo](/images/udp.png)
+
+<p align="center"><img src="/images/udp.png" width="70%"><br>
+Figure 3. UDP Demo</p>
+
 ### CoAP connection with our SDK: 
 #### COAP POST request sending over UDP:
 In this Section our SDK following steps are executed:
@@ -194,31 +179,28 @@ In this Section our SDK following steps are executed:
 * Create Confirmable CoAP POST with Quiry option
 * Create Client Interaction and analyse the response (ACK)
 * Valid the response.
+
 ##### User Guide:
+
 The code by default work with MQTT if you want to use our CoAP Solution you need to add : 
 /aws_demos/config_files/demo_config.h
 ```c
-#define USE_UDP
-#define COAP
 #define COAP_ENDPOINT "coap.connectivity-suite.cloud"
 #define configCOAP_PORT    5683
 #define configCOAP_URI_PATH    "t=<quiry_path>"
 #define PUBLISH_PAYLOAD_FORMAT                   "your text"
 ```
-Example: 
-![demo_config.h](/images/CoAP1.PNG)
 
+#### Example:
 
-The Message show in AWS :
- 
-![aws after Sending a message](/images/CoAP2.PNG)
+<p align="center"><img src="/images/coap.png" width="70%"><br>
+Figure 4. COAP Demo</p>
+
 ### COAP with DTLS Support: 
 
 For the DTLS Support the default Port is 5684 and define the DTLS_Demo as aditional define 
 ```c
-#define USE_UDP
-#define COAP
-#define DTLS_Demo
+#define ENABLE_DTLS
 #define COAP_ENDPOINT "coap.connectivity-suite.cloud"
 #define configCOAP_PORT    5684
 #define configCOAP_URI_PATH    "t=<quiry_path>"
@@ -228,6 +210,67 @@ The CoAP DTLS performs 3 main tasks :
 * Send the Onboarding Request
 * Get the Response
 * Process the Response and give the DTLS identity and PSK to the application code.
-![DTLS Flow](/images/DTLS.png)
+
+<p align="center"><img src="/images/DTLS.png" width="70%"><br>
+Figure 5. DTLS Flow</p>
+
+#### Example:
+
+<p align="center"><img src="/images/DTLSdemo.png" width="70%"><br>
+Figure 5. DTLS Demo</p>
+
+### Troubleshoting Demo :
+> This feature is limited to Users and Accounts who have already accepted our Connectivity Suite Addendum to the 1NCE T&Cs. It is a one-time action per 1NCE Customer Account. Please log into the 1NCE Customer Portal as Owner or Admin, navigate to the Connectivity Suite, and accept the Terms. If you don't see anything to accept and get directly to the Dashboard of the Connectivity Suite, you are ready to go!
+
+> N.B: The SMS and Data Consumed for the Troubleshooting is counted against the Customers own Volume of the SIM Card.
+
+This initial version's main target is to allow customers to connect their Things and automate the network debugging faster and more reliably. This will also reduce the workload on our Customer facing support teams and will also allow us to focus on further common issues.
+1. Go to config_files/nce_demo_config.h --> enable the flag TROUBLESHOOTING (Troubleshooting Example with/without DTLS in primary Flow and SMS as alternative)
+  ```
+/* COAP Configuration with/without DTLS */
+#define ENABLE_DTLS //if you want to use the DTLS support
+#define COAP_ENDPOINT "coap.connectivity-suite.cloud"
+#define configCOAP_PORT    5684 // Prot with DTLS if you want to use Coap without DTLS use the port 5683
+#define configCOAP_URI_QUERY    "t=test"
+
+/* Enable send the Information to 1NCE's client support */
+#define TROUBLESHOOTING
+  ```
+2. run the demo : the demo will send the information to coap endpoint as a firt step if No ACK come then an SMS to 1nce portal with required informations.
+
+**** Primary case ****
+<p align="center"><img src="/images/troubleshootingcoap.png" width="70%"><br>
+Figure 6. Troubleshooting from the coap endpoint</p>
+
+**** Fallback ****
+<p align="center"><img src="/images/troubleshooting.png" width="70%"><br>
+Figure 7. Troubleshooting from Portal</p>
+
+for more information on the troubleshooting
+| Parameter   |      description      |  
+|:------------------------:|:---------------------|
+| <RAT> Radio Access Technology |  - GSM <br> - LTE <br> - CATM1 <br> - NBIOT <br> - Otherwise: NULL |
+| Public Land Mobile Network (PLMN) information |     - <mcc> Mobile Country Code <br> - <mnc> Mobile Network Code <br>   |
+| Registred Network (RN) |- <id CellId> Registered network operator cell Id. <br> - <LAC> Registered network operator Location Area Code. <br> - <RAC> Registered network operator Routing Area Code. <br> <TAC> Registered network operator Tracking Area Code.|
+|Reject CS ((Circuit Switched) registration status)| - <Status>: Table 2. <br> - <type>: 0: 3GPP specific Reject Cause. Manufacture specific. <br> <cause>: Circuit Switch Reject cause.|
+|Reject PS ((Packet Switched) registration status)| - <Status>: Table 2. <br> - <type>: 0: 3GPP specific Reject Cause. Manufacture specific. <br> <cause>: Circuit Switch Reject cause.|
+|Signal Information|- <RSSI> Received Signal Strength Indicator (RSSI) in dBm. <br> - <RSRP> LTE Reference Signal Received Power (RSRP) in dBm <br> - <RSRQ> LTE Reference Signal Received Quality (RSRQ) in dB. <br> - <SINR> LTE Signal to Interference-Noise Ratio in dB. <br> - <BER> Bit Error Rate (BER) in 0.01%. <br> -<BARS> A number between 0 to 5 (both inclusive) indicating signal strength.|
+<p>Table 1. Key Feature of Troubleshooting Message </p>
+
+| Number   |      description      |  
+|:--------:|:----------------------|
+|0|CELLULAR NETWORK REGISTRATION STATUS NOT REGISTERED NOT SEARCHING|
+|1|CELLULAR NETWORK REGISTRATION STATUS REGISTERED HOME|
+|2|CELLULAR NETWORK REGISTRATION STATUS NOT REGISTERED SEARCHING|
+|3|CELLULAR NETWORK REGISTRATION STATUS REGISTRATION DENIED|
+|4|CELLULAR NETWORK REGISTRATION STATUS UNKNOWN|
+|5|CELLULAR NETWORK REGISTRATION STATUS REGISTERED ROAMING|
+|6|CELLULAR NETWORK REGISTRATION STATUS REGISTERED HOME SMS ONLY|
+|7|CELLULAR NETWORK REGISTRATION STATUS REGISTERED ROAMING SMS ONLY|
+|8|CELLULAR NETWORK REGISTRATION STATUS ATTACHED EMERG SERVICES ONLY|
+|9|CELLULAR NETWORK REGISTRATION STATUS MAX|
+<p>Table 2. Network Registration Status </p>
+
 #### Conclusion:
-When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection.
+
+When connecting to AWS the setup process is tricky and the policies, rules and certificates need to be setup correctly in order to successfully connect to your thing we automatize all this thing for you to connect fast and performed safety and secure connection and support diffrent type of protocols (UDP/COAP with/without DTLS).
