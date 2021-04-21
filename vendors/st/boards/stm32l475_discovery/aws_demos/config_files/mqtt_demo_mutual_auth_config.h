@@ -51,6 +51,8 @@
 #include "logging_stack.h"
 
 /************ End of logging configuration ****************/
+#include "nce_onboarding.h"
+#include "nce_demo_config.h"
 /**
  * To use this demo, please configure the client's certificate and private key
  * in demos/include/aws_clientcredential_keys.h.

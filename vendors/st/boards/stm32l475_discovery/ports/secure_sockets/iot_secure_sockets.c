@@ -52,6 +52,7 @@
 /* Clock includes. */
 #include "platform/iot_clock.h"
 
+#include "nce_demo_config.h"
 /* Configure logs for the functions in this file. */
 #ifdef IOT_LOG_LEVEL_NETWORK
     #define LIBRARY_LOG_LEVEL        IOT_LOG_LEVEL_NETWORK
@@ -167,7 +168,9 @@ static int32_t prvSetupTrustedServerCertificate( _cellularSecureSocket_t * pCell
                                                  size_t xOptionLength );
 static int32_t prvCellularSocketRegisterCallback( CellularSocketHandle_t tcpSocket,
                                                   _cellularSecureSocket_t * pCellularSocketContext );
+#if defined(ENABLE_DTLS)
 static int32_t prvCellularSetupTLS( _cellularSecureSocket_t * pCellularSocketContext );
+#endif
 static bool prvGetNextTok( char ** pDnsResultStr,
                            char delimiter,
                            char ** pToken );
@@ -732,6 +735,7 @@ static int32_t prvCellularSocketRegisterCallback( CellularSocketHandle_t tcpSock
 }
 
 /*-----------------------------------------------------------*/
+#if defined(ENABLE_DTLS)
 static int32_t prvCellularSetupTLS( _cellularSecureSocket_t * pCellularSocketContext )
 {
     int32_t retSetupTLS = SOCKETS_ERROR_NONE;
@@ -777,6 +781,7 @@ static int32_t prvCellularSetupTLS( _cellularSecureSocket_t * pCellularSocketCon
 
     return retSetupTLS;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 static bool prvGetNextTok( char ** pDnsResultStr,
@@ -1119,6 +1124,22 @@ Socket_t SOCKETS_Socket( int32_t lDomain,
     /* coverity[misra_c_2012_rule_10_4_violation] */
     /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( lDomain == SOCKETS_AF_INET );
+#if (defined( CONFIG_COAP_DEMO_ENABLED )||defined( CONFIG_UDP_DEMO_ENABLED ))
+
+    /* coverity[misra_c_2012_rule_10_4_violation] */
+    /* coverity[misra_c_2012_rule_10_5_violation] */
+    configASSERT( lType == SOCKETS_SOCK_DGRAM );
+    /* coverity[misra_c_2012_rule_10_4_violation] */
+    /* coverity[misra_c_2012_rule_10_5_violation] */
+    configASSERT( lProtocol == SOCKETS_IPPROTO_UDP );
+    /* Create a new UDP socket. */
+    socketStatus = Cellular_CreateSocket( CellularHandle,
+                                          CELLULAR_PDN_CONTEXT_ID_SOCKETS,
+                                          CELLULAR_SOCKET_DOMAIN_AF_INET,
+										  CELLULAR_SOCKET_TYPE_DGRAM,
+										  CELLULAR_SOCKET_PROTOCOL_UDP,
+                                          &Socket );
+#else
     /* coverity[misra_c_2012_rule_10_4_violation] */
     /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( lType == SOCKETS_SOCK_STREAM );
@@ -1133,6 +1154,7 @@ Socket_t SOCKETS_Socket( int32_t lDomain,
                                           CELLULAR_SOCKET_TYPE_STREAM,
                                           CELLULAR_SOCKET_PROTOCOL_TCP,
                                           &Socket );
+#endif
     if( socketStatus == CELLULAR_SUCCESS )
     {
         pCellularSocketContext = pvPortMalloc( sizeof( _cellularSecureSocket_t ) );
@@ -1295,11 +1317,13 @@ int32_t SOCKETS_Connect( Socket_t xSocket,
             retConnect = SOCKETS_ENOTCONN;
         }
     }
+#if defined(ENABLE_DTLS)
     /* Setup TLS parameters. */
     if( ( retConnect == SOCKETS_ERROR_NONE ) && ( tlsFlag != 0U ) )
     {
         retConnect = prvCellularSetupTLS( pCellularSocketContext );
     }
+#endif
     return retConnect;
 }
 

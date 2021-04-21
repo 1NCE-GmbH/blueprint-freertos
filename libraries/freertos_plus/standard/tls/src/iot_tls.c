@@ -42,6 +42,7 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/pk_internal.h"
 #include "mbedtls/debug.h"
+#include "nce_onboarding.h"
 #ifdef MBEDTLS_DEBUG_C
     #define tlsDEBUG_VERBOSE    4
 #endif
@@ -54,6 +55,7 @@
 #include <time.h>
 #include <stdio.h>
 
+#include "mbedtls/timing_alt.h"
 
 
 /**
@@ -249,7 +251,7 @@ static int prvGenerateRandomBytes( void * pvCtx,
  *
  * @return Zero on success.
  */
-
+#if defined(ENABLE_DTLS)
 static int prvInitializeClientCredential( TLSContext_t * pxCtx )
 {
 
@@ -269,6 +271,7 @@ static int prvInitializeClientCredential( TLSContext_t * pxCtx )
 
     return xResult;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 /**
@@ -405,6 +408,7 @@ BaseType_t TLS_Init( void ** ppvContext,
 #endif /* ifdef MBEDTLS_DEBUG_C */
 
 /*-----------------------------------------------------------*/
+#if defined(ENABLE_DTLS)
 BaseType_t TLS_Connect( void * pvContext )
 {
     BaseType_t xResult = 0;
@@ -524,6 +528,7 @@ BaseType_t TLS_Connect( void * pvContext )
 
     return xResult;
 }
+#endif
 /*-----------------------------------------------------------*/
 
 BaseType_t TLS_Recv( void * pvContext,

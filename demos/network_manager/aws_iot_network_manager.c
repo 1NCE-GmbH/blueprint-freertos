@@ -42,6 +42,7 @@
 #include "platform/iot_clock.h"
 
 
+#include "nce_demo_config.h"
 #if BLE_ENABLED
     #include "iot_ble_config.h"
     #include "iot_ble.h"

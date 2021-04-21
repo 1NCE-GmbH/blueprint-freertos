@@ -393,6 +393,7 @@ int RunCoreMqttMutualAuthDemo( bool awsIotMqttMode,
     * pdFAIL will indicate some failures occurred during execution. The
     * user of this demo must check the logs for any failure codes. */
     BaseType_t xDemoStatus = pdPASS;
+    Onboarding_Status_t onboarding_status = nce_onboard_device();
 
     /* Remove compiler warnings about unused parameters. */
     ( void ) awsIotMqttMode;

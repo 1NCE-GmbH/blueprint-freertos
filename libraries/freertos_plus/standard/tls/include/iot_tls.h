@@ -110,7 +110,16 @@ typedef struct xTLS_PARAMS
 BaseType_t TLS_Init( void ** ppvContext,
                      TLSParams_t * pxParams );
 
-
+/**
+ * @brief Negotiates TLS and connects to the server.
+ *
+ * @param pvContext Opaque context handle for TLS library.
+ *
+ * @return Zero on success. Error return codes have the high bit set.
+ */
+#if defined(ENABLE_DTLS)
+BaseType_t TLS_Connect( void * pvContext );
+#endif
 /**
  * @brief Reads the requested number of bytes from the secure connection
  *

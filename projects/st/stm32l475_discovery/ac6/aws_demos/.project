@@ -157,11 +157,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>demos/troubleshooting</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>demos/udp</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -362,11 +357,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_clientcredential.h</locationURI>
 		</link>
 		<link>
-			<name>demos/include/aws_clientcredential_keys.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_clientcredential_keys.h</locationURI>
-		</link>
-		<link>
 			<name>demos/include/aws_demo.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/demos/include/aws_demo.h</locationURI>
@@ -420,16 +410,6 @@
 			<name>demos/tcp/aws_tcp_echo_client_single_tasks.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/demos/tcp/aws_tcp_echo_client_single_tasks.h</locationURI>
-		</link>
-		<link>
-			<name>demos/troubleshooting/CMakeLists.txt</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/troubleshooting/CMakeLists.txt</locationURI>
-		</link>
-		<link>
-			<name>demos/troubleshooting/iot_demo_troubleshooting.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/troubleshooting/iot_demo_troubleshooting.c</locationURI>
 		</link>
 		<link>
 			<name>demos/udp/CMakeLists.txt</name>
