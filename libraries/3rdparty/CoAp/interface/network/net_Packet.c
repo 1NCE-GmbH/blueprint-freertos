@@ -25,15 +25,15 @@
 void _rom PrintRawPacket(NetPacket_t* pckt)
 {
 
-	PRINT_INFO("Packet size:%d rssi:%d hops: %d \r\nRawData (hex) :", pckt->size, pckt->metaInfo.Dat.RfPath.RSSI, pckt->metaInfo.Dat.RfPath.HopCount);
+	IotLogInfo("Packet size:%d rssi:%d hops: %d \r\nRawData (hex) :", pckt->size, pckt->metaInfo.Dat.RfPath.RSSI, pckt->metaInfo.Dat.RfPath.HopCount);
 	int i;
 	for(i=0; i<pckt->size; i++)
 	{
-		PRINT_INFO("0x%02x, ", pckt->pData[i]);
+		IotLogInfo("0x%02x, ", pckt->pData[i]);
 	}
-	PRINT_INFO("\r\nRawData (char):");
+	IotLogInfo("\r\nRawData (char):");
 	for(i=0; i<pckt->size; i++)
 	{
-		PRINT_INFO("%c", pckt->pData[i]);
+		IotLogInfo("%c", pckt->pData[i]);
 	}
 }

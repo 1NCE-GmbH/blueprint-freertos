@@ -167,7 +167,7 @@ CoAP_Result_t _rom parse_OptionsFromRaw(uint8_t* srcArr, uint16_t srcLength, uin
 	*pPayloadBeginInSrc = NULL;
 
 	if (*pOptionsListBegin != NULL) {
-		PRINT_INFO("- Option list argument must be an empty list!\r\n");
+		IotLogInfo("- Option list argument must be an empty list!\r\n");
 		return COAP_ERR_ARGUMENT;
 	}
 
@@ -176,7 +176,7 @@ CoAP_Result_t _rom parse_OptionsFromRaw(uint8_t* srcArr, uint16_t srcLength, uin
 	}
 
 	if (srcArr[0] == OPTION_PAYLOAD_MARKER) {
-		PRINT_INFO("- Options must not start with payload marker!\r\n");
+		IotLogInfo("- Options must not start with payload marker!\r\n");
 		return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 	}
 
@@ -186,7 +186,7 @@ CoAP_Result_t _rom parse_OptionsFromRaw(uint8_t* srcArr, uint16_t srcLength, uin
 		if (srcArr[offset] == OPTION_PAYLOAD_MARKER) // Payload Marker
 		{
 			if ((srcLength - offset) < 2) {
-				PRINT_INFO("- at least one byte payload must follow to the payload marker\r\n");
+				IotLogInfo("- at least one byte payload must follow to the payload marker\r\n");
 				return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 			}
 
@@ -216,7 +216,7 @@ CoAP_Result_t _rom parse_OptionsFromRaw(uint8_t* srcArr, uint16_t srcLength, uin
 				// value but the entire byte is not the payload marker, this MUST
 				// be processed as a message format error.
 				// NOTE: we checked for OPTION_PAYLOAD_MARKER before!
-				PRINT_INFO("- currOptDeltaField == 15 is not allowed(1)\r\n");
+				IotLogInfo("- currOptDeltaField == 15 is not allowed(1)\r\n");
 				return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 			}
 
@@ -228,16 +228,16 @@ CoAP_Result_t _rom parse_OptionsFromRaw(uint8_t* srcArr, uint16_t srcLength, uin
 				currOptLength = ((((uint16_t) srcArr[offset]) << 8) | ((uint16_t) srcArr[offset + 1])) + 269;
 				offset += 2;
 			} else if (currOptLengthField == 15) {
-				PRINT_INFO("- currOptDeltaField == 15 is not allowed %x (2)\r\n", srcArr[offset - 1]);
+				IotLogInfo("- currOptDeltaField == 15 is not allowed %x (2)\r\n", srcArr[offset - 1]);
 				return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 			}
 
 			if (currOptLength > MAX_OPTION_VALUE_SIZE) {
-				PRINT_INFO("- Option too long\r\n");
+				IotLogInfo("- Option too long\r\n");
 				return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 			}
 			if ((srcLength - offset) < currOptLength) {
-				PRINT_INFO("- Option too short\r\n");
+				IotLogInfo("- Option too short\r\n");
 				return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 			}
 
@@ -541,17 +541,17 @@ uint16_t _rom CoAP_CheckForUnknownCriticalOption(CoAP_option_t* pOptionsListBegi
 
 void _rom CoAP_printOptionsList(CoAP_option_t* pOptListBegin) {
 	while (pOptListBegin != NULL) {
-		PRINT_INFO("-Option #%u (Length=%u) ->", pOptListBegin->Number, pOptListBegin->Length);
+		IotLogInfo("-Option #%u (Length=%u) ->", pOptListBegin->Number, pOptListBegin->Length);
 		int j;
 		for (j = 0; j < pOptListBegin->Length; j++) {
 			if (pOptListBegin->Value[j]) {
-				PRINT_INFO(" %c[", pOptListBegin->Value[j]);
-				PRINT_INFO("%02x]", pOptListBegin->Value[j]);
+				IotLogInfo(" %c[", pOptListBegin->Value[j]);
+				IotLogInfo("%02x]", pOptListBegin->Value[j]);
 			} else {
-				PRINT_INFO("  [0x00]", pOptListBegin->Value[j]);
+				IotLogInfo("  [0x00]", pOptListBegin->Value[j]);
 			}
 		}
-		PRINT_INFO("\r\n");
+		IotLogInfo("\r\n");
 		pOptListBegin = pOptListBegin->next;
 	}
 }

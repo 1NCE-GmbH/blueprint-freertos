@@ -130,14 +130,11 @@ char* ReliabilityStateToString(CoAP_ConfirmationState_t state) {
 void _rom PrintEndpoint(const NetEp_t* ep) {
 	switch (ep->NetType) {
 	case EP_NONE:
-		PRINT_INFO("NONE");
+		IotLogInfo("NONE");
 		break;
 	case IPV6:
-//		PRINT_INFO("IPv6, [");
-//		PRINT_IPV6(ep->NetAddr.IPv6);
-//		PRINT_INFO("]: %u", ep->NetPort);
 
-		PRINT_INFO("IPv6,[ %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:%u \r\n",
+		IotLogInfo("IPv6,[ %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x]:%u",
 						ep->NetAddr.IPv6.u8[0], ep->NetAddr.IPv6.u8[1], ep->NetAddr.IPv6.u8[2],
 						ep->NetAddr.IPv6.u8[3],ep->NetAddr.IPv6.u8[4], ep->NetAddr.IPv6.u8[5],
 						ep->NetAddr.IPv6.u8[6],ep->NetAddr.IPv6.u8[7], ep->NetAddr.IPv6.u8[8],
@@ -147,31 +144,31 @@ void _rom PrintEndpoint(const NetEp_t* ep) {
 						ep->NetPort);
 		break;
 	case IPV4:
-		PRINT_INFO("IPv4, %d.%d.%d.%d:%d \r\n",
+		IotLogInfo("IPv4, %d.%d.%d.%d:%d",
 				ep->NetAddr.IPv4.u8[0], ep->NetAddr.IPv4.u8[1], ep->NetAddr.IPv4.u8[2], ep->NetAddr.IPv4.u8[3],
 				ep->NetPort);
 		break;
 	case BTLE:
-		PRINT_INFO("BTLE");
+		IotLogInfo("BTLE");
 		break;
 	case UART:
-		PRINT_INFO("UART, COM%d", ep->NetAddr.Uart.ComPortID);
+		IotLogInfo("UART, COM%d", ep->NetAddr.Uart.ComPortID);
 		break;
 	default:
-		PRINT_INFO("UNKNOWN_EP (%d)", ep->NetType);
+		IotLogInfo("UNKNOWN_EP (%d)", ep->NetType);
 	}
 }
 
 void PrintToken(CoAP_Token_t* token) {
 	uint8_t tokenBytes = token->Length;
 	if (tokenBytes > 0) {
-		PRINT_INFO("%u Byte -> 0x", tokenBytes);
+		IotLogInfo("%u Byte -> 0x", tokenBytes);
 		int i;
 		for (i = 0; i < tokenBytes; i++) {
-			PRINT_INFO("%02x", token->Token[i]);
+			IotLogInfo("%02x", token->Token[i]);
 		}
 	} else {
-		PRINT_INFO("%u Byte -> 0x0", tokenBytes);
+		IotLogInfo("%u Byte -> 0x0", tokenBytes);
 	}
 }
 
@@ -181,33 +178,33 @@ void _rom PrintInteractions(CoAP_Interaction_t *pInteractions) {
 		cnt++;
 	}
 
-	PRINT_INFO("Interactions: %d\n", cnt);
-	PRINT_INFO("-------------\n");
+	IotLogInfo("Interactions: %d\n", cnt);
+	IotLogInfo("-------------\n");
 	for (CoAP_Interaction_t* pIA = CoAP.pInteractions; pIA != NULL; pIA = pIA->next) {
-		PRINT_INFO("- Role: %s, State: %s\n",
+		IotLogInfo("- Role: %s, State: %s\n",
 				InteractionRoleToString(pIA->Role), InteractionStateToString(pIA->State));
-		PRINT_INFO("RetransCnt: %u, SleepUntil %lu, AckTimeout: %lu\n", pIA->RetransCounter, pIA->SleepUntil, pIA->AckTimeout);
-		PRINT_INFO("Socket: %04lx, RemoteEp: ", (uint32_t )pIA->socketHandle);
+		IotLogInfo("RetransCnt: %u, SleepUntil %lu, AckTimeout: %lu\n", pIA->RetransCounter, pIA->SleepUntil, pIA->AckTimeout);
+		IotLogInfo("Socket: %04lx, RemoteEp: ", (uint32_t )pIA->socketHandle);
 		PrintEndpoint(&pIA->RemoteEp);
-		PRINT_INFO("\n");
-		PRINT_INFO("ReqReliabilityState: %s\n", ReliabilityStateToString(pIA->ReqConfirmState));
-		PRINT_INFO("RespReliabilityState: %s\n", ReliabilityStateToString(pIA->ResConfirmState));
+		IotLogInfo("\n");
+		IotLogInfo("ReqReliabilityState: %s\n", ReliabilityStateToString(pIA->ReqConfirmState));
+		IotLogInfo("RespReliabilityState: %s\n", ReliabilityStateToString(pIA->ResConfirmState));
 
-		PRINT_INFO("Observer: ");
+		IotLogInfo("Observer: ");
 		if (pIA->pObserver != NULL) {
 			PrintEndpoint(&pIA->pObserver->Ep);
-			PRINT_INFO(", Socket: %04lx, FailCnt: %d, Token: ", (uint32_t )pIA->pObserver->socketHandle, pIA->pObserver->FailCount);
+			IotLogInfo(", Socket: %04lx, FailCnt: %d, Token: ", (uint32_t )pIA->pObserver->socketHandle, pIA->pObserver->FailCount);
 			PrintToken(&pIA->pObserver->Token);
-			PRINT_INFO("\n");
+			IotLogInfo("\n");
 		} else {
-			PRINT_INFO("NONE\n");
+			IotLogInfo("NONE\n");
 		}
 
 		if (pIA->UpdatePendingNotification) {
-			PRINT_INFO("Update Pending Notifications\n");
+			IotLogInfo("Update Pending Notifications\n");
 		}
 
 		// TODO: Consider: Resource description and observers
 	}
-	PRINT_INFO("-------------\n\n");
+	IotLogInfo("-------------\n\n");
 }

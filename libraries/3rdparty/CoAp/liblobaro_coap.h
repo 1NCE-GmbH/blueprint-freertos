@@ -345,7 +345,7 @@ typedef struct {
 //################################
 // Public API (setup)
 //################################
-
+CoAP_Message_t troubleshooting;
 /**
  * Initialize the CoAP stack with a set of API functions used by the stack and a config struct.
  * @param api Struct with API functions that need to be defined for the stack to work
@@ -405,8 +405,8 @@ void CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket);
 void CoAP_doWork();
 
 
-// sending and receiving CoAP messages through wifi interface
 NetTransmit_fn  CoAP_Send_Wifi(Socket_t socketHandle, NetPacket_t* pckt);
+
 void CoAP_Recv_Wifi(Socket_t socketHandle, NetPacket_t* pPacket,const NetEp_t ServerEp);
 
 #endif //LIBLOBARO_COAP_H

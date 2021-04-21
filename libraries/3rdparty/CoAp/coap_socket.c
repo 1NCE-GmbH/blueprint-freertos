@@ -9,13 +9,13 @@
 
 CoAP_Result_t _rom
 CoAP_SendMsg(CoAP_Message_t* Msg, Socket_t socketHandle, NetEp_t receiver) {
-	PRINT_INFO("Sending CoAP msg\r\n");
+	IotLogInfo("Sending CoAP msg\r\n");
 
 	uint16_t bytesToSend = 0;
 	CoAP_Socket_t* pSocket = RetrieveSocket(socketHandle);
 
 	if (pSocket == NULL) {
-		PRINT_ERR("Socket not found! handle: %d\r\n", (int) socketHandle);
+		IotLogError("Socket not found! handle: %d\r\n", (int) socketHandle);
 		return
 				COAP_NOT_FOUND;
 	}
@@ -24,7 +24,7 @@ CoAP_SendMsg(CoAP_Message_t* Msg, Socket_t socketHandle, NetEp_t receiver) {
 	uint8_t quickBuf[16]; //speed up sending of tiny messages
 
 	if (SendPacket == NULL) {
-		PRINT_ERR("SendPacket function not found! handle: %d\r\n", socketHandle);
+		IotLogError("SendPacket function not found! handle: %d\r\n", socketHandle);
 		return
 				COAP_NOT_FOUND;
 	}
@@ -47,37 +47,39 @@ CoAP_SendMsg(CoAP_Message_t* Msg, Socket_t socketHandle, NetEp_t receiver) {
 	CoAP_BuildDatagram((pked.pData), &bytesToSend, Msg);
 
 	if (bytesToSend != pked.size) {
-		PRINT_INFO("(!!!) Bytes to Send = %d estimated = %d\r\n", bytesToSend,
+		IotLogInfo("(!!!) Bytes to Send = %d estimated = %d\r\n", bytesToSend,
 			 CoAP_GetRawSizeOfMessage(Msg)
 		);
 	}
 
-	PRINT_INFO("\r\no>>>>>>>>>>>>>>>>>>>>>>\r\nSend Message [%d Bytes], Interface #%u\r\n", bytesToSend, socketHandle);
-	PRINT_INFO("Receiving Endpoint: ");
+	IotLogInfo("\r\n>>>>>>>>>>>>>>>>>>>>>>\r\nSend Message [%d Bytes], Interface #%u<<<<<<<<<<<<\r\n", bytesToSend, socketHandle);
+	IotLogInfo("Receiving Endpoint: ");
 	PrintEndpoint(&(pked.remoteEp));
-	PRINT_INFO("\n");
+	IotLogInfo("\n");
 
 	int i;
 	for (i = 0; i < pked.size; i++) {
 		if (pked.pData[i] != 0) { //0 = string end
-			PRINT_INFO("0x%02x(%c) ", pked.pData[i], pked.pData[i]);
+			IotLogInfo("0x%02x(%c) ", pked.pData[i], pked.pData[i]);
 		} else {
-			PRINT_INFO("0x00() ");
+			IotLogInfo("0x00() ");
 		}
 	}
-	PRINT_INFO("\r\n");
+	IotLogInfo("\r\n");
 
 	if (SendPacket(socketHandle, &pked) == true) { // send COAP_OK!
 		Msg->Timestamp =IotClock_GetTimeMs()/1000;
 		CoAP_PrintMsg(Msg);
-		PRINT_INFO("o>>>>>>>>>>OK>>>>>%d>>>>>\r\n",Msg->Timestamp);
+		IotLogInfo(">>>>>>>>>>send COAP_OK<<<<<<<<<<\r\n");
+
 		if (pked.pData != quickBuf) {
 			vPortFree(pked.pData);
 		}
+//		this is just workaround
+//		HAL_NVIC_SystemReset();
 		return COAP_OK;
 	} else {
 		CoAP_PrintMsg(Msg);
-		PRINT_INFO("o>>>>>>>>>>FAIL>>>>>>>>>>\r\n");
 		if (pked.pData != quickBuf) {
 			vPortFree(pked.pData);
 		}

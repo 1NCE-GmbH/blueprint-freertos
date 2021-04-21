@@ -30,17 +30,24 @@ static CoAP_Interaction_t* _rom CoAP_AllocNewInteraction() {
 	CoAP_Interaction_t* newInteraction = (CoAP_Interaction_t*) (pvPortMalloc(sizeof(CoAP_Interaction_t)));
 	if (newInteraction == NULL) {
 		//coap_mem_stats();
-		PRINT_INFO("- (!!!) CoAP_AllocNewInteraction() Out of Memory (Needed %d bytes) !!!\r\n", sizeof(CoAP_Interaction_t));
+		IotLogInfo("- (!!!) CoAP_AllocNewInteraction() Out of Memory (Needed %d bytes) !!!\r\n", sizeof(CoAP_Interaction_t));
 		return NULL;
 	}
 
-	memset(newInteraction, 0, sizeof(CoAP_Interaction_t));
-//	assert_coap(newInteraction->pObserver == NULL);
-	return newInteraction;
+    if( newInteraction == NULL )
+    {
+        /*coap_mem_stats(); */
+        IotLogInfo( "- (!!!) CoAP_AllocNewInteraction() Out of Memory (Needed %d bytes) !!!\r\n", sizeof( CoAP_Interaction_t ) );
+        return NULL;
+    }
+
+    memset( newInteraction, 0, sizeof( CoAP_Interaction_t ) );
+/*	assert_coap(newInteraction->pObserver == NULL); */
+    return newInteraction;
 }
 
 CoAP_Result_t _rom CoAP_FreeInteraction(CoAP_Interaction_t** pInteraction) {
-	PRINT_INFO("Releasing Interaction...\r\n");
+	IotLogInfo("Releasing Interaction...\r\n");
 	//coap_mem_stats();
 	CoAP_FreeMessage((*pInteraction)->pReqMsg);
 	(*pInteraction)->pReqMsg = NULL;
@@ -256,7 +263,7 @@ CoAP_Result_t _rom CoAP_StartNewGetRequest(char* UriString, Socket_t socketHandl
 		return CoAP_StartNewClientInteraction(pReqMsg, socketHandle, ServerEp, cb);
 	}
 
-	PRINT_INFO("- New GetRequest failed: Out of Memory\r\n");
+	IotLogInfo("- New GetRequest failed: Out of Memory\r\n");
 
 	return COAP_ERR_OUT_OF_MEMORY;
 }
@@ -278,7 +285,7 @@ CoAP_Result_t _rom CoAP_StartNotifyInteractions(CoAP_Res_t* pRes) {
 		cnt++;
 		pObserver = pObserver->next;
 	}
-	PRINT_INFO("Notify %d observers for res %s\n", cnt, pRes->pDescription);
+	IotLogInfo("Notify %d observers for res %s\n", cnt, pRes->pDescription);
 
 
 
@@ -492,7 +499,7 @@ CoAP_Result_t _rom CoAP_HandleObservationInReq(CoAP_Interaction_t* pIA) {
 				if (CoAP_TokenEqual(pIApending->pRespMsg->Token, pIA->pReqMsg->Token)
 						&& pIApending->socketHandle == pIA->socketHandle
 						&& EpAreEqual(&(pIApending->RemoteEp), &(pIA->RemoteEp))) {
-					PRINT_INFO("Abort of pending notificaton interaction\r\n");
+					IotLogInfo("Abort of pending notificaton interaction\r\n");
 					CoAP_DeleteInteraction(pIApending);
 					break;
 				}
@@ -505,5 +512,3 @@ CoAP_Result_t _rom CoAP_HandleObservationInReq(CoAP_Interaction_t* pIA) {
 
 	return COAP_ERR_NOT_FOUND;
 }
-
-

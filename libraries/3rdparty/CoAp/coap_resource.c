@@ -22,7 +22,7 @@
  *******************************************************************************/
 #include "coap.h"
 #include "liblobaro_coap.h"
-#include "demo_config.h"
+
 static CoAP_Res_t* pResList = NULL;
 static uint32_t ResListMembers = 0;
 
@@ -82,7 +82,7 @@ CoAP_Result_t _rom CoAP_NVsaveObservers(WriteBuf_fn writeBufFn) {
 				TotalPageBytes += BytesWritten + 1;
 				pTempPage = pTempPage + TotalPageBytes;
 
-				PRINT_INFO("Wrote Observer Option List:\r\n");
+				IotLogInfo("Wrote Observer Option List:\r\n");
 				CoAP_printOptionsList(pOptList);
 
 				CoAP_FreeOptionList(pOptList); //free options
@@ -94,7 +94,7 @@ CoAP_Result_t _rom CoAP_NVsaveObservers(WriteBuf_fn writeBufFn) {
 	}
 
 	pTempPage = TempPage;
-	PRINT_INFO("writing: %d bytes to flash\r\n", TotalPageBytes);
+	IotLogInfo("writing: %d bytes to flash\r\n", TotalPageBytes);
 	writeBufFn(pTempPage, TotalPageBytes);
 	return COAP_OK;
 }
@@ -110,14 +110,14 @@ CoAP_Result_t _rom CoAP_NVloadObservers(uint8_t* pRawPage) {
 	CoAP_Res_t* pResTemp = NULL;
 
 	while (parse_OptionsFromRaw(pRawPage, 2048, &pRawPage, &pOptList) == COAP_OK) { //finds "payload-marker" and sets pointer to its beginning. in this context this is the next stored observe dataset
-		PRINT_INFO("found flash stored options:\r\n");
+		IotLogInfo("found flash stored options:\r\n");
 		CoAP_printOptionsList(pOptList);
 
 		//Map Stored option to resource
 		pResTemp = CoAP_FindResourceByUri(pResList, pOptList);
 		if (pResTemp != NULL) pRes = pResTemp;
 		else {
-			PRINT_INFO("- Observed Resource not found!\r\n");
+			IotLogInfo("- Observed Resource not found!\r\n");
 			//todo: del observe res?
 			continue;
 		}
@@ -127,14 +127,14 @@ CoAP_Result_t _rom CoAP_NVloadObservers(uint8_t* pRawPage) {
 		CoAP_Observer_t* pNewObserver = CoAP_AllocNewObserver();
 
 		if (pNewObserver == NULL) {
-			PRINT_INFO("pNewObserver out of Mem!\r\n");
+			IotLogInfo("pNewObserver out of Mem!\r\n");
 			//todo: do anything different to simple continue
 			continue;
 		}
 
 		CoAP_option_t* pOpt = pOptList;
 		while (pOpt != NULL) {
-			PRINT_INFO(".");
+			IotLogInfo(".");
 
 			switch (pOpt->Number) {
 				case OPT_NUM_URI_HOST:
@@ -184,12 +184,12 @@ CoAP_HandlerResult_t _rom WellKnown_GetHandler(CoAP_Message_t* pReq, CoAP_Messag
 	uint8_t* pStrStart = pStr;
 
 	if (pStr == NULL) {
-		PRINT_INFO("- WellKnown_GetHandler(): Ouf memory error!\r\n");
+		IotLogError("- WellKnown_GetHandler(): Ouf memory error!\r\n");
 		return HANDLER_ERROR;
 	}
 	memset(pStr, 0, (ResListMembers + 1) * 64);
 
-	PRINT_INFO("- WellKnown_GetHandler(): res cnt:%u temp alloc:%u\r\n", (unsigned int) ResListMembers, (unsigned int) (ResListMembers + 2) * 64);
+	IotLogInfo("- WellKnown_GetHandler(): res cnt:%u temp alloc:%u\r\n", (unsigned int) ResListMembers, (unsigned int) (ResListMembers + 2) * 64);
 
 	//TODO: Implement non ram version, e.g. write to memory to eeprom
 	while (pList != NULL) {
@@ -231,9 +231,8 @@ CoAP_HandlerResult_t _rom WellKnown_GetHandler(CoAP_Message_t* pReq, CoAP_Messag
 
 void _rom CoAP_InitResources() {
 	CoAP_ResOpts_t Options = {.Cf = COAP_CF_LINK_FORMAT, .AllowedMethods = RES_OPT_GET};
-#ifdef COAP
-	CoAP_CreateResource(configCOAP_URI_PATH, "\0", Options, WellKnown_GetHandler, NULL);
-#endif
+//	CoAP_CreateResource("/.well-known/core", "\0", Options, WellKnown_GetHandler, NULL);
+	CoAP_CreateResource("/suite", "\0", Options, WellKnown_GetHandler, NULL);
 }
 
 static CoAP_Result_t _rom CoAP_AppendResourceToList(CoAP_Res_t** pListStart, CoAP_Res_t* pResToAdd) {
@@ -314,14 +313,14 @@ CoAP_Res_t* _rom CoAP_FindResourceByUri(CoAP_Res_t* pResListToSearchIn, CoAP_opt
 }
 
 CoAP_Res_t* _rom CoAP_CreateResource(char* Uri, char* Descr, CoAP_ResOpts_t Options, CoAP_ResourceHandler_fPtr_t pHandlerFkt, CoAP_ResourceNotifier_fPtr_t pNotifierFkt) {
-	PRINT_INFO("Creating resource %s (%s) AllowedMethods: %x%x%x%x\r\n", Uri, Descr == NULL ? "" : Descr,
+	IotLogInfo("Creating resource %s (%s) AllowedMethods: %x%x%x%x\r\n", Uri, Descr == NULL ? "" : Descr,
 		 !!(Options.AllowedMethods & RES_OPT_GET),
 		 !!(Options.AllowedMethods & RES_OPT_POST),
 		 !!(Options.AllowedMethods & RES_OPT_PUT),
 		 !!(Options.AllowedMethods & RES_OPT_DELETE));
 
 	if (Options.AllowedMethods == 0) {
-		PRINT_ERR("Can not create Resource that does not allow any method!");
+		IotLogError("Can not create Resource that does not allow any method!");
 		return NULL;
 	}
 
@@ -366,19 +365,19 @@ CoAP_Result_t _rom CoAP_NotifyResourceObservers(CoAP_Res_t* pRes) {
 
 void _rom CoAP_PrintResource(CoAP_Res_t* pRes) {
 	CoAP_printUriOptionsList(pRes->pUri);
-	PRINT_INFO("Observers:\r\n");
+	IotLogInfo("Observers:\r\n");
 	CoAP_Observer_t* pOpserver = pRes->pListObservers; //point to ListStart
 	while (pOpserver != NULL) {
-		PRINT_INFO("Token:%llx - ", (uint64_t)pOpserver->Token.Token[0]);
+		IotLogInfo("Token:%llx - ", (uint64_t)pOpserver->Token.Token[0]);
 		PrintEndpoint(&(pOpserver->Ep));
-		PRINT_INFO("\n");
+		IotLogInfo("\n");
 		CoAP_printUriOptionsList(pOpserver->pOptList);
 		CoAP_printOptionsList(pOpserver->pOptList);
-		PRINT_INFO("---\r\n");
+		IotLogInfo("---\r\n");
 		pOpserver = pOpserver->next;
 
 	}
-	PRINT_INFO("\r\n");
+	IotLogInfo("\r\n");
 }
 
 void _rom CoAP_PrintAllResources() {
@@ -397,7 +396,7 @@ CoAP_Result_t _rom CoAP_RemoveObserverFromResource(CoAP_Observer_t** pObserverLi
 
 		if (CoAP_TokenEqual(token, pObserver->Token) && socketHandle == pObserver->socketHandle && EpAreEqual(pRemoteEP, &(pObserver->Ep))) {
 
-			PRINT_INFO("- (!) Unlinking observer from resource\r\n");
+			IotLogInfo("- (!) Unlinking observer from resource\r\n");
 			CoAP_UnlinkObserverFromList(pObserverList, pObserver, true);
 			return COAP_REMOVED;
 

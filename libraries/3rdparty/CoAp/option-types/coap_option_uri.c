@@ -153,24 +153,24 @@ void _rom CoAP_printUriOptionsList(CoAP_option_t* pOptListBegin) {
 	while (pOptListBegin != NULL) {
 		if (pOptListBegin->Number == OPT_NUM_URI_PATH) {
 			for (j = 0; j < pOptListBegin->Length; j++) {
-				PRINT_INFO("%c", pOptListBegin->Value[j]);
+				IotLogInfo("%c", pOptListBegin->Value[j]);
 			}
-			PRINT_INFO("\\");
+			IotLogInfo("\\");
 		} else if (pOptListBegin->Number == OPT_NUM_URI_QUERY) {
 			if (!queryPos) {
-				PRINT_INFO("?");
+				IotLogInfo("?");
 				queryPos = true;
 			} else
-				PRINT_INFO("&");
+				IotLogInfo("&");
 
 			for (j = 0; j < pOptListBegin->Length; j++) {
-				PRINT_INFO("%c", pOptListBegin->Value[j]);
+				IotLogInfo("%c", pOptListBegin->Value[j]);
 			}
 		}
 
 		pOptListBegin = pOptListBegin->next;
 	}
-	PRINT_INFO("\r\n");
+	IotLogInfo("\r\n");
 }
 
 // Return the value of

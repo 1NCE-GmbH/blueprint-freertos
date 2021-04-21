@@ -22,7 +22,6 @@
 
 #ifndef USER_LOBARO_COAP_INTERFACE_COAP_INTERFACE_H_
 #define USER_LOBARO_COAP_INTERFACE_COAP_INTERFACE_H_
-
 //-------------------------------------------------------------------------
 // lobaro-coap needs some std C language functions/headers
 //-------------------------------------------------------------------------

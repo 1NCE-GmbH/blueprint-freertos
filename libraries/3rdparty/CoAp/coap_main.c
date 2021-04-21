@@ -38,24 +38,25 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 	CoAP_Result_t res = COAP_OK;
 
 	// Try to parse packet of bytes into CoAP message
-	PRINT_INFO("\r\no<<<<<<<<<<<<<<<<<<<<<<\r\nNew Datagram received [%d Bytes], Interface #%x\r\n", pPacket->size, socketHandle); //PrintRawPacket(pckt);
-	PRINT_INFO("Sending Endpoint: ");
+	IotLogInfo("\r\no<<<<<<<<<<<<<<<<<<<<<<\r\nNew Datagram received [%d Bytes], Interface #%x\r\n", pPacket->size, socketHandle); //PrintRawPacket(pckt);
+	IotLogInfo("Sending Endpoint: ");
 	PrintEndpoint(&(pPacket->remoteEp));
-	PRINT_INFO("\n");
+	IotLogInfo("\n");
 
 	if ((res = CoAP_ParseMessageFromDatagram(pPacket->pData, pPacket->size, &pMsg)) == COAP_OK) {
 		CoAP_PrintMsg(pMsg); // allocates the needed amount of ram
-		PRINT_INFO("o<<<<<<<<<<<<<<<<<<<<<<\r\n");
+		troubleshooting= *pMsg;
+		IotLogInfo("o<<<<<<<<<<<<<<<<<<<<<<\r\n");
 	} else {
-		PRINT_ERR("ParseResult: ");
+		IotLogError("ParseResult: ");
 		CoAP_PrintResultValue(res);
-		PRINT_INFO("o<<<<<<<<<<<<<<<<<<<<<<\r\n");
+		IotLogInfo("o<<<<<<<<<<<<<<<<<<<<<<\r\n");
 		return; //very early parsing fail, coap parse was a total fail can't do anything for remote user, complete ignore of packet
 	}
 
 	isRequest = CoAP_MsgIsRequest(pMsg);
 
-	PRINT_INFO("Filter out bad CODE/TYPE combinations\r\n");
+	IotLogInfo("Filter out bad CODE/TYPE combinations\r\n");
 	// Filter out bad CODE/TYPE combinations (Table 1, RFC7252 4.3.) by silently ignoring them
 	if (pMsg->Type == CON && pMsg->Code == EMPTY) {
 		CoAP_SendEmptyRST(pMsg->MessageID, socketHandle, pPacket->remoteEp); //a.k.a "CoAP Ping"
@@ -71,7 +72,6 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 		goto END;
 	}
 
-	//PRINT_INFO("Find the request handler or send 4.04\r\n");
 	// Requested uri present?
 	// Then find the handler, else send 4.04 response
 	if (isRequest) {
@@ -86,11 +86,11 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 		}
 	}
 
-	//PRINT_INFO("Check for critical options\r\n");
+
 	// Unknown critical Option check
 	uint16_t criticalOptNum = CoAP_CheckForUnknownCriticalOption(pMsg->pOptionsList); // !=0 if at least one unknown option found
 	if (criticalOptNum) {
-		PRINT_INFO("- (!) Received msg has unknown critical option!!!\r\n");
+		IotLogInfo("- (!) Received msg has unknown critical option!!!\r\n");
 		if (pMsg->Type == NON || pMsg->Type == ACK) {
 			// NON messages are just silently ignored
 			goto END;
@@ -110,7 +110,6 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 	// Prechecks done
 	//*****************
 
-	//PRINT_INFO("Prechecks done. Handle message by type\r\n");
 	// try to include message into new or existing server/client interaction
 
 	CoAP_Interaction_t* pIA = CoAP_FindInteractionByMessageIdAndEp(CoAP.pInteractions, pMsg->MessageID, &(pPacket->remoteEp));
@@ -122,7 +121,7 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 	switch (pMsg->Type) {
 	case RST: {
 		if (pIA == NULL) {
-			PRINT_INFO("- (?) Got Reset on (no more?) existing message id: %d\r\n", pMsg->MessageID);
+			IotLogInfo("- (?) Got Reset on (no more?) existing message id: %d\r\n", pMsg->MessageID);
 		}
 		pIA->ResConfirmState = RST_SEND;
 		goto END;
@@ -130,13 +129,13 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 	case ACK: {
 		// apply "ACK received" to req (client) or resp (server)
 		if (pIA == NULL) {
-			PRINT_INFO("- (?) Got ACK on (no more?) existing message id: %d\r\n", pMsg->MessageID);
+			IotLogInfo("- (?) Got ACK on (no more?) existing message id: %d\r\n", pMsg->MessageID);
 			goto END;
 		}
 		pIA->ResConfirmState = ACK_SEND;
 
 		//piA is NOT NULL in every case here
-		PRINT_INFO("- piggybacked response received\r\n");
+		IotLogInfo("- piggybacked response received\r\n");
 		if (pMsg->Code != EMPTY) {
 			//no "simple" ACK => must be piggybacked RESPONSE to our [client] request. corresponding Interaction has been found before
 			if (pIA->Role == COAP_ROLE_CLIENT && CoAP_TokenEqual(pIA->pReqMsg->Token, pMsg->Token) && pIA->State == COAP_STATE_WAITING_RESPONSE) {
@@ -148,7 +147,7 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 				pIA->State = COAP_STATE_HANDLE_RESPONSE;
 				return;
 			} else {
-				PRINT_INFO("- could not piggybacked response to any request!\r\n");
+				IotLogInfo("- could not piggybacked response to any request!\r\n");
 			}
 		}
 		break;
@@ -228,7 +227,7 @@ static CoAP_Result_t _rom SendResp(CoAP_Interaction_t* pIA, CoAP_InteractionStat
 		CoAP_EnqueueLastInteraction(pIA); //(re)enqueue interaction for further processing//todo: in die äußere statemachine
 
 	} else { //unexspected internal failure todo: try at least to send 4 byte RESP_INTERNAL_SERVER_ERROR_5_00
-		PRINT_INFO("(!!!) SendResp(): Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
+		IotLogInfo("(!!!) SendResp(): Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
 		CoAP_DeleteInteraction(pIA);
 		return COAP_ERR_SOCKET;
 	}
@@ -236,7 +235,7 @@ static CoAP_Result_t _rom SendResp(CoAP_Interaction_t* pIA, CoAP_InteractionStat
 	return COAP_OK;
 }
 
-static CoAP_Result_t _rom SendReq(CoAP_Interaction_t* pIA, CoAP_InteractionState_t nextIAState) {
+static CoAP_Result_t SendReq(CoAP_Interaction_t* pIA, CoAP_InteractionState_t nextIAState) {
 	if (CoAP_SendMsg(pIA->pReqMsg, pIA->socketHandle, pIA->RemoteEp) == COAP_OK) {
 
 		if (pIA->pReqMsg->Type == CON) {
@@ -248,7 +247,7 @@ static CoAP_Result_t _rom SendReq(CoAP_Interaction_t* pIA, CoAP_InteractionState
 		CoAP_EnqueueLastInteraction(pIA); //(re)enqueue interaction for further processing//todo: in die äußere statemachine
 
 	} else { //unexspected internal failure todo: try at least to send 4 byte RESP_INTERNAL_SERVER_ERROR_5_00
-		PRINT_INFO("(!!!) SendReq(): Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
+		IotLogInfo("(!!!) SendReq(): Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
 		CoAP_DeleteInteraction(pIA);
 		return COAP_ERR_SOCKET;
 	}
@@ -260,7 +259,7 @@ static CoAP_Result_t _rom SendReq(CoAP_Interaction_t* pIA, CoAP_InteractionState
 static CoAP_Result_t _rom CheckRespStatus(CoAP_Interaction_t* pIA) {
 
 	if (pIA->ResConfirmState == RST_SEND) {
-		PRINT_INFO("- Response reset by remote client -> Interaction aborted\r\n");
+		IotLogInfo("- Response reset by remote client -> Interaction aborted\r\n");
 		//todo: call failure callback to user
 		return COAP_ERR_REMOTE_RST;
 	}
@@ -275,18 +274,18 @@ static CoAP_Result_t _rom CheckRespStatus(CoAP_Interaction_t* pIA) {
 
 	} else if (pIA->pRespMsg->Type == CON) {
 		if (pIA->ResConfirmState == ACK_SEND) { //everything fine!
-			PRINT_INFO("- Response ACKed by Client -> Transaction ended successfully\r\n");
+			IotLogInfo("- Response ACKed by Client -> Transaction ended successfully\r\n");
 			//todo: call success callback to user
 			return COAP_OK;
 		} else { //check ACK/RST timeout of our CON response
 			if (timeAfter(IotClock_GetTimeMs()/1000, pIA->AckTimeout)) {
 
 				if (pIA->RetransCounter + 1 > MAX_RETRANSMIT) { //give up
-					PRINT_INFO("- (!) ACK timeout on sending response, giving up! Resp.MiD: %d\r\n",
+					IotLogInfo("- (!) ACK timeout on sending response, giving up! Resp.MiD: %d\r\n",
 							pIA->pRespMsg->MessageID);
 					return COAP_ERR_OUT_OF_ATTEMPTS;
 				} else {
-					PRINT_INFO("- (!) Retry num %d\r\n", pIA->RetransCounter + 1);
+					IotLogInfo("- (!) Retry num %d\r\n", pIA->RetransCounter + 1);
 					return COAP_RETRY;
 				}
 			} else {
@@ -296,7 +295,7 @@ static CoAP_Result_t _rom CheckRespStatus(CoAP_Interaction_t* pIA) {
 		}
 	}
 
-	PRINT_INFO("(!!!) CheckRespStatus(...) COAP_ERR_ARGUMENT !?!?\r\n");
+	IotLogInfo("(!!!) CheckRespStatus(...) COAP_ERR_ARGUMENT !?!?\r\n");
 	return COAP_ERR_ARGUMENT;
 }
 
@@ -304,7 +303,7 @@ static CoAP_Result_t _rom CheckRespStatus(CoAP_Interaction_t* pIA) {
 static CoAP_Result_t _rom CheckReqStatus(CoAP_Interaction_t* pIA) {
 
 	if (pIA->ReqConfirmState == RST_SEND) {
-		PRINT_INFO("- Response reset by remote server -> Interaction aborted\r\n");
+		IotLogInfo("- Response reset by remote server -> Interaction aborted\r\n");
 		//todo: call failure callback to user
 		return COAP_ERR_REMOTE_RST;
 	}
@@ -312,19 +311,19 @@ static CoAP_Result_t _rom CheckReqStatus(CoAP_Interaction_t* pIA) {
 	if (pIA->pReqMsg->Type == CON) { // We send a CON
 		if (pIA->ReqConfirmState == ACK_SEND) {
 			if (CoAP_MsgIsOlderThan(pIA->pReqMsg, CLIENT_MAX_RESP_WAIT_TIME)) {
-				PRINT_INFO("- Request ACKed separate by server, but giving up to wait for actual response data\r\n");
+				IotLogInfo("- Request ACKed separate by server, but giving up to wait for actual response data\r\n");
 				return COAP_ERR_TIMEOUT;
 			}
 
-			PRINT_INFO("- Request ACKed separate by server -> Waiting for actual response\r\n");
+			IotLogInfo("- Request ACKed separate by server -> Waiting for actual response\r\n");
 			return COAP_WAITING;
 		} else { //check ACK/RST timeout of our CON request
 			if (timeAfter(IotClock_GetTimeMs()/1000, pIA->AckTimeout)) {
 				if (pIA->RetransCounter + 1 > MAX_RETRANSMIT) { //give up
-					PRINT_INFO("- (!) ACK timeout on sending request, giving up! MiD: %d", pIA->pReqMsg->MessageID);
+					IotLogInfo("- (!) ACK timeout on sending request, giving up! MiD: %d", pIA->pReqMsg->MessageID);
 					return COAP_ERR_OUT_OF_ATTEMPTS;
 				} else {
-					PRINT_INFO("- (!) Retry num %d\r\n", pIA->RetransCounter + 1);
+					IotLogInfo("- (!) Retry num %d\r\n", pIA->RetransCounter + 1);
 					return COAP_RETRY;
 				}
 			} else {
@@ -333,13 +332,13 @@ static CoAP_Result_t _rom CheckReqStatus(CoAP_Interaction_t* pIA) {
 		}
 	} else { // request type = NON
 		if (CoAP_MsgIsOlderThan(pIA->pReqMsg, CLIENT_MAX_RESP_WAIT_TIME)) {
-			PRINT_INFO("- [NON request]: Giving up to wait for actual response data\r\n");
+			IotLogInfo("- [NON request]: Giving up to wait for actual response data\r\n");
 			return COAP_ERR_TIMEOUT;
 		} else
 			return COAP_WAITING;
 	}
 
-	PRINT_INFO("(!!!) CheckReqStatus(...) COAP_ERR_ARGUMENT !?!?\r\n");
+	IotLogInfo("(!!!) CheckReqStatus(...) COAP_ERR_ARGUMENT !?!?\r\n");
 	return COAP_ERR_ARGUMENT;
 }
 
@@ -357,7 +356,7 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 		if (pIA->ReqMetaInfo.Type == META_INFO_MULTICAST) {
 			// Messages sent via multicast MUST be NON-confirmable.
 			if (pIA->pReqMsg->Type == CON) {
-				PRINT_INFO("Request received from multicast endpoint is not allowed");
+				IotLogInfo("Request received from multicast endpoint is not allowed");
 				CoAP_DeleteInteraction(pIA);
 				return;
 			}
@@ -368,7 +367,7 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 				// Todo: Pick a random leisure period (See section 8.2 of [RFC7252])
 				CoAP_SetSleepInteraction(pIA, DEFAULT_LEISURE); // Don't respond right away'
 				CoAP_EnqueueLastInteraction(pIA);
-				PRINT_INFO("Multicast request postponed processing until %d\r\n", pIA->SleepUntil);
+				IotLogInfo("Multicast request postponed processing until %d\r\n", pIA->SleepUntil);
 				return;
 			}
 		}
@@ -380,10 +379,10 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 				) {
 			pIA->pRespMsg = CoAP_CreateResponseMsg(pIA->pReqMsg, RESP_METHOD_NOT_ALLOWED_4_05); //matches also TYPE + TOKEN to request
 
-			//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			//transmit response & move to next state
 			SendResp(pIA, COAP_STATE_RESPONSE_SENT);
-			//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			return;
 		}
 		// (else) request method supported by resource...:
@@ -425,10 +424,10 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 					CoAP_SetSleepInteraction(pIA, POSTPONE_WAIT_TIME_SEK);
 
 					CoAP_EnqueueLastInteraction(pIA);
-					PRINT_INFO("Resource not ready, postponed response until %d\r\n", pIA->SleepUntil);
+					IotLogInfo("Resource not ready, postponed response until %d\r\n", pIA->SleepUntil);
 					return;
 				} else { // unexspected internal failure todo: try at least to send 4 byte RESP_INTERNAL_SERVER_ERROR_5_00
-					PRINT_INFO("(!!!) Send Error on empty ack, MiD: %d", pIA->pReqMsg->MessageID);
+					IotLogInfo("(!!!) Send Error on empty ack, MiD: %d", pIA->pReqMsg->MessageID);
 					CoAP_DeleteInteraction(pIA);
 					return;
 				}
@@ -468,18 +467,18 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 			CoAP_Result_t result = CoAP_HandleObservationInReq(pIA);
 			if (result == COAP_OK) { //<---- attach OBSERVER to resource
 				AddObserveOptionToMsg(pIA->pRespMsg, 0);  //= ACK observation to client
-				PRINT_INFO("- Observation activated\r\n");
+				IotLogInfo("- Observation activated\r\n");
 			} else if (result == COAP_REMOVED) {
-				PRINT_INFO("- Observation actively removed by client\r\n");
+				IotLogInfo("- Observation actively removed by client\r\n");
 			} else {
-				PRINT_INFO("- Observation failed\r\n");
+				IotLogInfo("- Observation failed\r\n");
 			}
 
 		}
 
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		SendResp(pIA, COAP_STATE_RESPONSE_SENT); //transmit response & move to next state
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		return;
 		//--------------------------------------------------
 	} else if (pIA->State == COAP_STATE_RESPONSE_SENT) {
@@ -495,7 +494,7 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 				pIA->RetransCounter++;
 				CoAP_EnableAckTimeout(pIA, pIA->RetransCounter);
 			} else {
-				PRINT_INFO("(!!!) Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
+				IotLogInfo("(!!!) Internal socket error on sending response! MiD: %d", pIA->pReqMsg->MessageID);
 				CoAP_DeleteInteraction(pIA);
 			}
 			break;
@@ -509,16 +508,16 @@ static void handleServerInteraction(CoAP_Interaction_t* pIA) {
 	return;
 }
 
-static void handleNotifyInteraction(CoAP_Interaction_t* pIA) {
+static void _rom handleNotifyInteraction(CoAP_Interaction_t* pIA) {
 	if (pIA->State == COAP_STATE_READY_TO_NOTIFY) {
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		PRINT_INFO("Sending Notification\n");
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		IotLogInfo("Sending Notification\n");
 		SendResp(pIA, COAP_STATE_NOTIFICATION_SENT); //transmit response & move to next state
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		//--------------------------------------------------
 	} else if (pIA->State == COAP_STATE_NOTIFICATION_SENT) {
 		CoAP_Result_t respStatus = CheckRespStatus(pIA);
-		PRINT_INFO("Response Status: %s\n", ResultToString(respStatus));
+		IotLogInfo("Response Status: %s\n", ResultToString(respStatus));
 
 		switch (respStatus) {
 		case COAP_WAITING:
@@ -534,7 +533,7 @@ static void handleNotifyInteraction(CoAP_Interaction_t* pIA) {
 			//retain transmission parameters of "pending" interaction
 			if (pIA->UpdatePendingNotification) {
 				CoAP_MessageType_t TypeSave = pIA->pRespMsg->Type;
-				PRINT_INFO("in retry: update pending IA\r\n");
+				IotLogInfo("in retry: update pending IA\r\n");
 				pIA->UpdatePendingNotification = false;
 				pIA->pRespMsg->MessageID = CoAP_GetNextMid();
 				//call notifier
@@ -554,9 +553,9 @@ static void handleNotifyInteraction(CoAP_Interaction_t* pIA) {
 			if (CoAP_SendMsg(pIA->pRespMsg, pIA->socketHandle, pIA->RemoteEp) == COAP_OK) {
 				pIA->RetransCounter++;
 				CoAP_EnableAckTimeout(pIA, pIA->RetransCounter);
-				PRINT_INFO("- Changed notification body during retry\r\n");
+				IotLogInfo("- Changed notification body during retry\r\n");
 			} else {
-				PRINT_INFO("(!!!) Internal socket error on sending response! MiD: %d\r\n", pIA->pReqMsg->MessageID);
+				IotLogInfo("(!!!) Internal socket error on sending response! MiD: %d\r\n", pIA->pReqMsg->MessageID);
 				CoAP_DeleteInteraction(pIA);
 			}
 			break;
@@ -580,7 +579,7 @@ static void handleNotifyInteraction(CoAP_Interaction_t* pIA) {
 				} else { //good response
 					UpdateObserveOptionInMsg(pIA->pRespMsg, pIA->pRes->UpdateCnt);
 				}
-				PRINT_INFO("- Started new notification since resource has been updated!\r\n");
+				IotLogInfo("- Started new notification since resource has been updated!\r\n");
 				CoAP_EnqueueLastInteraction(pIA);
 				return;
 			}
@@ -601,19 +600,19 @@ static void handleNotifyInteraction(CoAP_Interaction_t* pIA) {
 	return;
 }
 
-static void handleClientInteraction(CoAP_Interaction_t* pIA) {
+static void _rom handleClientInteraction(CoAP_Interaction_t* pIA) {
 
 	//------------------------------------------
 	if (pIA->State == COAP_STATE_READY_TO_REQUEST) {
 		//------------------------------------------
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		SendReq(pIA, COAP_STATE_WAITING_RESPONSE); //transmit response & move to next state
-		//o>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		//--------------------------------------------------
 	} else if (pIA->State == COAP_STATE_WAITING_RESPONSE) {
 		//--------------------------------------------------
 		CoAP_Result_t reqStatus = CheckReqStatus(pIA);
-		PRINT_INFO("Request Status: %s\n", ResultToString(reqStatus));
+		IotLogInfo("Request Status: %s\n", ResultToString(reqStatus));
 		switch (reqStatus) {
 		case COAP_WAITING:
 			CoAP_EnqueueLastInteraction(pIA); //(re)enqueue interaction for further processing
@@ -624,7 +623,7 @@ static void handleClientInteraction(CoAP_Interaction_t* pIA) {
 				pIA->RetransCounter++;
 				CoAP_EnableAckTimeout(pIA, pIA->RetransCounter);
 			} else {
-				PRINT_INFO("(!!!) Internal socket error on sending request retry! MiD: %d\r\n",
+				IotLogInfo("(!!!) Internal socket error on sending request retry! MiD: %d\r\n",
 						pIA->pReqMsg->MessageID);
 				CoAP_DeleteInteraction(pIA);
 			}
@@ -639,13 +638,13 @@ static void handleClientInteraction(CoAP_Interaction_t* pIA) {
 		//--------------------------------------------------
 	} else if (pIA->State == COAP_STATE_HANDLE_RESPONSE) {
 		//--------------------------------------------------
-		PRINT_INFO("- Got Response to Client request! -> calling Handler!\r\n");
+		IotLogInfo("- Got Response to Client request! -> calling Handler!\r\n");
 		if (pIA->RespCB != NULL) {
 			pIA->RespCB(pIA->pRespMsg, &(pIA->RemoteEp)); //call callback
 		}
 
 			pIA->State = COAP_STATE_FINISHED;
-//			CoAP_EnqueueLastInteraction(pIA);
+			CoAP_EnqueueLastInteraction(pIA);
 		CoAP_DeleteInteraction(
 				pIA); //direct delete, todo: eventually wait some time to send ACK instead of RST if out ACK to remote reponse was lost
 
@@ -667,19 +666,17 @@ void _rom CoAP_doWork() {
 	uint32_t now = IotClock_GetTimeMs()/1000;
 
 	if (timeAfter(pIA->SleepUntil, now)) {
-		//PRINT_INFO("Interaction paused till %lu (remaining: %lu)\n",pIA->SleepUntil, pIA->SleepUntil - now);
 		CoAP_EnqueueLastInteraction(pIA);
 		return;
 	}
 
 	// DEBUG output all interactions
-	PRINT_INFO("\n");
+	IotLogInfo("\n");
 	PrintInteractions(CoAP.pInteractions);
 	//coap_mem_stats();
 
-	PRINT_INFO("Now: %lu\n", now);
+	IotLogInfo("Now: %lu\n", now);
 
-	//	PRINT_INFO("pending Transaction found! ReqTime: %u\r\n", pIA->ReqTime);
 	//	com_mem_stats();
 
 	switch (pIA->Role) {
@@ -693,7 +690,7 @@ void _rom CoAP_doWork() {
 		handleClientInteraction(pIA);
 		break;
 	default:
-		PRINT_ERR("Unknown Notification Role: %d", pIA->Role);
+		IotLogError("Unknown Notification Role: %d", pIA->Role);
 	}
 
 	return;

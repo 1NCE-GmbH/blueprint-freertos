@@ -28,17 +28,17 @@ CoAP_Result_t _rom dbgBlkOption(CoAP_blockwise_option_t* blkOption)
 {
 	if (blkOption->Type == BLOCK_1)
 			{
-		PRINT_INFO("\r\n>>Block1 (#%d) Option found\r\n", blkOption->Type);
+		IotLogInfo("\r\n>>Block1 (#%d) Option found\r\n", blkOption->Type);
 	}
 
 	if (blkOption->Type == BLOCK_2)
 			{
-		PRINT_INFO("\r\n>>Block2 (#%d) Option found\r\n", blkOption->Type);
+		IotLogInfo("\r\n>>Block2 (#%d) Option found\r\n", blkOption->Type);
 	}
 
-	PRINT_INFO("- BlockSize: %ud\r\n", blkOption->BlockSize);
-	PRINT_INFO("- BlockNum: %ud\r\n", blkOption->BlockNum);
-	PRINT_INFO("- MoreFlag: %d\r\n", blkOption->MoreFlag);
+	IotLogInfo("- BlockSize: %ud\r\n", blkOption->BlockSize);
+	IotLogInfo("- BlockNum: %ud\r\n", blkOption->BlockNum);
+	IotLogInfo("- MoreFlag: %d\r\n", blkOption->MoreFlag);
 
 	return COAP_OK;
 }

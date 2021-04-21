@@ -82,12 +82,12 @@ void _rom coap_mem_init(uint8_t* pMemoryArea, int16_t size)
 
 void* _rom coap_mem_get(bufsize size) {
 	void* ptr = bget(size);
-//	PRINT_INFO("- mem req: %d got: %d ptr %x\r\n", size, coap_mem_size(ptr), ptr);
+//	configPRINTF(("- mem req: %d got: %d ptr %x\r\n", size, coap_mem_size(ptr), ptr);
 	return ptr;
 }
 
 void* _rom coap_mem_get0(bufsize size) {
-	//PRINT_INFO("- mem req: %d byte\r\n", size);
+	//configPRINTF(("- mem req: %d byte\r\n", size);
 	return bgetz(size);
 }
 
@@ -113,9 +113,9 @@ void _rom coap_mem_stats()
 		memMax = totfree;
 	}
 
-	PRINT_INFO("- CoAP mem: used: [%ld] free: [%ld (%d|%d)]\n",
+	IotLogInfo("- CoAP mem: used: [%ld] free: [%ld (%d|%d)]\n",
 			(int32_t )curalloc, (int32_t )totfree, memMin, memMax);
-	PRINT_INFO("max-chunk: [%ld] get/rel: [%ld|%ld=%ld]\n", (int32_t )maxfree, nget, nrel, nget - nrel);
+	IotLogInfo("max-chunk: [%ld] get/rel: [%ld|%ld=%ld]\n", (int32_t )maxfree, nget, nrel, nget - nrel);
 }
 
 /*

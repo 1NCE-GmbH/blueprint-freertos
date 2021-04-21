@@ -86,13 +86,13 @@ CoAP_Result_t _rom CoAP_FreeMessage(CoAP_Message_t* pMsg) {
 	}
 
 	if (pMsg->Type == CON) {
-		PRINT_INFO("- Message memory freed! (CON, MID: %d):\r\n", pMsg->MessageID);
+		IotLogInfo("- Message memory freed! (CON, MID: %d):\r\n", pMsg->MessageID);
 	} else if ((pMsg)->Type == NON) {
-		PRINT_INFO("- Message memory freed! (NON, MID: %d):\r\n", pMsg->MessageID);
+		IotLogInfo("- Message memory freed! (NON, MID: %d):\r\n", pMsg->MessageID);
 	} else if ((pMsg)->Type == ACK) {
-		PRINT_INFO("- Message memory freed! (ACK, MID: %d):\r\n", pMsg->MessageID);
+		IotLogInfo("- Message memory freed! (ACK, MID: %d):\r\n", pMsg->MessageID);
 	} else if ((pMsg)->Type == RST) {
-		PRINT_INFO("- Message memory freed! (RST, MID: %d):\r\n", pMsg->MessageID);
+		IotLogInfo("- Message memory freed! (RST, MID: %d):\r\n", pMsg->MessageID);
 	}
 
 	CoAP_FreeOptionList(pMsg->pOptionsList);
@@ -160,7 +160,7 @@ CoAP_Result_t _rom CoAP_ParseMessageFromDatagram(uint8_t* srcArr, uint16_t srcAr
 	CoAP_InitToEmptyResetMsg(&msg);
 //1st Header Byte
 	uint8_t Version = srcArr[0] >> 6;
-	PRINT_INFO("V[0]=%d\r\n",Version);
+	IotLogInfo("V[0]=%d\r\n",Version);
 	if (Version != COAP_VERSION) {
 		return COAP_PARSE_UNKOWN_COAP_VERSION;
 	}
@@ -168,7 +168,7 @@ CoAP_Result_t _rom CoAP_ParseMessageFromDatagram(uint8_t* srcArr, uint16_t srcAr
 	msg.Type = (srcArr[0] & 0b110000) >> 4;
 	tokenLength = srcArr[0] & 0b1111;
 	if (tokenLength > 8) {
-		PRINT_INFO("CoAP-Parse Byte1 Error\r\n");
+		IotLogInfo("CoAP-Parse Byte1 Error\r\n");
 		return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 	} // return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 
@@ -176,11 +176,11 @@ CoAP_Result_t _rom CoAP_ParseMessageFromDatagram(uint8_t* srcArr, uint16_t srcAr
 	msg.Code = srcArr[1];
 
 	//"Hack" to support early version of "myCoAP" iOS app which sends malformed "CoAP-pings" containing a token...
-	//if(Msg.Code == EMPTY && (TokenLength != 0 || srcArrLength != 4))	{PRINT_INFO("err2\r\n");return COAP_PARSE_MESSAGE_FORMAT_ERROR;}// return COAP_PARSE_MESSAGE_FORMAT_ERROR;
+	//if(Msg.Code == EMPTY && (TokenLength != 0 || srcArrLength != 4))	{IotLogInfo("err2\r\n"));return COAP_PARSE_MESSAGE_FORMAT_ERROR;}// return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 
 	uint8_t codeClass = ((uint8_t) msg.Code) >> 5;
 	if (codeClass == 1 || codeClass == 6 || codeClass == 7) {
-		PRINT_INFO("CoAP-Parse Byte2/3 Error\r\n");
+		IotLogInfo("CoAP-Parse Byte2/3 Error\r\n");
 		return COAP_PARSE_MESSAGE_FORMAT_ERROR;
 	}    //  return COAP_PARSE_MESSAGE_FORMAT_ERROR; //reserved classes
 
@@ -217,7 +217,7 @@ CoAP_Result_t _rom CoAP_ParseMessageFromDatagram(uint8_t* srcArr, uint16_t srcAr
 	if (ParseOptionsResult != COAP_OK) {
 		CoAP_FreeOptionList(msg.pOptionsList);
 		msg.pOptionsList = NULL;
-		PRINT_INFO("CoAP-Parse Options Error\r\n");
+		IotLogInfo("CoAP-Parse Options Error\r\n");
 		return ParseOptionsResult;
 	}
 
@@ -347,7 +347,7 @@ CoAP_Token_t _rom CoAP_GenerateToken() {
 
 CoAP_Result_t _rom CoAP_addNewPayloadToMessage(CoAP_Message_t* Msg, uint8_t* pData, uint16_t size) {
 	if (size > MAX_PAYLOAD_SIZE) {
-		PRINT_ERR("payload > MAX_PAYLOAD_SIZE");
+		IotLogError("payload > MAX_PAYLOAD_SIZE");
 		return COAP_ERR_OUT_OF_MEMORY;
 	}
 
@@ -375,102 +375,102 @@ CoAP_Result_t _rom CoAP_addTextPayload(CoAP_Message_t* Msg, char* PayloadStr) {
 }
 
 void _rom CoAP_PrintMsg(CoAP_Message_t* msg) {
-	PRINT_INFO("---------CoAP msg--------\r\n");
+	IotLogInfo("---------CoAP msg--------\r\n");
 
 	if (msg->Type == CON) {
-		PRINT_DBG("*Type: CON (0x%02x)\r\n", msg->Type);
+		IotLogDebug("*Type: CON (0x%02x)\r\n", msg->Type);
 	} else if (msg->Type == NON) {
-		PRINT_DBG("*Type: NON (0x%02x)\r\n", msg->Type);
+		IotLogDebug("*Type: NON (0x%02x)\r\n", msg->Type);
 	} else if (msg->Type == ACK) {
-		PRINT_DBG("*Type: ACK (0x%02x)\r\n", msg->Type);
+		IotLogDebug("*Type: ACK (0x%02x)\r\n", msg->Type);
 	} else if (msg->Type == RST) {
-		PRINT_DBG("*Type: RST (0x%02x)\r\n", msg->Type);
+		IotLogDebug("*Type: RST (0x%02x)\r\n", msg->Type);
 	} else {
-		PRINT_DBG("*Type: UNKNOWN! (0x%02x)\r\n", msg->Type);
+		IotLogDebug("*Type: UNKNOWN! (0x%02x)\r\n", msg->Type);
 	}
 
 	uint8_t tokenBytes = msg->Token.Length;
 	if (tokenBytes > 0) {
-		PRINT_DBG("*Token: %u Byte -> 0x", tokenBytes);
+		IotLogDebug("*Token: %u Byte -> 0x", tokenBytes);
 		int i;
 		for (i = 0; i < tokenBytes; i++) {
-			PRINT_DBG("%02x", msg->Token.Token[i]);
+			IotLogDebug("%02x", msg->Token.Token[i]);
 		}
 	} else {
-		PRINT_DBG("*Token: %u Byte -> 0", tokenBytes);
+		IotLogDebug("*Token: %u Byte -> 0", tokenBytes);
 	}
 
 	uint8_t code = msg->Code;
-	PRINT_DBG("\r\n*Code: %d.%02d (0x%02x) ", code >> 5, code & 31, code);
+	IotLogDebug("\r\n*Code: %d.%02d (0x%02x) ", code >> 5, code & 31, code);
 
 	if (msg->Code == EMPTY) {
-		PRINT_DBG("[EMPTY]\r\n");
+		IotLogDebug("[EMPTY]\r\n");
 	} else if (msg->Code == REQ_GET) {
-		PRINT_DBG("[REQ_GET]\r\n");
+		IotLogDebug("[REQ_GET]\r\n");
 	} else if (msg->Code == REQ_POST) {
-		PRINT_DBG("[REQ_POST]\r\n");
+		IotLogDebug("[REQ_POST]\r\n");
 	} else if (msg->Code == REQ_PUT) {
-		PRINT_DBG("[REQ_PUT]\r\n");
+		IotLogDebug("[REQ_PUT]\r\n");
 	} else if (msg->Code == REQ_DELETE) {
-		PRINT_DBG("[REQ_DELETE]\r\n");
+		IotLogDebug("[REQ_DELETE]\r\n");
 	} else
-		PRINT_DBG("\r\n");
+		IotLogDebug("\r\n");
 
-	PRINT_DBG("*MessageId: %u\r\n", msg->MessageID);
+	IotLogDebug("*MessageId: %u\r\n", msg->MessageID);
 
 	CoAP_option_t* pOption = NULL;
 	if (msg->pOptionsList != NULL) {
 		pOption = msg->pOptionsList;
 	}
 	while (pOption != NULL) {
-		PRINT_INFO("*Option #%u (Length=%u) ->", pOption->Number, pOption->Length);
+		IotLogInfo("*Option #%u (Length=%u) ->", pOption->Number, pOption->Length);
 		int j;
 		for (j = 0; j < pOption->Length; j++) {
 			if (pOption->Value[j]) {
-				PRINT_INFO(" %c[", pOption->Value[j]);
-				PRINT_INFO("%02x]", pOption->Value[j]);
+				IotLogInfo(" %c[", pOption->Value[j]);
+				IotLogInfo("%02x]", pOption->Value[j]);
 			} else {
-				PRINT_INFO("  [00]", pOption->Value[j]);
+				IotLogInfo("  [00]", pOption->Value[j]);
 			}
 		}
-		PRINT_INFO("\r\n");
+		IotLogInfo("\r\n");
 		pOption = pOption->next;
 	}
 	if (msg->PayloadLength) {
-		PRINT_DBG("*Payload (%u Byte): \"", msg->PayloadLength);
+		IotLogDebug("*Payload (%u Byte): \"", msg->PayloadLength);
 		if (msg->PayloadLength > MAX_PAYLOAD_SIZE) {
-			PRINT_DBG("too much payload!");
+			IotLogDebug("too much payload!");
 		} else {
 			int i;
 			for (i = 0; i < msg->PayloadLength && i < MAX_PAYLOAD_SIZE; i++) {
-				PRINT_DBG("%c", msg->Payload[i]);
+				IotLogDebug("%c", msg->Payload[i]);
 			}
 		}
-		PRINT_DBG("\"\r\n");
+		IotLogDebug("\"\r\n");
 	}
 
-	PRINT_INFO("*Timestamp: %d\r\n", msg->Timestamp);
-	PRINT_INFO("----------------------------\r\n");
+	IotLogInfo("*Timestamp: %d\r\n", msg->Timestamp);
+	IotLogInfo("----------------------------\r\n");
 }
 
 void _rom CoAP_PrintResultValue(CoAP_Result_t res) {
 	if (res == COAP_OK) {
-		PRINT_INFO("COAP_OK\r\n");
+		IotLogInfo("COAP_OK\r\n");
 	} else if (res == COAP_PARSE_DATAGRAM_TOO_SHORT) {
-		PRINT_INFO("COAP_PARSE_DATAGRAM_TOO_SHORT\r\n");
+		IotLogInfo("COAP_PARSE_DATAGRAM_TOO_SHORT\r\n");
 	} else if (res == COAP_PARSE_UNKOWN_COAP_VERSION) {
-		PRINT_INFO("COAP_PARSE_UNKOWN_COAP_VERSION\r\n");
+		IotLogInfo("COAP_PARSE_UNKOWN_COAP_VERSION\r\n");
 	} else if (res == COAP_PARSE_MESSAGE_FORMAT_ERROR) {
-		PRINT_INFO("COAP_PARSE_MESSAGE_FORMAT_ERROR\r\n");
+		IotLogInfo("COAP_PARSE_MESSAGE_FORMAT_ERROR\r\n");
 	} else if (res == COAP_PARSE_TOO_MANY_OPTIONS) {
-		PRINT_INFO("COAP_PARSE_TOO_MANY_OPTIONS\r\n");
+		IotLogInfo("COAP_PARSE_TOO_MANY_OPTIONS\r\n");
 	} else if (res == COAP_PARSE_TOO_LONG_OPTION) {
-		PRINT_INFO("COAP_PARSE_TOO_LONG_OPTION\r\n");
+		IotLogInfo("COAP_PARSE_TOO_LONG_OPTION\r\n");
 	} else if (res == COAP_PARSE_TOO_MUCH_PAYLOAD) {
-		PRINT_INFO("COAP_PARSE_TOO_MUCH_PAYLOAD\r\n");
+		IotLogInfo("COAP_PARSE_TOO_MUCH_PAYLOAD\r\n");
 	} else if (res == COAP_ERR_OUT_OF_MEMORY) {
-		PRINT_INFO("COAP_ERR_OUT_OF_MEMORY\r\n");
+		IotLogInfo("COAP_ERR_OUT_OF_MEMORY\r\n");
 	} else {
-		PRINT_INFO("UNKNOWN RESULT\r\n");
+		IotLogInfo("UNKNOWN RESULT\r\n");
 	}
 }

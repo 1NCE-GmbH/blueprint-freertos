@@ -105,7 +105,7 @@ CoAP_Observer_t* _rom CoAP_AllocNewObserver()
 
 CoAP_Result_t _rom CoAP_FreeObserver(CoAP_Observer_t** pObserver)
 {
-	PRINT_INFO("Releasing pObserver\r\n");
+	IotLogInfo("Releasing pObserver\r\n");
 	//coap_mem_stats();
 
 	CoAP_FreeOptionList((*pObserver)->pOptList);

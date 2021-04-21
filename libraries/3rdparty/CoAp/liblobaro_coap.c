@@ -31,27 +31,27 @@ static const TickType_t xSendTimeOut = pdMS_TO_TICKS(40000);
 
 
 NetTransmit_fn CoAP_Send_Wifi(Socket_t socketHandle, NetPacket_t *pckt) {
-	NetTransmit_fn result = false;
+	NetTransmit_fn result =(NetTransmit_fn) false;
 	BaseType_t xTransmitted;
 
 
 	xTransmitted = SOCKETS_Send(socketHandle, /* The socket being sent to. */
-	(void*) pckt->pData + 8 , /* The data being sent. */
+	(void*) pckt->pData, /* The data being sent. */
 	pckt->size, /* The length of the data being sent. */
 	0); /* No flags. */
 
 	if (xTransmitted < 0) {
 		/* Error? */
-		PRINT_INFO( "ERROR - Failed to send CoAP packet\r\n" );
+		IotLogInfo( "ERROR - Failed to send CoAP packet\r\n" );
 	} else {
 
-		result = true;
-		PRINT_INFO( "CoAP Packet Sent\r\n" );
+		result = (NetTransmit_fn) true;
+		IotLogInfo( "CoAP Packet Sent\r\n" );
 	}
 
 	return (result);
 }
-void _ram	CoAP_Recv_Wifi(Socket_t socketHandle, NetPacket_t* pPacket,const NetEp_t ServerEp){
+void _rom CoAP_Recv_Wifi(Socket_t socketHandle, NetPacket_t* pPacket,const NetEp_t ServerEp){
 	/* Clear the buffer into which the echoed string will be
 			 * placed. */
 			unsigned char pcReceivedString[200];
@@ -63,12 +63,12 @@ void _ram	CoAP_Recv_Wifi(Socket_t socketHandle, NetPacket_t* pPacket,const NetEp
 			if (xReturned < 0) {
 				/* Error occurred.  Latch it so it can be detected
 				 * below. */
-				configPRINTF(
-						( "ERROR: Receiving from CoAP server %d bytes\r\n",xReturned ));
+				IotLogInfo
+						( "ERROR: Receiving from CoAP server %d bytes\r\n",xReturned );
 				return;
 			} else if (xReturned == 0) {
 				/* Timed out. */
-				PRINT_INFO( "Timed out receiving from CoAP server\r\n" );
+				IotLogInfo( "Timed out receiving from CoAP server\r\n" );
 				return;
 			}
 			pPacket->pData = pvPortMalloc(sizeof(uint8_t) * xReturned);
@@ -79,4 +79,3 @@ void _ram	CoAP_Recv_Wifi(Socket_t socketHandle, NetPacket_t* pPacket,const NetEp
 
 			CoAP_HandleIncomingPacket(socketHandle, pPacket);
 }
-
