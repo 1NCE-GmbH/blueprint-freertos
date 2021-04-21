@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,11 +26,17 @@
 #ifndef __CELLULAR_COMMON_H__
 #define __CELLULAR_COMMON_H__
 
+#include "iot_config.h"
+
 /* Standard includes. */
 #include <stdbool.h>
 
+/* Platform layer includes. */
+#include "platform/iot_threads.h"
+#include "event_groups.h"
+#include "queue.h"
+
 /* Cellular includes. */
-#include "cellular_platform.h"
 #include "cellular_comm_interface.h"
 #include "cellular_types.h"
 #include "cellular_at_core.h"
@@ -38,21 +44,19 @@
 /*-----------------------------------------------------------*/
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
  * @brief The AT command request structure.
  */
 typedef struct CellularAtReq
 {
     const char * pAtCmd;
     CellularATCommandType_t atCmdType;
-    const char * pAtRspPrefix;
+    char * pAtRspPrefix;
     CellularATCommandResponseReceivedCallback_t respCallback;
     void * pData;
     uint32_t dataLen;
 } CellularAtReq_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
  * @brief The data command request structure.
  */
 typedef struct CellularAtDataReq
@@ -68,14 +72,12 @@ typedef struct CellularAtDataReq
 } CellularAtDataReq_t;
 
 /**
- * @ingroup cellular_common_datatypes_functionpointers
  * @brief URC handler function.
  */
 typedef void ( * CellularAtParseTokenHandler_t )( CellularContext_t * pContext,
                                                   char * pInputStr );
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
  * @brief the URC token and URC handler mapping structure used by pkthanlder.
  */
 typedef struct CellularAtParseTokenMap
@@ -85,7 +87,6 @@ typedef struct CellularAtParseTokenMap
 } CellularAtParseTokenMap_t;
 
 /**
- * @ingroup cellular_common_datatypes_enums
  * @brief enum representing different Socket State.
  */
 typedef enum CellularSocketState
@@ -97,7 +98,6 @@ typedef enum CellularSocketState
 } CellularSocketState_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
  * @brief Parameters involved in sending/receiving data through sockets.
  */
 typedef struct CellularSocketContext
@@ -132,7 +132,6 @@ typedef struct CellularSocketContext
 } CellularSocketContext_t;
 
 /**
- * @ingroup cellular_common_datatypes_paramstructs
  * @brief Parameters to setup pktio and pkthandler token tables.
  */
 typedef struct CellularTokenTable
@@ -157,7 +156,6 @@ typedef struct CellularTokenTable
 } CellularTokenTable_t;
 
 /**
- * @ingroup cellular_common_datatypes_functionpointers
  * @brief Callback used to inform pktio the data start and the length of the data.
  *
  * @param[in] pCallbackContext The pCallbackContext in _Cellular_TimeoutAtcmdDataRecvRequestWithCallback.
@@ -177,12 +175,11 @@ typedef CellularPktStatus_t ( * CellularATCommandDataPrefixCallback_t ) ( void *
                                                                           uint32_t * pDataLength );
 
 /**
- * @ingroup cellular_common_datatypes_functionpointers
  * @brief Callback used to fix the stream before the send data.
  *
  * @param[in] pCallbackContext The pCallbackContext in CellularATCommandDataSendPrefixCallback_t.
- * @param[in,out] pLine The input line form cellular modem.
- * @param[in,out] pBytesRead The length of the input line from cellular modem.
+ * @param[in/out] pLine The input line form cellular modem.
+ * @param[in/out] pBytesRead The length of the input line from cellular modem.
  *
  * @return CELLULAR_PKT_STATUS_OK if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -199,7 +196,7 @@ typedef CellularPktStatus_t ( * CellularATCommandDataSendPrefixCallback_t ) ( vo
  * This function initializes and returns the supplied context. It must be called
  * once (and only once) before calling any other function of this library.
  *
- * @param[in,out] pCellularHandle The handle pointer to store the cellular handle.
+ * @param[in/out] pCellularHandle The handle pointer to store the cellular handle.
  * @param[in] pCommInterface Comm interface for communicating with the module.
  * @param[in] pTokenTable Token tables for pkthandler and pktio.
  *
@@ -283,7 +280,7 @@ void _Cellular_ModemEventCallback( const CellularContext_t * pContext,
 /**
  * @brief Check Library Status.
  *
- * This Functions checks if the FreeRTOS Cellular Library is already opened and set up
+ * This Functions checks if the HAL library is already opened and set up
  * for cellular modem operation for control and data plane function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
@@ -409,7 +406,7 @@ CellularError_t _Cellular_ConvertCsqSignalBer( int16_t csqBer,
  * @brief Get the socket data structure with socket index.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[out] ppModuleContext The module context set in Cellular_ModuleInit function.
+ * @param[out] pModuleContext The module context set in Cellular_ModuleInit function.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -421,7 +418,7 @@ CellularError_t _Cellular_GetModuleContext( const CellularContext_t * pContext,
  * @brief Convert the signal to bar.
  *
  * @param[in] rat Current RAT of the registered network.
- * @param[in,out] pSignalInfo The signal value of current RAT. The result bar
+ * @param[in/out] pSignalInfo The signal value of current RAT. The result bar
  * value is assigned in this structure.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
@@ -434,7 +431,7 @@ CellularError_t _Cellular_ComputeSignalBars( CellularRat_t rat,
  * @brief Return the current RAT if previously received with 3GPP AT command.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
- * @param[out] pRat Current RAT of the registered network.
+ * @param[out] rat Current RAT of the registered network.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -510,8 +507,6 @@ CellularPktStatus_t _Cellular_TimeoutAtcmdDataSendRequestWithCallback( CellularC
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  * @param[in] atReq The AT command data structure with send command response callback.
  * @param[in] dataReq The following data request after the at request.
- * @param[in] pktDataSendPrefixCallback The callback function to inidcate the data sending start.
- * @param[in] pCallbackContext The callback context pass to pktDataSendPrefixCallback function.
  * @param[in] atTimeoutMS The timeout value to wait for the AT command response from cellular modem.
  * @param[in] dataTimeoutMS The timeout value to wait for the data command response from cellular modem.
  * @param[in] interDelayMS The delay between AT command and data send.

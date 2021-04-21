@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -29,36 +29,25 @@
 #include <stdbool.h>
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Invalid signal value.
  */
 #define CELLULAR_INVALID_SIGNAL_VALUE        ( -32768 )
-
-/**
- * @ingroup cellular_datatypes_paramstructs
- * @brief Invalid signal bar value.
- */
 #define CELLULAR_INVALID_SIGNAL_BAR_VALUE    ( 0xFFU )
 
-struct CellularContext;
-typedef struct CellularContext         CellularContext_t;
-
 /**
- * @ingroup cellular_datatypes_handles
  * @brief Opaque Cellular handle.
  */
+struct CellularContext;
+typedef struct CellularContext         CellularContext_t;
 typedef struct CellularContext         * CellularHandle_t;
 
-struct CellularSocketContext;
-
 /**
- * @ingroup cellular_datatypes_handles
  * @brief Opaque socket handle.
  */
+struct CellularSocketContext;
 typedef struct CellularSocketContext   * CellularSocketHandle_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Status code returns from APIs.
  */
 typedef enum CellularError
@@ -81,7 +70,6 @@ typedef enum CellularError
 } CellularError_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Enums representing Radio Access Technologies (RATs). Reference 3GPP TS 27.007 PLMN selection +COPS.
  */
 typedef enum CellularRat
@@ -100,7 +88,6 @@ typedef enum CellularRat
 } CellularRat_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief SIM card state codes.
  */
 typedef enum CellularSimCardState
@@ -112,7 +99,6 @@ typedef enum CellularSimCardState
 } CellularSimCardState_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief SIM card lock state codes. Reference 3GPP TS 27.007 Enter PIN +CPIN.
  */
 typedef enum CellularSimCardLockState
@@ -137,7 +123,6 @@ typedef enum CellularSimCardLockState
 } CellularSimCardLockState_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents network registration mode. Reference 3GPP TS 27.007 PLMN selection +COPS.
  */
 typedef enum CellularNetworkRegistrationMode
@@ -151,7 +136,6 @@ typedef enum CellularNetworkRegistrationMode
 } CellularNetworkRegistrationMode_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents network registration status. Reference 3GPP TS 27.007 network registration status.
  */
 typedef enum CellularNetworkRegistrationStatus
@@ -169,7 +153,6 @@ typedef enum CellularNetworkRegistrationStatus
 } CellularNetworkRegistrationStatus_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents operator name format.
  */
 typedef enum CellularOperatorNameFormat
@@ -182,7 +165,6 @@ typedef enum CellularOperatorNameFormat
 } CellularOperatorNameFormat_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents URC events.
  */
 typedef enum CellularUrcEvent
@@ -198,7 +180,6 @@ typedef enum CellularUrcEvent
 } CellularUrcEvent_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents Modem events.
  */
 typedef enum CellularModemEvent
@@ -209,7 +190,6 @@ typedef enum CellularModemEvent
 } CellularModemEvent_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents PDN context type.
  */
 typedef enum CellularPdnContextType
@@ -221,7 +201,6 @@ typedef enum CellularPdnContextType
 } CellularPdnContextType_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents PDN authentication type.
  */
 typedef enum CellularPdnAuthType
@@ -233,7 +212,6 @@ typedef enum CellularPdnAuthType
 } CellularPdnAuthType_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents socket domain.
  */
 typedef enum CellularSocketDomain
@@ -243,7 +221,6 @@ typedef enum CellularSocketDomain
 } CellularSocketDomain_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents socket type.
  */
 typedef enum CellularSocketType
@@ -253,7 +230,6 @@ typedef enum CellularSocketType
 } CellularSocketType_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents socket protocol.
  */
 typedef enum CellularSocketProtocol
@@ -263,7 +239,6 @@ typedef enum CellularSocketProtocol
 } CellularSocketProtocol_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents data access modes.
  */
 typedef enum CellularSocketAccessMode
@@ -275,7 +250,6 @@ typedef enum CellularSocketAccessMode
 } CellularSocketAccessMode_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents IP address.
  */
 typedef enum CellularIPAddressType
@@ -285,7 +259,6 @@ typedef enum CellularIPAddressType
 } CellularIPAddressType_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents socket option level.
  */
 typedef enum CellularSocketOptionLevel
@@ -295,7 +268,6 @@ typedef enum CellularSocketOptionLevel
 } CellularSocketOptionLevel_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Socket option names.
  */
 typedef enum CellularSocketOption
@@ -307,7 +279,6 @@ typedef enum CellularSocketOption
 } CellularSocketOption_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief packet Status Names.
  */
 typedef enum CellularPktStatus
@@ -329,7 +300,6 @@ typedef enum CellularPktStatus
 } CellularPktStatus_t;
 
 /**
- * @ingroup cellular_datatypes_enums
  * @brief Represents AT Command type.
  */
 typedef enum CellularATCommandType
@@ -344,7 +314,6 @@ typedef enum CellularATCommandType
 } CellularATCommandType_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief SIM Card status.
  */
 typedef struct CellularSimCardStatus
@@ -354,7 +323,6 @@ typedef struct CellularSimCardStatus
 } CellularSimCardStatus_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Public Land Mobile Network (PLMN) information.
  */
 typedef struct CellularPlmnInfo
@@ -364,7 +332,6 @@ typedef struct CellularPlmnInfo
 } CellularPlmnInfo_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief SIM Card information.
  */
 typedef struct CellularSimCardInfo
@@ -375,7 +342,6 @@ typedef struct CellularSimCardInfo
 } CellularSimCardInfo_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Modem information.
  */
 typedef struct CellularModemInfo
@@ -389,7 +355,6 @@ typedef struct CellularModemInfo
 } CellularModemInfo_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents time.
  */
 typedef struct CellularTime
@@ -407,7 +372,6 @@ typedef struct CellularTime
 } CellularTime_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents signal information.
  */
 typedef struct CellularSignalInfo
@@ -421,7 +385,6 @@ typedef struct CellularSignalInfo
 } CellularSignalInfo_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents network service status.
  */
 typedef struct CellularServiceStatus
@@ -440,7 +403,6 @@ typedef struct CellularServiceStatus
 } CellularServiceStatus_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents A singly-lined list of intermediate AT responses.
  */
 typedef struct CellularATCommandLine
@@ -450,7 +412,6 @@ typedef struct CellularATCommandLine
 } CellularATCommandLine_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents AT Command response.
  */
 typedef struct CellularATCommandResponse
@@ -460,7 +421,6 @@ typedef struct CellularATCommandResponse
 } CellularATCommandResponse_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents PSM settings.
  */
 typedef struct CellularPsmSettings
@@ -539,7 +499,6 @@ typedef struct CellularPsmSettings
 } CellularPsmSettings_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents e-I-DRX settings.
  */
 typedef struct CellularEidrxSettings
@@ -629,10 +588,6 @@ typedef struct CellularEidrxSettings
     uint8_t pagingTimeWindow; /**< Paging time window encoded as per spec (as shown above). Only applicable in URC. */
 } CellularEidrxSettings_t;
 
-/**
- * @ingroup cellular_datatypes_paramstructs
- * @brief Cellular Represents e-I-DRX settings Lists.
- */
 typedef struct CellularEidrxSettingsList
 {
     CellularEidrxSettings_t eidrxList[ CELLULAR_EDRX_LIST_MAX_SIZE ];
@@ -640,7 +595,6 @@ typedef struct CellularEidrxSettingsList
 } CellularEidrxSettingsList_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents IP Address.
  */
 typedef struct CellularIPAddress
@@ -650,7 +604,6 @@ typedef struct CellularIPAddress
 } CellularIPAddress_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents a PDN config.
  */
 typedef struct CellularPdnConfig
@@ -663,7 +616,6 @@ typedef struct CellularPdnConfig
 } CellularPdnConfig_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents status of a PDN context.
  */
 typedef struct CellularPdnStatus
@@ -675,7 +627,6 @@ typedef struct CellularPdnStatus
 } CellularPdnStatus_t;
 
 /**
- * @ingroup cellular_datatypes_paramstructs
  * @brief Represents socket address.
  */
 typedef struct CellularSocketAddress
@@ -685,7 +636,6 @@ typedef struct CellularSocketAddress
 } CellularSocketAddress_t;
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about the response of an AT command sent
  * using Cellular_ATCommandRaw API.
  *
@@ -703,7 +653,6 @@ typedef CellularPktStatus_t ( * CellularATCommandResponseReceivedCallback_t ) ( 
                                                                                 uint16_t dataLen );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about a Network Registration URC event.
  *
  * @param[in] urcEvent URC Event that happened.
@@ -716,7 +665,6 @@ typedef void ( * CellularUrcNetworkRegistrationCallback_t )( CellularUrcEvent_t 
                                                              void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about PDN URC events.
  *
  * @param[in] urcEvent URC Event that happened.
@@ -729,7 +677,6 @@ typedef void ( * CellularUrcPdnEventCallback_t )( CellularUrcEvent_t urcEvent,
                                                   void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about signal strength changed URC event.
  *
  * @param[in] urcEvent URC Event that happened.
@@ -742,7 +689,6 @@ typedef void ( * CellularUrcSignalStrengthChangedCallback_t )( CellularUrcEvent_
                                                                void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Generic callback used to inform all other URC events.
  *
  * @param[in] pRawData Raw data received in the URC event.
@@ -753,7 +699,6 @@ typedef void ( * CellularUrcGenericCallback_t )( const char * pRawData,
                                                  void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about modem events.
  *
  * @param[in] modemEvent The modem event.
@@ -764,7 +709,6 @@ typedef void ( * CellularModemEventCallback_t )( CellularModemEvent_t modemEvent
                                                  void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform about the status of socket open.
  *
  * @param[in] urcEvent URC Event that happened.
@@ -777,7 +721,6 @@ typedef void ( * CellularSocketOpenCallback_t )( CellularUrcEvent_t urcEvent,
                                                  void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform that data is ready for reading on a socket.
  *
  * @param[in] socketHandle Socket handle for which data is ready.
@@ -788,7 +731,6 @@ typedef void ( * CellularSocketDataReadyCallback_t )( CellularSocketHandle_t soc
                                                       void * pCallbackContext );
 
 /**
- * @ingroup cellular_datatypes_functionpointers
  * @brief Callback used to inform that remote end closed the connection for a
  * connected socket.
  *

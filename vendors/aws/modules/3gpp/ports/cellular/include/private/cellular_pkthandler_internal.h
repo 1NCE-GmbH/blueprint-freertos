@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,7 +26,7 @@
 #ifndef __CELLULAR_PKTHANDLER_INTERNAL_H__
 #define __CELLULAR_PKTHANDLER_INTERNAL_H__
 
-
+#include "iot_config.h"
 #include "cellular_types.h"
 #include "cellular_common.h"
 #include "cellular_pktio_internal.h"
@@ -77,7 +77,7 @@ void _Cellular_DestroyPktResponseMutex( CellularContext_t * pContext );
 /**
  * @brief Packet handler init function.
  *
- * This function init the packet handler in FreeRTOS Cellular Library common.
+ * This function init the packet handler in cellular HAL common.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  *
@@ -89,7 +89,7 @@ CellularPktStatus_t _Cellular_PktHandlerInit( CellularContext_t * pContext );
 /**
  * @brief Packet handler cleanup function.
  *
- * This function cleanup the pakcet handler in FreeRTOS Cellular Library common.
+ * This function cleanup the pakcet handler in cellular HAL common.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
  */

@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,6 +26,18 @@
 #ifndef __CELLULAR_INTERNAL_H__
 #define __CELLULAR_INTERNAL_H__
 
-#include "cellular_platform.h"
+/* Configure logs for HAL functions. */
+#ifdef IOT_LOG_LEVEL_CELLULAR
+    #define LIBRARY_LOG_LEVEL        IOT_LOG_LEVEL_CELLULAR
+#else
+    #ifdef IOT_LOG_LEVEL_GLOBAL
+        #define LIBRARY_LOG_LEVEL    IOT_LOG_LEVEL_GLOBAL
+    #else
+        #define LIBRARY_LOG_LEVEL    IOT_LOG_INFO
+    #endif
+#endif
+
+#define LIBRARY_LOG_NAME    ( "CELLULAR" )
+#include "iot_logging_setup.h"
 
 #endif /* __CELLULAR_INTERNAL_H__ */

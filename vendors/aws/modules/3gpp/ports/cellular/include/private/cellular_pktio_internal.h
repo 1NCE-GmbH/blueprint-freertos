@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -64,7 +64,7 @@ typedef void ( * _pPktioShutdownCallback_t ) ( CellularContext_t * pContext );
 /**
  * @brief Packet IO init function.
  *
- * This function init the packet IO in FreeRTOS Cellular Library common.
+ * This function init the packet IO in cellular HAL common.
  * Packet IO thread is created in this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.
@@ -79,7 +79,7 @@ CellularPktStatus_t _Cellular_PktioInit( CellularContext_t * pContext,
 /**
  * @brief Packet IO shutdown function.
  *
- * This function shutdown the packet IO in FreeRTOS Cellular Library common.
+ * This function shutdown the packet IO in cellular HAL common.
  * Packet IO thread is shutdown in this function.
  *
  * @param[in] pContext The opaque cellular context pointer created by Cellular_Init.

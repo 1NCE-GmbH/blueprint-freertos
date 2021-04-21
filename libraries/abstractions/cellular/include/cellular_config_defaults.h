@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -128,18 +128,6 @@
 
 #ifndef CELLULAR_COMM_IF_RECV_TIMEOUT_MS
     #define CELLULAR_COMM_IF_RECV_TIMEOUT_MS    ( 1000U )
-#endif
-
-#ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
-    #define CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT    ( 0U )
-#endif
-
-#ifndef CELLULAR_CONFIG_STATIC_ALLOCATION_CONTEXT
-    #define CELLULAR_CONFIG_STATIC_ALLOCATION_COMM_CONTEXT    ( 0U )
-#endif
-
-#ifndef CELLULAR_CONFIG_DEFAULT_RAT
-    #define CELLULAR_CONFIG_DEFAULT_RAT     ( 8 )  /* Set default RAT to CELLULAR_RAT_CATM1 @ref CellularRat_t. */
 #endif
 
 #endif /* __CELLULAR_CONFIG_DEFAULTS_H__ */

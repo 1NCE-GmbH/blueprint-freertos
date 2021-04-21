@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -24,11 +24,10 @@
  */
 
 /* The config header is always included first. */
-
+#include "iot_config.h"
 
 #include <stdint.h>
-#include "cellular_platform.h"
-#include "cellular_config.h"
+#include "aws_cellular_config.h"
 #include "cellular_config_defaults.h"
 #include "cellular_common.h"
 #include "cellular_common_portable.h"
@@ -48,27 +47,27 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
 
 static cellularModuleContext_t cellularBg96Context = { 0 };
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 const char * CellularSrcTokenErrorTable[] =
 { "ERROR", "BUSY", "NO CARRIER", "NO ANSWER", "NO DIALTONE", "ABORTED", "+CMS ERROR", "+CME ERROR", "SEND FAIL" };
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularSrcTokenErrorTableSize = sizeof( CellularSrcTokenErrorTable ) / sizeof( char * );
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 const char * CellularSrcTokenSuccessTable[] =
 { "OK", "CONNECT", "SEND OK", ">" };
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularSrcTokenSuccessTableSize = sizeof( CellularSrcTokenSuccessTable ) / sizeof( char * );
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 const char * CellularUrcTokenWoPrefixTable[] =
 { "NORMAL POWER DOWN", "PSM POWER DOWN", "RDY" };
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 uint32_t CellularUrcTokenWoPrefixTableSize = sizeof( CellularUrcTokenWoPrefixTable ) / sizeof( char * );
 
@@ -104,7 +103,7 @@ static CellularError_t sendAtCommandWithRetryTimeout( CellularContext_t * pConte
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
                                      void ** ppModuleContext )
@@ -126,7 +125,7 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
         ( void ) memset( &cellularBg96Context, 0, sizeof( cellularModuleContext_t ) );
 
         /* Create the mutex for DNS. */
-        status = PlatformMutex_Create( &cellularBg96Context.dnsQueryMutex, false );
+        status = IotMutex_Create( &cellularBg96Context.dnsQueryMutex, false );
 
         if( status == false )
         {
@@ -139,7 +138,7 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
 
             if( cellularBg96Context.pktDnsQueue == NULL )
             {
-                PlatformMutex_Destroy( &cellularBg96Context.dnsQueryMutex );
+                IotMutex_Destroy( &cellularBg96Context.dnsQueryMutex );
                 cellularStatus = CELLULAR_NO_MEMORY;
             }
             else
@@ -154,7 +153,7 @@ CellularError_t Cellular_ModuleInit( const CellularContext_t * pContext,
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
 {
@@ -170,7 +169,7 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
         vQueueDelete( cellularBg96Context.pktDnsQueue );
 
         /* Delete the mutex for DNS. */
-        PlatformMutex_Destroy( &cellularBg96Context.dnsQueryMutex );
+        IotMutex_Destroy( &cellularBg96Context.dnsQueryMutex );
     }
 
     return cellularStatus;
@@ -178,7 +177,7 @@ CellularError_t Cellular_ModuleCleanUp( const CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 {
@@ -235,49 +234,6 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 
         if( cellularStatus == CELLULAR_SUCCESS )
         {
-            /* Configure Band configuration to all bands. */
-            atReqGetNoResult.pAtCmd = "AT+QCFG=\"band\",f,400a0e189f,a0e189f";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            /* Configure RAT(s) to be Searched to Automatic. */
-            atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanmode\",0,1";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            /* Configure Network Category to be Searched under LTE RAT to LTE Cat M1 and Cat NB1. */
-            atReqGetNoResult.pAtCmd = "AT+QCFG=\"iotopmode\",2,1";
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
-            /* Configure RAT Searching Sequence to default radio access technology. */
-            switch( CELLULAR_CONFIG_DEFAULT_RAT )
-            {
-            case CELLULAR_RAT_CATM1:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",02,1";
-                break;
-            case CELLULAR_RAT_NBIOT:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",03,1";
-                break;
-            case CELLULAR_RAT_GSM:
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",01,1";
-                break;
-            default:
-                /* Configure RAT Searching Sequence to automatic. */
-                atReqGetNoResult.pAtCmd = "AT+QCFG=\"nwscanseq\",00,1";
-                break;
-            }
-            cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
-        }
-
-        if( cellularStatus == CELLULAR_SUCCESS )
-        {
             atReqGetNoResult.pAtCmd = "AT+CFUN=1";
             cellularStatus = sendAtCommandWithRetryTimeout( pContext, &atReqGetNoResult );
         }
@@ -288,7 +244,7 @@ CellularError_t Cellular_ModuleEnableUE( CellularContext_t * pContext )
 
 /*-----------------------------------------------------------*/
 
-/* FreeRTOS Cellular Common Library porting interface. */
+/* Cellular HAL common porting interface. */
 /* coverity[misra_c_2012_rule_8_7_violation] */
 CellularError_t Cellular_ModuleEnableUrc( CellularContext_t * pContext )
 {

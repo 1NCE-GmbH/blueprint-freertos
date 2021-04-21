@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -91,7 +91,7 @@ typedef enum CellularATError
  * Note that a prefix is always followed by colon (':') and this function
  * removes colon as well.
  *
- * @param[in,out] ppString The AT response to remove the prefix from. In
+ * @param[in/out] ppString The AT response to remove the prefix from. In
  * case of success, the pointer is updated to move past the prefix.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -121,7 +121,7 @@ CellularATError_t Cellular_ATRemovePrefix( char ** ppString );
  *            |
  *           *ppString
  *
- * @param[in,out] ppString The AT response to remove the leading white spaces
+ * @param[in/out] ppATResponse The AT response to remove the leading white spaces
  * from. In case of success, the pointer is updated to the first non white space
  * character.
  *
@@ -146,7 +146,7 @@ CellularATError_t Cellular_ATRemoveLeadingWhiteSpaces( char ** ppString );
  * | r | e | s | p | o | n | s | e | '\0' |  |  | '\0' |
  * +---+---+---+---+---+---+---+---+------+--+--+------+
  *
- * @param[in,out] pString The AT response to remove the trailing white
+ * @param[in/out] pString The AT response to remove the trailing white
  * spaces from.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -171,7 +171,7 @@ CellularATError_t Cellular_ATRemoveTrailingWhiteSpaces( char * pString );
  * | r | e | s | p | o | n | s | e | '\0' | '\0' |
  * +---+---+---+---+---+---+---+---+------+------+
  *
- * @param[in,out] pString The AT response to remove the white spaces from.
+ * @param[in/out] pString The AT response to remove the white spaces from.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
  * error code indicating the cause of the error.
@@ -202,7 +202,7 @@ CellularATError_t Cellular_ATRemoveAllWhiteSpaces( char * pString );
  *       |
  *      *ppString
  *
- * @param[in,out] ppString The AT response to remove the double quotes
+ * @param[in/out] ppString The AT response to remove the double quotes
  * from.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -227,7 +227,7 @@ CellularATError_t Cellular_ATRemoveOutermostDoubleQuote( char ** ppString );
  * | r | e | s | p | o | n | s | e | '\0' | s | e | " | '\0' |
  * +---+---+---+---+---+---+---+---+------+---+---+---+------+
  *
- * @param[in,out] pString The AT response to remove the double quotes
+ * @param[in/out] ppString The AT response to remove the double quotes
  * from.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -238,8 +238,8 @@ CellularATError_t Cellular_ATRemoveAllDoubleQuote( char * pString );
 /**
  * @brief Extract the next token based on comma (',') as delimiter.
  *
- * @param[in,out] ppString The AT response to extract the token from.
- * @param[in,out] ppTokOutput The output parameter to return the location of the
+ * @param[in/out] ppString The AT response to extract the token from.
+ * @param[in/out] ppTokOutput The output parameter to return the location of the
  * token.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -258,9 +258,9 @@ CellularATError_t Cellular_ATGetNextTok( char ** ppString,
  * token. This ensures that the next call to this function will extract the next
  * occurrence of the token.
  *
- * @param[in,out] ppString The AT response to extract the token from.
+ * @param[in/out] ppString The AT response to extract the token from.
  * @param[in] pDelimiter The delimiter string.
- * @param[in,out] ppTokOutput The output parameter to return the location of the
+ * @param[in/out] ppOutToken The output parameter to return the location of the
  * token.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -293,7 +293,7 @@ CellularATError_t Cellular_ATGetSpecificNextTok( char ** ppString,
  *
  * Decimal 16 is 0x10 and decimal 171 is 0xAB.
  *
- * @param[in] pString The hex string to convert to HEX.
+ * @param[in] pStrData The hex string to convert to HEX.
  * @param[in] ppHexData The buffer to return the converted HEX data into.
  * @param[in] hexDataLen The length of the buffer.
  *
@@ -311,7 +311,7 @@ CellularATError_t Cellular_ATHexStrToHex( const char * pString,
  * "1234" is numeric but "123YD" is not because 'Y' and 'D' are not digits.
  *
  * @param[in] pString The input string to check.
- * @param[out] pResult The bool output parameter to return whether or not the
+ * @param[out] result = true; The bool output parameter to return whether or not the
  * string is numeric.
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
@@ -323,15 +323,14 @@ CellularATError_t Cellular_ATIsStrDigit( const char * pString,
 /**
  * @brief check if a string as prefix present by determine present of ':'
  *
- * @param[in] pString input string
- * @param[out] pResult The bool output parameter to return whether or not the
- * string is numeric.
+ * @param[in] pString: input string
+ * @param[out] result = true/false
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
  * error code indicating the cause of the error.
  */
 CellularATError_t Cellular_ATIsPrefixPresent( const char * pString,
-                                              bool * pResult );
+                                              bool * result );
 
 /**
  * @brief duplicate string from pSrc to ppDst, malloc is use to allocate mem space for ppDst
@@ -348,16 +347,16 @@ CellularATError_t Cellular_ATStrDup( char ** ppDst,
 /**
  * @brief check if a string starts with certain prefix
  *
- * @param[in] pString input string
- * @param[in] pPrefix input prefix
- * @param[out] pResult return true if prefix is at start of pString, else false
+ * @param[in] pString: input string
+ * @param[in] pString: input prefix
+ * @param[out] result: return true if prefix is at start of pString, else false
  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
  * error code indicating the cause of the error.
  */
 CellularATError_t Cellular_ATStrStartWith( const char * pString,
                                            const char * pPrefix,
-                                           bool * pResult );
+                                           bool * result );
 
 /**
  * @brief check if certain success code/error code present in the input buffer
@@ -365,7 +364,7 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
  * @param[in] pInputBuf: the haystack buffer
  * @param[in] ppKeyList: list of keys
  * @param[in] keyListLen: size of the keyList array
- * @param[out] pResult: return true if any of Keys in ppKeyList is found in  is at start of pString, else false
+ * @param[out] result: return true if any of Keys in ppKeyList is found in  is at start of pString, else false
  *  *
  * @return CELLULAR_AT_SUCCESS if the operation is successful, otherwise an
  * error code indicating the cause of the error.
@@ -373,7 +372,7 @@ CellularATError_t Cellular_ATStrStartWith( const char * pString,
 CellularATError_t Cellular_ATcheckErrorCode( const char * pInputBuf,
                                              const char * const * const ppKeyList,
                                              size_t keyListLen,
-                                             bool * pResult );
+                                             bool * result );
 
 /**
  * @brief Convert string to int32_t.

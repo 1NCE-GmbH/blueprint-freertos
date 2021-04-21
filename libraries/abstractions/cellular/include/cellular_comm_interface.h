@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,7 +26,7 @@
 #ifndef __CELLULAR_COMM_INTERFACE_H__
 #define __CELLULAR_COMM_INTERFACE_H__
 
-
+#include "iot_config.h"
 #include "cellular_types.h"
 
 /* Standard includes. */
@@ -46,11 +46,10 @@ typedef enum CellularCommInterfaceError
     IOT_COMM_INTERFACE_BUSY           /**< The interface is currently busy. */
 } CellularCommInterfaceError_t;
 
-struct CellularCommInterfaceContext;
-
 /**
  * @brief Opaque handle to comm interface.
  */
+struct CellularCommInterfaceContext;
 typedef struct CellularCommInterfaceContext * CellularCommInterfaceHandle_t;
 
 /**

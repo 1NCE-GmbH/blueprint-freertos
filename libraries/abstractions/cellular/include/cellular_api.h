@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS Cellular Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -38,7 +38,7 @@
  * This function initializes and returns the supplied context. It must be called
  * once (and only once) before calling any other function of this library.
  *
- * @param[in,out] pCellularHandle the handle pointer to store the cellular handle.
+ * @param[in/out] pCellularHandle the handle pointer to store the cellular handle.
  * @param[in] pCommInterface Comm interface for communicating with the module.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
@@ -218,7 +218,7 @@ CellularError_t Cellular_SetPdnConfig( CellularHandle_t cellularHandle,
  * @brief Get status reports for all PDN contexts.
  *
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[out] pPdnStatusBuffers Out parameter to provide array of PDN contexts.
+ * @param[out] pPdnStatus Out parameter to provide array of PDN contexts.
  * @param[in] numStatusBuffers Number of CellularPdnStatus_t buffers in the
  * provided array pPdnStatusBuffers.
  * @param[out] pNumStatus Out parameter to provide the number of PDN statuses
@@ -264,7 +264,7 @@ CellularError_t Cellular_DeactivatePdn( CellularHandle_t cellularHandle,
  * @param[in] contextId Context ID of the PDN context for which IP address is requested.
  * @param[out] pBuffer the buffer to receive the IP address into. The returned pBuffer
  * is a NULL terminated string.
- * @param[in] bufferLength of the buffer pBuffer.
+ * @param[in] Length of the buffer pBuffer.
  *
  * @return CELLULAR_SUCCESS if the operation is successful, otherwise an error
  * code indicating the cause of the error.
@@ -447,7 +447,7 @@ CellularError_t Cellular_ATCommandRaw( CellularHandle_t cellularHandle,
  * @brief Create a socket.
  *
  * @param[in] cellularHandle The opaque cellular context pointer created by Cellular_Init.
- * @param[in] pdnContextId pdn context id on which this socket needs to be created. The pdn
+ * @param[in] pdn context id on which this socket needs to be created. The pdn
  * context must be previously activated by Cellular_ActivatePdn function.
  * @param[in] socketDomain Socket domain.
  * @param[in] socketType Socket Type.
@@ -499,6 +499,8 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
                                      const uint8_t * pData,
                                      uint32_t dataLength,
                                      uint32_t * pSentDataLength );
+
+
 
 /**
  * @brief Receive data on a connected socket.

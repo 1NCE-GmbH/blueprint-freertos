@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Cellular Preview Release
+ * Amazon FreeRTOS CELLULAR Preview Release
  * Copyright (C) 2020 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -26,10 +26,7 @@
 #ifndef __CELLULAR_COMMON_INTERNAL_H__
 #define __CELLULAR_COMMON_INTERNAL_H__
 
-
-
 /* Cellular includes. */
-#include "cellular_platform.h"
 #include "cellular_comm_interface.h"
 #include "cellular_types.h"
 #include "cellular_pkthandler_internal.h"
@@ -103,8 +100,8 @@ typedef struct CellularContext
     bool bLibOpened;   /* CellularLib is currently open */
     bool bLibShutdown; /* CellularLib prematurely shut down */
     bool bLibClosing;  /* Graceful shutdown in progress */
-    PlatformMutex_t libStatusMutex;
-    PlatformMutex_t libAtDataMutex;
+    IotMutex_t libStatusMutex;
+    IotMutex_t libAtDataMutex;
     _callbackEvents_t cbEvents; /* Call back functions registered to report events. */
     cellularAtData_t libAtData; /* Global variables. */
 
@@ -112,8 +109,8 @@ typedef struct CellularContext
     CellularTokenTable_t tokenTable;
 
     /* Packet handler. */
-    PlatformMutex_t pktRequestMutex;
-    PlatformMutex_t PktRespMutex;
+    IotMutex_t pktRequestMutex;
+    IotMutex_t PktRespMutex;
     QueueHandle_t pktRespQueue;
     CellularATCommandResponseReceivedCallback_t pktRespCB;
     CellularATCommandDataPrefixCallback_t pktDataPrefixCB;         /* Data prefix callback function for socket receive function. */
@@ -127,7 +124,7 @@ typedef struct CellularContext
     /* Packet IO. */
     bool bPktioUp;
     CellularCommInterfaceHandle_t hPktioCommIntf;
-    PlatformEventGroupHandle_t pPktioCommEvent;
+    EventGroupHandle_t pPktioCommEvent;
     _pPktioShutdownCallback_t pPktioShutdownCB;
     _pPktioHandlePacketCallback_t pPktioHandlepktCB;
     char pktioSendBuf[ PKTIO_WRITE_BUFFER_SIZE + 1 ];
