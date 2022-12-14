@@ -47,16 +47,14 @@
 #include "iot_network_types.h"
 #include "iot_logging_task.h"
 #include "iot_uart.h"
-#include "aws_dev_mode_key_provisioning.h"
-#include "iot_logging_setup.h"
+
 
 // Print log messages up to the "info" level.
 #define LIBRARY_LOG_LEVEL    IOT_LOG_DEBUG
-// Print library name "SAMPLE".
 #define LIBRARY_LOG_NAME     "MAIN"
 // Including this header defines the logging macros using LIBRARY_LOG_LEVEL and
-// LIBRARY_LOG_NAME.
 
+#include "iot_logging_setup.h"
 /* The SPI driver polls at a high priority. The logging task's priority must also
  * be high to be not be starved of CPU time. */
 #define mainLOGGING_TASK_PRIORITY           ( configMAX_PRIORITIES - 1 )

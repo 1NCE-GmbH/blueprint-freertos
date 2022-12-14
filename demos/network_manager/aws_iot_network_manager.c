@@ -60,7 +60,7 @@
     #include "cellular_comm_interface.h"
     #include "cellular_manager.h"
     #include "cellular_api.h"
-	#include "mqtt_demo_mutual_auth_config.h"
+	#include "nce_demo_config.h"
 #endif
 
 #if TCPIP_NETWORK_ENABLED

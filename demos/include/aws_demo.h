@@ -34,14 +34,14 @@
 /**
  * @brief All C SDK demo functions have this signature.
  */
-typedef int (* demoFunction_t)( bool awsIotMqttMode,
+typedef int (* demoFunction_t)( bool awsIotMode,
                                 const char * pIdentifier,
                                 void * pNetworkServerInfo,
                                 void * pNetworkCredentialInfo,
                                 const IotNetworkInterface_t * pNetworkInterface );
 
 
-typedef void (* networkConnectedCallback_t)( bool awsIotMqttMode,
+typedef void (* networkConnectedCallback_t)( bool awsIotMode,
                                              const char * pIdentifier,
                                              void * pNetworkServerInfo,
                                              void * pNetworkCredentialInfo,

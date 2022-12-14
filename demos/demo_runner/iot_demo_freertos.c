@@ -37,7 +37,7 @@
 #include "platform/iot_threads.h"
 #include "aws_demo.h"
 #include "iot_init.h"
-#include "mqtt_demo_mutual_auth_config.h"
+#include "nce_demo_config.h"
 
 static IotNetworkManagerSubscription_t subscription = IOT_NETWORK_MANAGER_SUBSCRIPTION_INITIALIZER;
 
@@ -118,7 +118,7 @@ static void _onNetworkStateChangeCallback( uint32_t network,
             pCredentials = AwsIotNetworkManager_GetCredentials( network ),
 
             pDemoContext->networkConnectedCallback( true,
-            										democonfigCLIENT_IDENTIFIER,
+            										democonfigCLIENT_ICCID,
                                                     pConnectionParams,
                                                     pCredentials,
                                                     pNetworkInterface );
@@ -152,7 +152,7 @@ static void _onNetworkStateChangeCallback( uint32_t network,
                 pCredentials = AwsIotNetworkManager_GetCredentials( demoConnectedNetwork );
 
                 pDemoContext->networkConnectedCallback( true,
-                										democonfigCLIENT_IDENTIFIER,
+                										democonfigCLIENT_ICCID,
                                                         pConnectionParams,
                                                         pCredentials,
                                                         pNetworkInterface );
@@ -164,7 +164,7 @@ static void _onNetworkStateChangeCallback( uint32_t network,
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Initialize the common libraries, Mqtt library and network manager.
+ * @brief Initialize the common libraries, network manager.
  *
  * @return `EXIT_SUCCESS` if all libraries were successfully initialized;
  * `EXIT_FAILURE` otherwise.
@@ -268,7 +268,7 @@ static int _initialize( demoContext_t * pContext )
 /*-----------------------------------------------------------*/
 
 /**
- * @brief Clean up the common libraries and the MQTT library.
+ * @brief Clean up the common libraries.
  */
 static void _cleanup( void )
 {

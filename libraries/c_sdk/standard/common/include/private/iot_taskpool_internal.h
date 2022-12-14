@@ -277,7 +277,7 @@ typedef struct _taskPoolJob
 /**
  * @brief Represents an operation that is subject to a timer.
  *
- * These events are queued per MQTT connection. They are sorted by their
+ * These events are queued per connection. They are sorted by their
  * expiration time.
  */
 typedef struct _taskPoolTimerEvent

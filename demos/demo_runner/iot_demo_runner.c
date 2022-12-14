@@ -45,7 +45,7 @@
 
 /* Forward declaration of demo entry function to be renamed from #define in
  * aws_demo_config.h */
-int DEMO_entryFUNCTION( bool awsIotMqttMode,
+int DEMO_entryFUNCTION( bool awsIotMode,
                         const char * pIdentifier,
                         void * pNetworkServerInfo,
                         void * pNetworkCredentialInfo,
@@ -55,7 +55,7 @@ int DEMO_entryFUNCTION( bool awsIotMqttMode,
 /* Forward declaration of network connected DEMO callback to be renamed from
  * #define in aws_demo_config.h */
 #ifdef DEMO_networkConnectedCallback
-    void DEMO_networkConnectedCallback( bool awsIotMqttMode,
+    void DEMO_networkConnectedCallback( bool awsIotMode,
                                         const char * pIdentifier,
                                         void * pNetworkServerInfo,
                                         void * pNetworkCredentialInfo,
@@ -81,7 +81,7 @@ void DEMO_RUNNER_RunDemos( void )
 {
     /* These demos are shared with the C SDK and perform their own initialization and cleanup. */
 
-    static demoContext_t mqttDemoContext =
+    static demoContext_t DemoContext =
     {
         .networkTypes                = democonfigNETWORK_TYPES,
         .demoFunction                = DEMO_entryFUNCTION,
@@ -90,7 +90,7 @@ void DEMO_RUNNER_RunDemos( void )
     };
 
     Iot_CreateDetachedThread( runDemoTask,
-                              &mqttDemoContext,
+                              &DemoContext,
                               democonfigDEMO_PRIORITY,
                               democonfigDEMO_STACKSIZE );
 }

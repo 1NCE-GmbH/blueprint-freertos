@@ -39,7 +39,7 @@ static const TickType_t xSendTimeOut = pdMS_TO_TICKS( 40000 );
 /*-----------------------------------------------------------*/
 
 /* Declaration of demo function. */
-int RunudpDemo( bool awsIotMqttMode,
+int RunudpDemo( bool awsIotMode,
                 const char * pIdentifier,
                 void * pNetworkServerInfo,
                 void * pNetworkCredentialInfo,
@@ -51,7 +51,7 @@ int RunudpDemo( bool awsIotMqttMode,
  * @brief The function that runs the UDP demo, called by the demo runner.
  * @return `EXIT_SUCCESS` if the demo completes successfully; `EXIT_FAILURE` otherwise.
  */
-int RunudpDemo( bool awsIotMqttMode,
+int RunudpDemo( bool awsIotMode,
                 const char * pIdentifier,
                 void * pNetworkServerInfo,
                 void * pNetworkCredentialInfo,

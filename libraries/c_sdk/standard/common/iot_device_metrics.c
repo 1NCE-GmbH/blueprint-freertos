@@ -24,9 +24,9 @@
  */
 
 /**
- * @file iot_mqtt_metrics.c
+ * @file iot_device_metrics.c
  * @brief Source code for generating device metrics for AWS IOT.
- * The generated metrics will be included within the username field of MQTT CONNECT message.
+ * The generated metrics will be included within the username field of CONNECT message.
  */
 #include <string.h>
 #include <stdint.h>

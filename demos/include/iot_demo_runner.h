@@ -38,107 +38,16 @@
  */
 
 /* Individual demo task entry definitions */
-#if defined( CONFIG_CORE_MQTT_MUTUAL_AUTH_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              RunCoreMqttMutualAuthDemo
-    #if defined( democonfigMQTT_ECHO_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigMQTT_ECHO_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigMQTT_ECHO_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY     democonfigMQTT_ECHO_TASK_PRIORITY
-    #endif
-	#elif defined( CONFIG_COAP_DEMO_ENABLED )
-    	#define DEMO_entryFUNCTION              RuncoapDemo
-	#elif defined( CONFIG_UDP_DEMO_ENABLED )
-    	#define DEMO_entryFUNCTION              RunudpDemo
-#elif defined( CONFIG_CORE_MQTT_CONNECTION_SHARING_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              RunCoreMqttConnectionSharingDemo
-    #if defined( democonfigMQTT_ECHO_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigMQTT_ECHO_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigCORE_MQTT_CONNECTION_SHARING_DEMO_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY     democonfigCORE_MQTT_CONNECTION_SHARING_DEMO_TASK_PRIORITY
-    #endif
-#elif defined( CONFIG_DEVICE_SHADOW_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              RunDeviceShadowDemo
-    #if defined( democonfigSHADOW_DEMO_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigSHADOW_DEMO_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigSHADOW_DEMO_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY     democonfigSHADOW_DEMO_TASK_PRIORITY
-    #endif
-#elif defined( CONFIG_GREENGRASS_DISCOVERY_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              vStartGreenGrassDiscoveryTask
-    #if defined( democonfigGREENGRASS_DISCOVERY_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigGREENGRASS_DISCOVERY_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigGREENGRASS_DISCOVERY_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY     democonfigGREENGRASS_DISCOVERY_TASK_PRIORITY
-    #endif
-#elif defined( CONFIG_TCP_ECHO_CLIENT_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              vStartTCPEchoClientTasks_SingleTasks
-    #if defined( democonfigTCP_ECHO_TASKS_SINGLE_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigTCP_ECHO_TASKS_SINGLE_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigTCP_ECHO_TASKS_SINGLE_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY     democonfigTCP_ECHO_TASKS_SINGLE_TASK_PRIORITY
-    #endif
-#elif defined( CONFIG_DEFENDER_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              RunDefenderDemo
-#elif defined( CONFIG_POSIX_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              vStartPOSIXDemo
-#elif defined( CONFIG_OTA_UPDATE_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION              vStartOTAUpdateDemoTask
-    #if defined( democonfigOTA_UPDATE_TASK_STACK_SIZE )
-        #undef democonfigDEMO_STACKSIZE
-        #define democonfigDEMO_STACKSIZE    democonfigOTA_UPDATE_TASK_STACK_SIZE
-    #endif
-    #if defined( democonfigOTA_UPDATE_TASK_TASK_PRIORITY )
-        #undef democonfigDEMO_PRIORITY
-        #define democonfigDEMO_PRIORITY    democonfigOTA_UPDATE_TASK_TASK_PRIORITY
-    #endif
-#elif defined( CONFIG_BLE_GATT_SERVER_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             vGattDemoSvcInit
-    #if defined( democonfigNETWORK_TYPES )
-        #undef democonfigNETWORK_TYPES
-        #define democonfigNETWORK_TYPES    ( AWSIOT_NETWORK_TYPE_BLE )
-    #endif
-#elif defined( CONFIG_MQTT_BLE_TRANSPORT_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunMQTTBLETransportDemo
-    #if defined( democonfigNETWORK_TYPES )
-        #undef democonfigNETWORK_TYPES
-        #define democonfigNETWORK_TYPES    ( AWSIOT_NETWORK_TYPE_BLE )
-    #endif
-#elif defined( CONFIG_SHADOW_BLE_TRANSPORT_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunShadowBLETransportDemo
-    #if defined( democonfigNETWORK_TYPES )
-        #undef democonfigNETWORK_TYPES
-        #define democonfigNETWORK_TYPES    ( AWSIOT_NETWORK_TYPE_BLE )
-    #endif
-#elif defined( CONFIG_HTTPS_SYNC_DOWNLOAD_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunHttpsSyncDownloadDemo
-#elif defined( CONFIG_HTTPS_ASYNC_DOWNLOAD_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunHttpsAsyncDownloadDemo
-#elif defined( CONFIG_HTTPS_SYNC_UPLOAD_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunHttpsSyncUploadDemo
-#elif defined( CONFIG_HTTPS_ASYNC_UPLOAD_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             RunHttpsAsyncUploadDemo
 
-#elif defined( CONFIG_CLI_UART_DEMO_ENABLED )
-    #define DEMO_entryFUNCTION             vRunCLIUartDemo
-#else /* if defined( CONFIG_CORE_MQTT_BASIC_TLS_DEMO_ENABLED ) */
+#if defined( CONFIG_COAP_DEMO_ENABLED )
+    #define DEMO_entryFUNCTION              RuncoapDemo
+#elif defined( CONFIG_LwM2M_DEMO_ENABLED )
+    #define DEMO_entryFUNCTION              Runlwm2mDemo
+#elif defined( CONFIG_UDP_DEMO_ENABLED )
+    #define DEMO_entryFUNCTION              RunudpDemo
+#else /* if defined( CONFIG_COAP_DEMO_ENABLED ) */
 /* if no demo was defined there will be no entry point defined and we will not be able to run the demo */
     #error "No demo to run. One demo should be enabled"
-#endif /* if defined( CONFIG_CORE_MQTT_BASIC_TLS_DEMO_ENABLED ) */
-
+#endif /* if defined( CONFIG_COAP_DEMO_ENABLED ) */
 
 #endif /* ifndef _IOT_DEMO_RUNNER_H_ */

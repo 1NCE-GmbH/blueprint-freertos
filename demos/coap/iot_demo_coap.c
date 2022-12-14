@@ -45,7 +45,7 @@ CoAP_RespHandler_fn_t CoAP_Resp_handler( CoAP_Message_t * pRespMsg,
 }
 
 /* Declaration of demo function. */
-int RuncoapDemo( bool awsIotMqttMode,
+int RuncoapDemo( bool awsIotMode,
                  const char * pIdentifier,
                  void * pNetworkServerInfo,
                  void * pNetworkCredentialInfo,
@@ -57,7 +57,7 @@ int RuncoapDemo( bool awsIotMqttMode,
  * @brief The function that runs the COAP demo, called by the demo runner.
  * @return `EXIT_SUCCESS` if the demo completes successfully; `EXIT_FAILURE` otherwise.
  */
-int RuncoapDemo( bool awsIotMqttMode,
+int RuncoapDemo( bool awsIotMode,
                  const char * pIdentifier,
                  void * pNetworkServerInfo,
                  void * pNetworkCredentialInfo,

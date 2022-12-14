@@ -215,93 +215,6 @@ static void _networkReceiveTask( void * pArgument )
 
 /*-----------------------------------------------------------*/
 
-/**
- * @brief Set up a secured TLS connection.
- *
- * @param[in] pAfrCredentials Credentials for the secured connection.
- * @param[in] tcpSocket An initialized socket to secure.
- * @param[in] pHostName Remote server name for SNI.
- * @param[in] hostnameLength The length of `pHostName`.
- *
- * @return #IOT_NETWORK_SUCCESS or #IOT_NETWORK_SYSTEM_ERROR.
- */
-static IotNetworkError_t _tlsSetup( const IotNetworkCredentials_t * pAfrCredentials,
-                                    Socket_t tcpSocket,
-                                    const char * pHostName,
-                                    size_t hostnameLength )
-{
-    IOT_FUNCTION_ENTRY( IotNetworkError_t, IOT_NETWORK_SUCCESS );
-    int32_t socketStatus = SOCKETS_ERROR_NONE;
-
-    /* ALPN options for AWS IoT. */
-    const char * ppcALPNProtos[] = { socketsAWS_IOT_ALPN_MQTT };
-
-    /* Set secured option. */
-    socketStatus = SOCKETS_SetSockOpt( tcpSocket,
-                                       0,
-                                       SOCKETS_SO_REQUIRE_TLS,
-                                       NULL,
-                                       0 );
-
-    if( socketStatus != SOCKETS_ERROR_NONE )
-    {
-        IotLogError( "Failed to set secured option for new connection." );
-        IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
-    }
-
-    /* Set ALPN option. */
-    if( pAfrCredentials->pAlpnProtos != NULL )
-    {
-        socketStatus = SOCKETS_SetSockOpt( tcpSocket,
-                                           0,
-                                           SOCKETS_SO_ALPN_PROTOCOLS,
-                                           ppcALPNProtos,
-                                           sizeof( ppcALPNProtos ) / sizeof( ppcALPNProtos[ 0 ] ) );
-
-        if( socketStatus != SOCKETS_ERROR_NONE )
-        {
-            IotLogError( "Failed to set ALPN option for new connection." );
-            IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
-        }
-    }
-
-    /* Set SNI option. */
-    if( pAfrCredentials->disableSni == false )
-    {
-        socketStatus = SOCKETS_SetSockOpt( tcpSocket,
-                                           0,
-                                           SOCKETS_SO_SERVER_NAME_INDICATION,
-                                           pHostName,
-                                           hostnameLength + 1 );
-
-        if( socketStatus != SOCKETS_ERROR_NONE )
-        {
-            IotLogError( "Failed to set SNI option for new connection." );
-            IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
-        }
-    }
-
-    /* Set custom server certificate. */
-    if( pAfrCredentials->pRootCa != NULL )
-    {
-        socketStatus = SOCKETS_SetSockOpt( tcpSocket,
-                                           0,
-                                           SOCKETS_SO_TRUSTED_SERVER_CERTIFICATE,
-                                           pAfrCredentials->pRootCa,
-                                           pAfrCredentials->rootCaSize );
-
-        if( socketStatus != SOCKETS_ERROR_NONE )
-        {
-            IotLogError( "Failed to set server certificate option for new connection." );
-            IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
-        }
-    }
-
-    IOT_FUNCTION_EXIT_NO_CLEANUP();
-}
-
-/*-----------------------------------------------------------*/
-
 IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
                                         void * pCredentialInfo,
                                         void ** pConnection )
@@ -353,16 +266,16 @@ IotNetworkError_t IotNetworkAfr_Create( void * pConnectionInfo,
         IOT_SET_AND_GOTO_CLEANUP( IOT_NETWORK_SYSTEM_ERROR );
     }
 
-    /* Set up connection encryption if credentials are provided. */
-    if( pAfrCredentials != NULL )
-    {
-        status = _tlsSetup( pAfrCredentials, tcpSocket, pServerInfo->pHostName, hostnameLength );
+    // /* Set up connection encryption if credentials are provided. */
+    // if( pAfrCredentials != NULL )
+    // {
+    //     status = _tlsSetup( pAfrCredentials, tcpSocket, pServerInfo->pHostName, hostnameLength );
 
-        if( status != IOT_NETWORK_SUCCESS )
-        {
-            IOT_GOTO_CLEANUP();
-        }
-    }
+    //     if( status != IOT_NETWORK_SUCCESS )
+    //     {
+    //         IOT_GOTO_CLEANUP();
+    //     }
+    // }
 
     /* Establish connection. */
     serverAddress.ucSocketDomain = SOCKETS_AF_INET;

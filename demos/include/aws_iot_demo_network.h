@@ -24,9 +24,9 @@
  */
 
 /**
- * @file aws_iot_mqtt_demo_network.h
+ * @file aws_iot_demo_network.h
  * @brief Contains network creation and teardown functions for handling different types of network connections
- * for MQTT demos.
+ * for demos.
  */
 #ifndef AWS_IOT_DEMO_NETWORK_H_
 #define AWS_IOT_DEMO_NETWORK_H_
@@ -35,39 +35,5 @@
 
 /* The config header is always included first. */
 #include "iot_config.h"
-
 #include "FreeRTOS.h"
-#include "types/iot_mqtt_types.h"
-
-
-typedef struct MqttConnectionContext
-{
-    void * pvNetworkConnection;
-    uint32_t ulNetworkType;
-    IotMqttNetworkInfo_t xNetworkInfo;
-    IotNetworkError_t ( * xDisconnectCallback )( void * );
-    IotMqttConnection_t xMqttConnection;
-} MqttConnectionContext_t;
-
-
-/**
- * @brief Creates an IoT network connection for demo.
- *
- * Function creates a  IoT network connection which can be then used by demo applications with MQTT library APIs.
- * IOT network connection is an abstraction over an BLE or WIFI connection.
- *
- * @param pxNetworkConnection Pointer to the network connection context passed from user.
- * @param ulPreferredNetworks OR separated flags indicating preferred network types.
- * @return pdTRUE if network is created successfully.
- */
-BaseType_t xMqttDemoCreateNetworkConnection( MqttConnectionContext_t * pxNetworkContext,
-                                             uint32_t ulNetworkTypes );
-
-/**
- * @brief Deletes a Network Connection.
- *
- * @param pxNetworkConnection pointer to the network connection context.
- */
-void vMqttDemoDeleteNetworkConnection( MqttConnectionContext_t * pxNetworkConnection );
-
 #endif /* AWS_IOT_DEMO_NETWORK_H_ */

@@ -437,11 +437,6 @@ int32_t SOCKETS_Close( Socket_t xSocket );
 /* @[declare_secure_sockets_close] */
 
 /**
- * @brief AWS IoT ALPN protocol name for MQTT over TLS on server port 443.
- */
-#define socketsAWS_IOT_ALPN_MQTT    "x-amzn-mqtt-ca"
-
-/**
  * @brief Manipulates the options for the socket.
  *
  * See the [Berkeley Sockets API]

@@ -58,10 +58,6 @@ foreach(module IN LISTS afr_modules_csdk afr_modules_freertos_plus afr_modules_a
     endif()
 endforeach()
 
-# Add core_mqtt modules ONLY if present in the FreeRTOS console download.
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/core_mqtt_demo_dependencies.cmake)
-    include(core_mqtt_demo_dependencies.cmake)
-endif()
 
 # Add FreeRTOS+TCP module ONLY if present in FreeRTOS console download.
 if(EXISTS ${AFR_MODULES_DIR}/freertos_plus/standard/freertos_plus_tcp.cmake)

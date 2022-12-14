@@ -298,7 +298,7 @@ extern UBaseType_t uxRand();
 #define ipconfigTCP_KEEP_ALIVE                   ( 1 )
 #define ipconfigTCP_KEEP_ALIVE_INTERVAL          ( 20 ) /* in seconds */
 
-/* The socket semaphore is used to unblock the MQTT task. */
+/* The socket semaphore is used to unblock the task. */
 #define ipconfigSOCKET_HAS_USER_SEMAPHORE        ( 0 )
 
 #define ipconfigSOCKET_HAS_USER_WAKE_CALLBACK    ( 1 )
@@ -307,8 +307,5 @@ extern UBaseType_t uxRand();
 
 #define portINLINE                               __inline
 
-void vApplicationMQTTGetKeys( const char ** ppcRootCA,
-                              const char ** ppcClientCert,
-                              const char ** ppcClientPrivateKey );
 
 #endif /* FREERTOS_IP_CONFIG_H */

@@ -54,9 +54,6 @@
 #ifndef IOT_TASKPOOL_ENABLE_ASSERTS
     #define IOT_TASKPOOL_ENABLE_ASSERTS        ( 1 )
 #endif
-#ifndef IOT_MQTT_ENABLE_ASSERTS
-    #define IOT_MQTT_ENABLE_ASSERTS            ( 1 )
-#endif
 #ifndef AWS_IOT_SHADOW_ENABLE_ASSERTS
     #define AWS_IOT_SHADOW_ENABLE_ASSERTS      ( 1 )
 #endif
@@ -71,7 +68,6 @@
 #define IotMetrics_Assert( expression )        configASSERT( expression )
 #define IotContainers_Assert( expression )     configASSERT( expression )
 #define IotTaskPool_Assert( expression )       configASSERT( expression )
-#define IotMqtt_Assert( expression )           configASSERT( expression )
 #define AwsIotShadow_Assert( expression )      configASSERT( expression )
 #define AwsIotDefender_Assert( expression )    configASSERT( expression )
 #define IotBle_Assert( expression )            configASSERT( expression )
@@ -95,7 +91,7 @@
 #define IotDemo_Malloc       pvPortMalloc
 #define IotDemo_Free         vPortFree
 
-/* Memory allocation function configuration for the MQTT and Defender library.
+/* Memory allocation function configuration for Defender library.
  * These libraries will be affected by IOT_STATIC_MEMORY_ONLY. */
 #if IOT_STATIC_MEMORY_ONLY == 0
     #define IotMetrics_MallocTcpConnection       pvPortMalloc
@@ -109,15 +105,6 @@
     #define IotTaskPool_FreeJob                  vPortFree
     #define IotTaskPool_MallocTimerEvent         pvPortMalloc
     #define IotTaskPool_FreeTimerEvent           vPortFree
-
-    #define IotMqtt_MallocConnection             pvPortMalloc
-    #define IotMqtt_FreeConnection               vPortFree
-    #define IotMqtt_MallocMessage                pvPortMalloc
-    #define IotMqtt_FreeMessage                  vPortFree
-    #define IotMqtt_MallocOperation              pvPortMalloc
-    #define IotMqtt_FreeOperation                vPortFree
-    #define IotMqtt_MallocSubscription           pvPortMalloc
-    #define IotMqtt_FreeSubscription             vPortFree
 
     #define IotSerializer_MallocCborEncoder      pvPortMalloc
     #define IotSerializer_FreeCborEncoder        vPortFree
@@ -157,17 +144,13 @@
     #define IOT_NETWORK_RECEIVE_TASK_STACK_SIZE    IOT_THREAD_DEFAULT_STACK_SIZE
 #endif
 
-/* Platform and SDK name for AWS IoT MQTT metrics. Only used when
- * AWS_IOT_MQTT_ENABLE_METRICS is 1. */
+/* Platform and SDK name for AWS IoT metrics.*/
 #define IOT_SDK_NAME             "AmazonFreeRTOS"
 #ifdef configPLATFORM_NAME
     #define IOT_PLATFORM_NAME    configPLATFORM_NAME
 #else
     #define IOT_PLATFORM_NAME    "Unknown"
 #endif
-
-/* Cloud endpoint to which the device connects to. */
-#define IOT_CLOUD_ENDPOINT        clientcredentialMQTT_BROKER_ENDPOINT
 
 /* Certificate for the device. */
 //#define IOT_DEVICE_CERTIFICATE    keyCLIENT_CERTIFICATE_PEM
