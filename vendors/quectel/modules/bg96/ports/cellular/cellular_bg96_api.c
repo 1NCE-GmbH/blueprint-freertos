@@ -43,9 +43,8 @@
 #include "limits.h"
 #include "cellular_bg96.h"
 
-#include "nce_onboarding.h"
 #include "nce_demo_config.h"
-
+#include "udp_impl.h"
 /*-----------------------------------------------------------*/
 
 #define CELLULAR_AT_CMD_TYPICAL_MAX_SIZE           ( 32U )
@@ -111,18 +110,9 @@
 #define QI_RECV_CMD  								"AT+QIRD="
 #define QI_CLOSE_CMD  								"AT+QICLOSE="
 
-#define QSSL_DATA_PREFIX_STRING                       "+QSSLRECV:"
-#define QSSL_DATA_PREFIX_STRING_LENGTH                ( 10U )
-#define QSSL_OPEN_CMD  								"AT+QSSLOPEN="
-#define QSSL_OPEN_CMD_STR 	 						"%s%d,%d,%ld,\"%s\",%d,%d"
-#define QSSL_SEND_CMD  								"AT+QSSLSEND="
-#define QSSL_RECV_CMD  								"AT+QSSLRECV="
-#define QSSL_CLOSE_CMD  							"AT+QSSLCLOSE="
-
-
-uint8_t MAX_RECV_PREFIX_STRING      =      ( 14U ) ;   /* The max data prefix string is "+QIRD: 1460\r\n" */
+#define DATA_PREFIX_STRING_CHANGELINE_LENGTH     ( 2U )     /* The length of the change line "\r\n". */
 #define MAX_QIRD_PREFIX_STRING  				     ( 14U )   /* The max data prefix string is "+QIRD: 1460\r\n" */
-#define MAX_QSSLRECV_STRING_PREFIX_STRING            ( 18U )    /* The max data prefix string is "+QSSLRECV: 1460\r\n" */
+
 
 /*-----------------------------------------------------------*/
 
@@ -1210,13 +1200,18 @@ static CellularError_t buildSocketConnect( CellularSocketHandle_t socketHandle,
 
     if( cellularStatus == CELLULAR_SUCCESS )
     {
-        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP && DEVICE_ONBOARDED == false )
+        if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_TCP)
         {
             ( void ) strcpy( protocol, "TCP" );
         }
         else
         {
-            ( void ) strcpy( protocol, "UDP" );
+        	 if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP && BIND == false ){
+        		 ( void ) strcpy( protocol, "UDP" );
+        	 }
+			else{
+				 ( void ) strcpy( protocol, "UDP SERVICE" );
+			}
         }
 
         /* Form the AT command. */
@@ -1225,50 +1220,6 @@ static CellularError_t buildSocketConnect( CellularSocketHandle_t socketHandle,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
 
-
-        /* Here we have 3 cases
-         * 1. DTLS with Onboarding: needs QSSL initially for onboarding and then QI
-         * 2. SSL_OFFLOAD: always uses QSSL
-         * 3. Otherwise : always uses QI
-         * */
-    #if defined(ENABLE_DTLS)
-    uint8_t sslctxID = 0U;
-    if(DEVICE_ONBOARDED == false) {
-		( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-								QSSL_OPEN_CMD_STR,
-								QSSL_OPEN_CMD,
-								socketHandle->contextId,
-								sslctxID,
-								socketHandle->socketId,
-								socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-								socketHandle->remoteSocketAddress.port,
-								socketHandle->dataMode );
-    }
-    else{
-		( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-								QI_OPEN_CMD_STR,
-								QI_OPEN_CMD,
-								socketHandle->contextId,
-								socketHandle->socketId,
-								protocol,
-								socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-								socketHandle->remoteSocketAddress.port,
-								socketHandle->localPort,
-								socketHandle->dataMode );
-    }
-    #elif  defined(USE_OFFLOAD_SSL)
-    uint8_t sslctxID = 0U;
-    sslctxID = (DEVICE_ONBOARDED == true) ?  1U :  0U;
-	( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
-							QSSL_OPEN_CMD_STR,
-							QSSL_OPEN_CMD,
-							socketHandle->contextId,
-							sslctxID,
-							socketHandle->socketId,
-							socketHandle->remoteSocketAddress.ipAddress.ipAddress,
-							socketHandle->remoteSocketAddress.port,
-							socketHandle->dataMode );
-	#else
 	( void ) snprintf( pCmdBuf, CELLULAR_AT_CMD_MAX_SIZE,
 							QI_OPEN_CMD_STR,
 							QI_OPEN_CMD,
@@ -1279,7 +1230,6 @@ static CellularError_t buildSocketConnect( CellularSocketHandle_t socketHandle,
 							socketHandle->remoteSocketAddress.port,
 							socketHandle->localPort,
 							socketHandle->dataMode );
-	#endif
 
     }
 
@@ -1761,29 +1711,13 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                                                  uint32_t * pDataLength )
 {
     char * pDataStart = NULL;
-    uint32_t tempStrlen = 0;
+    uint32_t prefixLineLength = 0U;
     int32_t tempValue = 0;
     CellularATError_t atResult = CELLULAR_AT_SUCCESS;
     CellularPktStatus_t pktStatus = CELLULAR_PKT_STATUS_OK;
     uint32_t i = 0;
-	char pLocalLine[ MAX_QSSLRECV_STRING_PREFIX_STRING + 1 ] = "\0";
-
-	#if defined(ENABLE_DTLS)
-	if(DEVICE_ONBOARDED == false) {
-		MAX_RECV_PREFIX_STRING = (18U);
-        tempStrlen = strlen( "+QSSLRECV:" );
-	}
-	else{
-		MAX_RECV_PREFIX_STRING = (14U);
-		tempStrlen = strlen( "+QIRD:" );
-
-	}
-	#elif  defined(USE_OFFLOAD_SSL)
-	MAX_RECV_PREFIX_STRING = (18U);
-    tempStrlen = strlen( "+QSSLRECV:" );
-	#endif
-
-    uint32_t localLineLength = MAX_RECV_PREFIX_STRING > lineLength ? lineLength : MAX_RECV_PREFIX_STRING;
+	char pLocalLine[ MAX_QIRD_PREFIX_STRING + 1 ] = "\0";
+	uint32_t localLineLength = MAX_QIRD_PREFIX_STRING  > lineLength ? lineLength : MAX_QIRD_PREFIX_STRING;
 
     if( ( pLine == NULL ) || ( ppDataStart == NULL ) || ( pDataLength == NULL ) )
     {
@@ -1793,15 +1727,15 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
     {
         /* Check if the message is a data response. */
 
-        if( strncmp( pLine, QI_DATA_PREFIX_STRING, QI_DATA_PREFIX_STRING_LENGTH ) == 0 || strncmp( pLine, QSSL_DATA_PREFIX_STRING, QSSL_DATA_PREFIX_STRING_LENGTH ) == 0  )
+        if( strncmp( pLine, QI_DATA_PREFIX_STRING, QI_DATA_PREFIX_STRING_LENGTH ) == 0 )
 
         {
 
 
-            strncpy( pLocalLine, pLine, MAX_RECV_PREFIX_STRING );
+            strncpy( pLocalLine, pLine, MAX_QIRD_PREFIX_STRING );
 
 
-            pLocalLine[ MAX_RECV_PREFIX_STRING ] = '\0';
+            pLocalLine[ MAX_QIRD_PREFIX_STRING ] = '\0';
             pDataStart = pLocalLine;
 
             /* Add a '\0' char at the end of the line. */
@@ -1810,6 +1744,7 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 if( ( pDataStart[ i ] == '\r' ) || ( pDataStart[ i ] == '\n' ) )
                 {
                     pDataStart[ i ] = '\0';
+                    prefixLineLength = i;
                     break;
                 }
             }
@@ -1823,13 +1758,13 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
 
         if( pDataStart != NULL )
         {
-            atResult = Cellular_ATStrtoi( &pDataStart[ tempStrlen ], 10, &tempValue );
+            atResult = Cellular_ATStrtoi( &pDataStart[ QI_DATA_PREFIX_STRING_LENGTH ], 10, &tempValue );
 
             if( ( atResult == CELLULAR_AT_SUCCESS ) && ( tempValue >= 0 ) &&
                 ( tempValue <= ( int32_t ) CELLULAR_MAX_RECV_DATA_LEN ) )
             {
                 /* Save the start of data point in pTemp. */
-                if( ( uint32_t ) ( strnlen( pDataStart, MAX_RECV_PREFIX_STRING ) + 2 ) > lineLength )
+                if( ( prefixLineLength + DATA_PREFIX_STRING_CHANGELINE_LENGTH ) > lineLength )
                 {
                     /* More data is required. */
                     *pDataLength = 0;
@@ -1838,9 +1773,9 @@ static CellularPktStatus_t socketRecvDataPrefix( void * pCallbackContext,
                 }
                 else
                 {
-                    pDataStart = &pLine[ strnlen( pDataStart, MAX_RECV_PREFIX_STRING ) ];
+                    pDataStart = &pLine[ prefixLineLength ];
                     pDataStart[ 0 ] = '\0';
-                    pDataStart = &pDataStart[ 2 ];
+                    pDataStart = &pDataStart[ DATA_PREFIX_STRING_CHANGELINE_LENGTH ];
                     *pDataLength = ( uint32_t ) tempValue;
                 }
 
@@ -1895,18 +1830,28 @@ static CellularError_t storeAccessModeAndAddress( CellularContext_t * pContext,
     }
     else
     {
-        socketHandle->remoteSocketAddress.port = pRemoteSocketAddress->port;
-        socketHandle->dataMode = dataAccessMode;
-        socketHandle->remoteSocketAddress.ipAddress.ipAddressType =
-            pRemoteSocketAddress->ipAddress.ipAddressType;
+    	socketHandle->dataMode = dataAccessMode;
+    	if( socketHandle->socketProtocol == CELLULAR_SOCKET_PROTOCOL_UDP && BIND == false ){
+
+    		socketHandle->remoteSocketAddress.port = pRemoteSocketAddress->port;
+    		socketHandle->remoteSocketAddress.ipAddress.ipAddressType =
+    				pRemoteSocketAddress->ipAddress.ipAddressType;
         ( void ) strncpy( socketHandle->remoteSocketAddress.ipAddress.ipAddress,
                           pRemoteSocketAddress->ipAddress.ipAddress,
                           CELLULAR_IP_ADDRESS_MAX_SIZE + 1U );
+   	 }
+   	 else{
+     	socketHandle->localPort= pRemoteSocketAddress->port;
+         socketHandle->remoteSocketAddress.port = 0;
+         socketHandle->localIpAddress.ipAddressType=pRemoteSocketAddress->ipAddress.ipAddressType;
+         ( void ) strncpy( socketHandle->remoteSocketAddress.ipAddress.ipAddress,
+                           pRemoteSocketAddress->ipAddress.ipAddress,
+                           CELLULAR_IP_ADDRESS_MAX_SIZE + 1U );
+   	 }
     }
 
     return cellularStatus;
 }
-
 
 /*-----------------------------------------------------------*/
 
@@ -2621,19 +2566,6 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
         bufferLength,
     };
 
-	#if defined(ENABLE_DTLS)
-	if(DEVICE_ONBOARDED == false) {
-		atReqSocketRecv.pAtRspPrefix = "+QSSLRECV";
-	}
-	else{
-		atReqSocketRecv.pAtRspPrefix = "+QIRD";
-	}
-	#elif  defined(USE_OFFLOAD_SSL)
-	atReqSocketRecv.pAtRspPrefix = "+QSSLRECV";
-	#endif
-
-
-
 
     cellularStatus = _Cellular_CheckLibraryStatus( pContext );
 
@@ -2670,22 +2602,10 @@ CellularError_t Cellular_SocketRecv( CellularHandle_t cellularHandle,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
 
-		#if defined(ENABLE_DTLS)
-		if(DEVICE_ONBOARDED == false) {
-	        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-	                           "%s%ld,%ld", QSSL_RECV_CMD, socketHandle->socketId, recvLen );
-		}
-		else{
-	        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
+
+	    ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
 	                           "%s%ld,%ld", QI_RECV_CMD, socketHandle->socketId, recvLen );
-		}
-		#elif  defined(USE_OFFLOAD_SSL)
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-                           "%s%ld,%ld", QSSL_RECV_CMD, socketHandle->socketId, recvLen );
-		#else
-        ( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE,
-                           "%s%ld,%ld", QI_RECV_CMD, socketHandle->socketId, recvLen );
-		#endif
+
 
         pktStatus = _Cellular_TimeoutAtcmdDataRecvRequestWithCallback( pContext,
                                                                        atReqSocketRecv, recvTimeout, socketRecvDataPrefix, NULL );
@@ -2773,24 +2693,9 @@ CellularError_t Cellular_SocketSend( CellularHandle_t cellularHandle,
          * The max length of the string is fixed and checked offline. */
         /* coverity[misra_c_2012_rule_21_6_violation]. */
 
-
-		#if defined(ENABLE_DTLS)
-		if(DEVICE_ONBOARDED == false) {
-			( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld,%ld",
-					QSSL_SEND_CMD,socketHandle->socketId, atDataReqSocketSend.dataLen );
-		}
-		else{
 			( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld,%ld",
 					QI_SEND_CMD,socketHandle->socketId, atDataReqSocketSend.dataLen );
-		}
-		#elif  defined(USE_OFFLOAD_SSL)
-		( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld,%ld",
-				QSSL_SEND_CMD,socketHandle->socketId, atDataReqSocketSend.dataLen );
-		#else
-		( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld,%ld",
-				QI_SEND_CMD,socketHandle->socketId, atDataReqSocketSend.dataLen );
 
-		#endif
 
         pktStatus = _Cellular_AtcmdDataSend( pContext, atReqSocketSend, atDataReqSocketSend,
                                              socketSendDataPrefix, NULL,
@@ -2850,26 +2755,10 @@ CellularError_t Cellular_SocketClose( CellularHandle_t cellularHandle,
              * The max length of the string is fixed and checked offline. */
             /* coverity[misra_c_2012_rule_21_6_violation]. */
 
-			#if defined(ENABLE_DTLS)
-			if(DEVICE_ONBOARDED == false) {
-				( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld", QSSL_CLOSE_CMD, socketHandle->socketId );
-				pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSockClose,
-																	   SOCKET_DISCONNECT_PACKET_REQ_TIMEOUT_MS );
-			}
-			else{
-				( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld", QI_CLOSE_CMD, socketHandle->socketId );
-				pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSockClose,
-																	   SOCKET_DISCONNECT_PACKET_REQ_TIMEOUT_MS );
-			}
-			#elif  defined(USE_OFFLOAD_SSL)
-			( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld", QSSL_CLOSE_CMD, socketHandle->socketId );
-			pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSockClose,
-																   SOCKET_DISCONNECT_PACKET_REQ_TIMEOUT_MS );
-			#else
 			( void ) snprintf( cmdBuf, CELLULAR_AT_CMD_TYPICAL_MAX_SIZE, "%s%ld", QI_CLOSE_CMD, socketHandle->socketId );
-			pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSockClose,
-																   SOCKET_DISCONNECT_PACKET_REQ_TIMEOUT_MS );
-			#endif
+				pktStatus = _Cellular_TimeoutAtcmdRequestWithCallback( pContext, atReqSockClose,
+																	   SOCKET_DISCONNECT_PACKET_REQ_TIMEOUT_MS );
+
 
             if( pktStatus != CELLULAR_PKT_STATUS_OK )
             {
