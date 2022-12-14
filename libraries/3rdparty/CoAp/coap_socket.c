@@ -76,7 +76,7 @@ CoAP_SendMsg(CoAP_Message_t* Msg, Socket_t socketHandle, NetEp_t receiver) {
 			vPortFree(pked.pData);
 		}
 //		this is just workaround
-//		HAL_NVIC_SystemReset();
+		HAL_NVIC_SystemReset();
 		return COAP_OK;
 	} else {
 		CoAP_PrintMsg(Msg);

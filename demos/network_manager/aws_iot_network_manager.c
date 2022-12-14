@@ -43,6 +43,7 @@
 
 
 #include "nce_demo_config.h"
+#include "nce_iot_c_sdk.h"
 #if BLE_ENABLED
     #include "iot_ble_config.h"
     #include "iot_ble.h"
@@ -818,26 +819,14 @@ static void _onNetworkStateChangeCallback( uint32_t networkType,
 static void _initializeTCPIPCredentials( void )
 {
     #if TCPIP_NETWORK_ENABLED
-        tcpIPConnectionParams.pHostName = democonfigMQTT_BROKER_ENDPOINT;
-        tcpIPConnectionParams.port = clientcredentialMQTT_BROKER_PORT;
-
-        if( tcpIPConnectionParams.port == 443 )
-        {
-            tcpIPCredentials.pAlpnProtos = socketsAWS_IOT_ALPN_MQTT;
-        }
-        else
-        {
-            tcpIPCredentials.pAlpnProtos = NULL;
-        }
-
+        tcpIPConnectionParams.pHostName = NceOnboard.host;
+        tcpIPConnectionParams.port = NceOnboard.port;
+        tcpIPCredentials.pAlpnProtos = NULL;
         tcpIPCredentials.maxFragmentLength = 0;
         tcpIPCredentials.disableSni = false;
         tcpIPCredentials.pRootCa = NULL;
         tcpIPCredentials.rootCaSize = 0;
-//        tcpIPCredentials.pClientCert = keyCLIENT_CERTIFICATE_PEM;
-//        tcpIPCredentials.clientCertSize = sizeof( keyCLIENT_CERTIFICATE_PEM );
-//        tcpIPCredentials.pPrivateKey = keyCLIENT_PRIVATE_KEY_PEM;
-//        tcpIPCredentials.privateKeySize = sizeof( keyCLIENT_PRIVATE_KEY_PEM );
+
     #endif /* if TCPIP_NETWORK_ENABLED */
 }
 

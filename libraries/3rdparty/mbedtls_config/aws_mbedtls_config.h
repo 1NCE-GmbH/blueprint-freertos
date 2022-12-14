@@ -219,7 +219,7 @@
  * Enable this layer to allow use of alternative memory allocators.
  */
 #define MBEDTLS_PLATFORM_MEMORY
-
+#define CONFIG_MEDTLS_USE_AFR_MEMORY
 #ifdef CONFIG_MEDTLS_USE_AFR_MEMORY
     #include <stddef.h>
 
@@ -1500,7 +1500,7 @@
  *
  * Comment this macro to disable support for the max_fragment_length extension
  */
-#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
+//#define MBEDTLS_SSL_MAX_FRAGMENT_LENGTH
 
 /**
  * \def MBEDTLS_SSL_PROTO_SSL3
@@ -3198,6 +3198,7 @@
  * incoming and outgoing I/O buffers.
  */
 #define MBEDTLS_SSL_MAX_CONTENT_LEN             4096
+//#define MBEDTLS_SSL_MAX_CONTENT_LEN             8192
 
 /** \def MBEDTLS_SSL_IN_CONTENT_LEN
  *
@@ -3222,7 +3223,7 @@
  * Uncomment to set the maximum plaintext size of the incoming I/O buffer
  * independently of the outgoing I/O buffer.
  */
-#define MBEDTLS_SSL_IN_CONTENT_LEN              2048
+//#define MBEDTLS_SSL_IN_CONTENT_LEN              8192
 
 /** \def MBEDTLS_SSL_OUT_CONTENT_LEN
  *
@@ -3246,7 +3247,7 @@
  * Uncomment to set the maximum plaintext size of the outgoing I/O buffer
  * independently of the incoming I/O buffer.
  */
-#define MBEDTLS_SSL_OUT_CONTENT_LEN             2048
+//#define MBEDTLS_SSL_OUT_CONTENT_LEN             2048
 
 /** \def MBEDTLS_SSL_DTLS_MAX_BUFFERING
  *
@@ -3263,7 +3264,7 @@
  * while buffering multiple smaller handshake messages.
  *
  */
-#define MBEDTLS_SSL_DTLS_MAX_BUFFERING             4096
+#define MBEDTLS_SSL_DTLS_MAX_BUFFERING             8192
 
 //#define MBEDTLS_SSL_DEFAULT_TICKET_LIFETIME     86400 /**< Lifetime of session tickets (if enabled) */
 //#define MBEDTLS_PSK_MAX_LEN               32 /**< Max size of TLS pre-shared keys, in bytes (default 256 bits) */
@@ -3282,7 +3283,7 @@
  * The value below is only an example, not the default.
  */
 //#define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-#define MBEDTLS_SSL_CIPHERSUITES  MBEDTLS_TLS_PSK_WITH_AES_128_GCM_SHA256
+#define MBEDTLS_SSL_CIPHERSUITES  MBEDTLS_TLS_PSK_WITH_AES_128_CBC_SHA256
 
 /* X509 options */
 //#define MBEDTLS_X509_MAX_INTERMEDIATE_CA   8   /**< Maximum number of intermediate CAs in a verification chain. */

@@ -27,7 +27,7 @@
 #define __CELLULAR_TYPES_H__
 
 #include <stdbool.h>
-
+#include "cellular_config_defaults.h"
 /**
  * @brief Invalid signal value.
  */

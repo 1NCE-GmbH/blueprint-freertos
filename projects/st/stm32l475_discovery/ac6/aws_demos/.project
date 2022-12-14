@@ -112,6 +112,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>demos/wakaama</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>freertos_kernel/event_groups.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/event_groups.c</locationURI>
@@ -317,16 +322,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/demos/network_manager/iot_network_manager_private.h</locationURI>
 		</link>
 		<link>
-			<name>demos/tcp/aws_tcp_echo_client_single_task.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/tcp/aws_tcp_echo_client_single_task.c</locationURI>
-		</link>
-		<link>
-			<name>demos/tcp/aws_tcp_echo_client_single_tasks.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/tcp/aws_tcp_echo_client_single_tasks.h</locationURI>
-		</link>
-		<link>
 			<name>demos/udp/CMakeLists.txt</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/demos/udp/CMakeLists.txt</locationURI>
@@ -335,6 +330,16 @@
 			<name>demos/udp/iot_demo_udp.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/demos/udp/iot_demo_udp.c</locationURI>
+		</link>
+		<link>
+			<name>demos/wakaama/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/wakaama/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>demos/wakaama/iot_demo_wakaama.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/demos/wakaama/iot_demo_wakaama.c</locationURI>
 		</link>
 		<link>
 			<name>freertos_kernel/include/FreeRTOS.h</name>
@@ -427,12 +432,17 @@
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/include/timers.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/CoAp</name>
+			<name>libraries/3rdparty/1nce_impl</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/NCE_SDK</name>
+			<name>libraries/3rdparty/1nce_sdk</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/CoAp</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -442,14 +452,14 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/abstractions/cellular</name>
+			<name>libraries/3rdparty/wakaama</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/coreMQTT/mqttFilePaths.cmake</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/mqttFilePaths.cmake</locationURI>
+			<name>libraries/abstractions/cellular</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>libraries/logging/iot_logging.c</name>
@@ -460,6 +470,11 @@
 			<name>libraries/logging/iot_logging_task_dynamic_buffers.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/iot_logging_task_dynamic_buffers.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/transport/source</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>vendors/aws/.DS_Store</name>
@@ -492,19 +507,99 @@
 			<locationURI>AWS_IOT_MCU_ROOT/demos/cellular_manager/include/cellular_manager_types.h</locationURI>
 		</link>
 		<link>
-			<name>demos/dev_mode_key_provisioning/include/aws_dev_mode_key_provisioning.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/dev_mode_key_provisioning/include/aws_dev_mode_key_provisioning.h</locationURI>
-		</link>
-		<link>
-			<name>demos/dev_mode_key_provisioning/src/aws_dev_mode_key_provisioning.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/demos/dev_mode_key_provisioning/src/aws_dev_mode_key_provisioning.c</locationURI>
-		</link>
-		<link>
 			<name>freertos_kernel/portable/MemMang/heap_5.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/MemMang/heap_5.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_impl/udp_impl.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_impl/udp_impl.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_impl/udp_impl.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_impl/udp_impl.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/.git</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/.git</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/.gitignore</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/.gitignore</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/.gitlab-ci.yml</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/.gitlab-ci.yml</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/.gitmodules</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/.gitmodules</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/CHANGELOG.md</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/CHANGELOG.md</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/CONTRIBUTING.md</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/CONTRIBUTING.md</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/LICENSE</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/LICENSE</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/README.md</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/README.md</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docker</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/lexicon.txt</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/lexicon.txt</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/nceiotcsdkFilePaths.cmake</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/nceiotcsdkFilePaths.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/project.yml</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/project.yml</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/test</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/tools</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/CoAp/coap.h</name>
@@ -602,26 +697,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>libraries/3rdparty/NCE_SDK/.DS_Store</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/.DS_Store</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/NCE_SDK/Inc</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_bg96_configuration.c</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/NCE_SDK/nce_onboarding.c</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/nce_onboarding.c</locationURI>
-		</link>
-		<link>
 			<name>libraries/3rdparty/mbedtls/.github</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -687,6 +762,36 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/pkcs11/pkcs11t.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/3rdparty/wakaama/coap</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/tools</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>libraries/abstractions/cellular/.DS_Store</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/.DS_Store</locationURI>
@@ -727,6 +832,11 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/logging/include/logging_stack.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/transport/source/interface</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>vendors/aws/modules/.DS_Store</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/aws/modules/.DS_Store</locationURI>
@@ -755,6 +865,56 @@
 			<name>freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/freertos_kernel/portable/GCC/ARM_CM4F/portmacro.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docker/Dockerfile</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docker/Dockerfile</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docker/compilerScript.sh</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docker/compilerScript.sh</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/include</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/interface</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/nce_iot_c_sdk.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_sdk/source/nce_iot_c_sdk.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/test/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/test/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/test/unit_test_sdk.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/test/unit_test_sdk.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/tools/uncrustify.cfg</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/tools/uncrustify.cfg</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/CoAp/interface/coap_interface.h</name>
@@ -820,16 +980,6 @@
 			<name>libraries/3rdparty/CoAp/option-types/coap_option_uri.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/CoAp/option-types/coap_option_uri.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/NCE_SDK/Inc/nce_bg96_configuration.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/Inc/nce_bg96_configuration.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/3rdparty/NCE_SDK/Inc/nce_onboarding.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/NCE_SDK/Inc/nce_onboarding.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/mbedtls/.github/issue_template.md</name>
@@ -1272,6 +1422,146 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/library/xtea.c</locationURI>
 		</link>
 		<link>
+			<name>libraries/3rdparty/wakaama/coap/block.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/block.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/coap.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/coap.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/er-coap-13</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/transaction.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/transaction.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/bootstrap.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/bootstrap.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/discover.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/discover.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/internals.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/internals.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/liblwm2m.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/liblwm2m.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/list.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/list.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/management.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/management.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/objects.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/objects.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/observe.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/observe.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/packet.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/packet.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/registration.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/registration.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/uri.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/uri.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/utils.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/utils.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/core/wakaama.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/core/wakaama.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/data.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/data.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/data.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/data.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/json.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/json.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/json_common.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/json_common.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/senml_json.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/senml_json.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/data/tlv.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/data/tlv.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/include/liblwm2m.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/include/liblwm2m.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/tools/ci</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>libraries/abstractions/cellular/include/cellular_api.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/cellular/include/cellular_api.h</locationURI>
@@ -1447,11 +1737,6 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/transport/secure_sockets/transport_secure_sockets.h</locationURI>
 		</link>
 		<link>
-			<name>libraries/abstractions/wifi/include/iot_wifi.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/wifi/include/iot_wifi.h</locationURI>
-		</link>
-		<link>
 			<name>libraries/c_sdk/standard/common/iot_device_metrics.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_device_metrics.c</locationURI>
@@ -1467,29 +1752,9 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/iot_static_memory_common.c</locationURI>
 		</link>
 		<link>
-			<name>libraries/coreMQTT/source/include/core_mqtt.h</name>
+			<name>libraries/transport/source/interface/transport_interface.h</name>
 			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/coreMQTT/source/include/core_mqtt_config_defaults.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_config_defaults.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/coreMQTT/source/include/core_mqtt_serializer.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_serializer.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/coreMQTT/source/include/core_mqtt_state.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/include/core_mqtt_state.h</locationURI>
-		</link>
-		<link>
-			<name>libraries/coreMQTT/source/interface/transport_interface.h</name>
-			<type>1</type>
-			<locationURI>AWS_IOT_MCU_ROOT/libraries/coreMQTT/source/interface/transport_interface.h</locationURI>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/transport/source/interface/transport_interface.h</locationURI>
 		</link>
 		<link>
 			<name>vendors/aws/modules/3gpp/.DS_Store</name>
@@ -1630,6 +1895,311 @@
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_uart_ex.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/stm32l4xx_hal_uart_ex.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/Doxyfile</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/Doxyfile</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/pages.dox</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/pages.dox</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/style.dox</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/style.dox</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/user_guide.dox</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/user_guide.dox</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/1ncelogobg.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/1ncelogobg.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/_integration__guide.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/_integration__guide.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/bc_s.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/bc_s.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/bdwn.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/bdwn.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/closed.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/closed.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/coap_onboarding.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/coap_onboarding.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/dir_359d2bec989c9a8deeeb9aee335c1c76.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/dir_359d2bec989c9a8deeeb9aee335c1c76.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/dir_49e56c817e5e54854c35e136979f97ca.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/dir_49e56c817e5e54854c35e136979f97ca.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/dir_8ee1a5e78eaec319fe5d64075812fc61.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/dir_8ee1a5e78eaec319fe5d64075812fc61.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/dir_b2f33c71d4aa5e7af42a1ca61ff5af1b.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/doc.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/doc.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/doxygen.css</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/doxygen.css</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/doxygen.svg</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/doxygen.svg</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/dynsections.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/dynsections.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/files.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/files.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/files_dup.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/files_dup.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/folderclosed.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/folderclosed.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/folderopen.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/folderopen.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/globals.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/globals.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/globals_defs.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/globals_defs.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/globals_func.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/globals_func.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/globals_vars.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/globals_vars.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/guide_developer_styleguide.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/guide_developer_styleguide.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/index.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/index.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/jquery.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/jquery.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/mqtt_onboarding.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/mqtt_onboarding.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nav_f.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nav_f.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nav_g.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nav_g.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nav_h.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nav_h.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/navtree.css</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/navtree.css</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/navtree.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/navtree.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/navtreedata.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/navtreedata.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/navtreeindex0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/navtreeindex0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c_source.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8c_source.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h_source.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/nce__sdk_8h_source.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/open.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/open.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/overview.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/overview.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/pages.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/pages.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/resize.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/resize.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/splitbar.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/splitbar.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/sync_off.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/sync_off.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/sync_on.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/sync_on.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/tab_a.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/tab_a.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/tab_b.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/tab_b.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/tab_h.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/tab_h.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/tab_s.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/tab_s.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/tabs.css</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/tabs.css</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/translation_service.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/translation_service.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/include/nce_iot_c_sdk.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_sdk/source/include/nce_iot_c_sdk.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/interface/log_interface.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_sdk/source/interface/log_interface.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/source/interface/udp_interface.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/1nce_sdk/source/interface/udp_interface.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/3rdparty/CoAp/interface/mem/coap_mem.c</name>
@@ -2067,6 +2637,141 @@
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/mbedtls/include/mbedtls/xtea.h</locationURI>
 		</link>
 		<link>
+			<name>libraries/3rdparty/wakaama/coap/er-coap-13/.clang-format</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/er-coap-13/.clang-format</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/er-coap-13/LICENSE</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/er-coap-13/LICENSE</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/er-coap-13/er-coap-13.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/er-coap-13/er-coap-13.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/coap/er-coap-13/er-coap-13.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/coap/er-coap-13/er-coap-13.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/CMakeLists.txt</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/CMakeLists.txt</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/lwm2mclient.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/lwm2mclient.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/lwm2mclient.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/lwm2mclient.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_access_control.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_access_control.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_connectivity_moni.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_connectivity_moni.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_connectivity_stat.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_connectivity_stat.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_device.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_device.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_firmware.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_firmware.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_location.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_location.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_security.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_security.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_server.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_server.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/object_test.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/object_test.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/client/system_api.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/client/system_api.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/connection.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/connection.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/connection.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/connection.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/dtlsconnection.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/dtlsconnection.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/dtlsconnection.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/dtlsconnection.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/memtrace.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/memtrace.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/platform.c</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/platform.c</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/shared.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/shared.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/tinydtls</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/examples/shared/tinydtls.cmake</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/examples/shared/tinydtls.cmake</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/wakaama/tools/ci/run_ci.sh</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/3rdparty/wakaama/tools/ci/run_ci.sh</locationURI>
+		</link>
+		<link>
 			<name>libraries/abstractions/pkcs11/corePKCS11/source/core_pkcs11.c</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/abstractions/pkcs11/corePKCS11/source/core_pkcs11.c</locationURI>
@@ -2115,6 +2820,11 @@
 			<name>libraries/c_sdk/standard/common/include/iot_linear_containers.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_linear_containers.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/c_sdk/standard/common/include/iot_logging_setup.h</name>
+			<type>1</type>
+			<locationURI>AWS_IOT_MCU_ROOT/libraries/c_sdk/standard/common/include/iot_logging_setup.h</locationURI>
 		</link>
 		<link>
 			<name>libraries/c_sdk/standard/common/include/iot_taskpool.h</name>
@@ -2755,6 +3465,351 @@
 			<name>vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_wwdg.h</name>
 			<type>1</type>
 			<locationURI>AWS_IOT_MCU_ROOT/vendors/st/stm32l475_discovery/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_wwdg.h</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/1ncelogobg.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/1ncelogobg.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/coap_device_authenticator.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/coap_device_authenticator.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/energy_saver.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/energy_saver.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/overview.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/overview.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/translation_template_1.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/translation_template_1.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/doxygen/images/translation_template_2.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/doxygen/images/translation_template_2.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_1.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_1.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_1.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_1.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_2.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_2.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_2.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_2.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_3.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_3.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_3.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_3.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_4.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_4.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_4.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_4.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_5.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_5.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_5.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_5.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_6.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_6.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_6.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_6.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_7.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_7.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_7.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_7.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_8.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_8.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_8.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_8.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_9.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_9.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_9.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_9.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_a.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_a.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_a.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_a.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_b.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_b.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/all_b.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/all_b.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/close.svg</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/close.svg</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_1.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_1.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_1.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_1.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_2.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_2.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_2.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_2.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_3.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_3.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_3.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_3.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_4.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_4.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_4.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_4.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_5.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_5.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_5.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_5.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_6.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_6.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_6.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_6.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_7.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_7.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_7.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_7.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_8.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_8.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/defines_8.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/defines_8.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/files_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/files_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/files_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/files_0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/functions_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/functions_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/functions_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/functions_0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/mag_sel.svg</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/mag_sel.svg</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/nomatches.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/nomatches.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_0.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_1.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_1.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_1.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_1.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_2.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_2.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/pages_2.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/pages_2.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/search.css</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/search.css</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/search.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/search.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/search_l.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/search_l.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/search_m.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/search_m.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/search_r.png</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/search_r.png</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/searchdata.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/searchdata.js</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/variables_0.html</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/variables_0.html</locationURI>
+		</link>
+		<link>
+			<name>libraries/3rdparty/1nce_sdk/docs/html/search/variables_0.js</name>
+			<type>1</type>
+			<locationURI>PARENT-2-AWS_IOT_MCU_ROOT/freertos_test/freertos_cellular_driver/libraries/3rdparty/1nce_sdk/docs/html/search/variables_0.js</locationURI>
 		</link>
 		<link>
 			<name>libraries/abstractions/pkcs11/corePKCS11/source/include/core_pkcs11.h</name>

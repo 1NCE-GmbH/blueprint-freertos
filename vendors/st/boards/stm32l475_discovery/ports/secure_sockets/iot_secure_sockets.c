@@ -52,7 +52,6 @@
 /* Clock includes. */
 #include "platform/iot_clock.h"
 
-#include "nce_demo_config.h"
 /* Configure logs for the functions in this file. */
 #ifdef IOT_LOG_LEVEL_NETWORK
     #define LIBRARY_LOG_LEVEL        IOT_LOG_LEVEL_NETWORK
@@ -117,6 +116,7 @@ extern uint8_t CellularSocketPdnContextId;
     #define     GETHOSTBYNAME_CACHE_SIZE    ( 10U )
 #endif /* if ( CELLULAR_SUPPORT_GETHOSTBYNAME == 0 ) */
 
+
 /*-----------------------------------------------------------*/
 
 typedef struct xSOCKET
@@ -138,6 +138,9 @@ typedef struct xSOCKET
 } _cellularSecureSocket_t;
 
 /*-----------------------------------------------------------*/
+/* xWaitingPacketSemaphore is not created until the socket is bound, so can be
+tested to see if bind() has been called. */
+#define socketSOCKET_IS_BOUND( xSocket ) ( ( BaseType_t ) xSOCKET->socketEventGroupHandle->xTasksWaitingForBits )
 
 static BaseType_t prvNetworkSend( void * ctx,
                                   const uint8_t * buf,
@@ -350,7 +353,7 @@ static BaseType_t prvNetworkRecvCellular( const _cellularSecureSocket_t * pCellu
         }
         else
         {
-            IotLogInfo( "prvNetworkRecv timeout" );
+//            IotLogInfo( "prvNetworkRecv timeout" );
             socketStatus = CELLULAR_SUCCESS;
             recvLength = 0;
         }
@@ -1124,7 +1127,7 @@ Socket_t SOCKETS_Socket( int32_t lDomain,
     /* coverity[misra_c_2012_rule_10_4_violation] */
     /* coverity[misra_c_2012_rule_10_5_violation] */
     configASSERT( lDomain == SOCKETS_AF_INET );
-#if (defined( CONFIG_COAP_DEMO_ENABLED )||defined( CONFIG_UDP_DEMO_ENABLED ))
+#if (defined( CONFIG_COAP_DEMO_ENABLED )||defined( CONFIG_UDP_DEMO_ENABLED )||defined( CONFIG_LwM2M_DEMO_ENABLED ))
 
     /* coverity[misra_c_2012_rule_10_4_violation] */
     /* coverity[misra_c_2012_rule_10_5_violation] */

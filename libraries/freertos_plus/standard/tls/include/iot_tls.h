@@ -25,6 +25,7 @@
 
 #ifndef __AWS__TLS__H__
 #define __AWS__TLS__H__
+#include "nce_demo_config.h"
 
 #ifndef INC_FREERTOS_H
     #error "include FreeRTOS.h must appear in source files before include iot_tls.h"
