@@ -42,7 +42,7 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/pk_internal.h"
 #include "mbedtls/debug.h"
-#include "nce_onboarding.h"
+#include "udp_impl.h"
 #ifdef MBEDTLS_DEBUG_C
     #define tlsDEBUG_VERBOSE    4
 #endif
@@ -251,27 +251,38 @@ static int prvGenerateRandomBytes( void * pvCtx,
  *
  * @return Zero on success.
  */
-#if defined(ENABLE_DTLS)
+//
 static int prvInitializeClientCredential( TLSContext_t * pxCtx )
 {
+	BaseType_t xResult = CKR_OK;
+	#if (defined(ENABLE_DTLS)&& defined(CONFIG_COAP_DEMO_ENABLED))
+    	DtlsKey_t nceKey={0};
+    	int result=	os_auth(&osNetwork,&nceKey);
 
-    BaseType_t xResult = CKR_OK;
+    	/* Attach the client PSK the DTLS configuration. */
+    	if( 0 == xResult )
+    	{
+    		/*Use PSK */
+    		size_t psk_len  = strlen(nceKey.Psk);
+    		size_t psk_identity_len  = strlen(nceKey.PskIdentity);
+    		xResult = mbedtls_ssl_conf_psk( &pxCtx->xMbedSslConfig,
+    				&(nceKey.Psk),psk_len,&(nceKey.PskIdentity),psk_identity_len);
 
-    /* Attach the client PSK the DTLS configuration. */
-    if( 0 == xResult )
-    {
-        /*Use PSK */
-        size_t psk_len  = strlen(PSK);
-		size_t psk_identity_len  = strlen(psk_identity);
+    	}
+	#elif (defined(CONFIG_LwM2M_DEMO_ENABLED) && defined(ENABLE_DTLS))
+    	if( 0 == xResult )
+    	{
+    		/*Use PSK */
+    		size_t psk_len  = strlen(lwm2m_psk);
+    		size_t psk_identity_len  = strlen(lwm2m_psk_id);
+    		xResult = mbedtls_ssl_conf_psk( &pxCtx->xMbedSslConfig,
+    				&(lwm2m_psk),psk_len,&(lwm2m_psk_id),psk_identity_len);
 
-        xResult = mbedtls_ssl_conf_psk( &pxCtx->xMbedSslConfig,
-                &PSK,strlen(PSK),&psk_identity,psk_identity_len);
-
-    }
-
+    	}
+	#endif
     return xResult;
 }
-#endif
+//#endif
 /*-----------------------------------------------------------*/
 
 /**

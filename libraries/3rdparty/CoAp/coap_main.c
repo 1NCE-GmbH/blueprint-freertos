@@ -62,7 +62,6 @@ void _ram CoAP_HandleIncomingPacket(Socket_t socketHandle, NetPacket_t* pPacket)
 		CoAP_SendEmptyRST(pMsg->MessageID, socketHandle, pPacket->remoteEp); //a.k.a "CoAP Ping"
 		CoAP_FreeMessage(pMsg); //free if not used inside interaction
 		pMsg = NULL;
-		//coap_mem_stats();
 		return;
 	} else if (pMsg->Type == ACK && isRequest) {
 		goto END;

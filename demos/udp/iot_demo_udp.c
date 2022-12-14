@@ -10,7 +10,8 @@
  * @file iot_demo_udp.c
  * @brief Demonstrates usage UDP in FreeRTOS connecting with our endpoint.
  */
-
+#include "nce_demo_config.h"
+#if defined(CONFIG_UDP_DEMO_ENABLED)
 /* The config header is always included first. */
 #include "iot_config.h"
 
@@ -30,7 +31,7 @@
 
 /* COAP include. */
 #include "coap_main.h"
-#include "nce_demo_config.h"
+
 
 #define udpLOOP_DELAY    ( ( TickType_t ) 150 / portTICK_PERIOD_MS )
 static const TickType_t xReceiveTimeOut = pdMS_TO_TICKS( 40000 );
@@ -91,7 +92,20 @@ int RunudpDemo( bool awsIotMode,
         if( SOCKETS_Connect( udp, &ServerAddress, sizeof( ServerAddress ) ) == 0 )
         {
             IotLogInfo( "Connected to udp server \r\n" );
-            sprintf( send_packet, &PUBLISH_PAYLOAD_FORMAT, UDP_ENDPOINT );
+			#ifndef CONFIG_NCE_ENERGY_SAVER
+            	/* Add payload */
+            	char pcTransmittedString[]=PUBLISH_PAYLOAD_FORMAT;
+			#else
+            	/* Add payload */
+            	char pcTransmittedString[500];
+            	(void) memset(&pcTransmittedString, (uint8_t) '\0', sizeof(pcTransmittedString));
+            	uint8_t selector = 4;
+            	Element2byte_gen_t battery_level = {.type= E_INTEGER,.value.i=99,.template_length=1};
+            	Element2byte_gen_t signal_strength = {.type= E_INTEGER,.value.i=84,.template_length=1};
+            	Element2byte_gen_t software_version = {.type= E_STRING,.value.s="2.2.1",.template_length=5};
+            	os_energy_save(pcTransmittedString,selector, 3,battery_level,signal_strength,software_version);
+			#endif
+            sprintf( send_packet, &pcTransmittedString, UDP_ENDPOINT );
             int32_t SendVal = SOCKETS_Send( udp, &send_packet,
                                             strlen( send_packet ), NULL );
             IotLogInfo( "Sending %s of length %d to udp server\r\n", send_packet, strlen( send_packet ) );
@@ -126,3 +140,4 @@ int RunudpDemo( bool awsIotMode,
 }
 
 /*-----------------------------------------------------------*/
+#endif

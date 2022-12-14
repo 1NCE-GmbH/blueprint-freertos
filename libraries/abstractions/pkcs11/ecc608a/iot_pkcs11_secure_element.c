@@ -45,8 +45,7 @@
     #include "iot_test_pkcs11_config.h"
 #endif
 
-/* Credential includes. */
-#include "aws_clientcredential_keys.h"
+
 
 #if ( pkcs11configOTA_SUPPORTED == 1 )
     #include "aws_ota_codesigner_certificate.h"

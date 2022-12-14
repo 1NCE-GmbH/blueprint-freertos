@@ -10,7 +10,8 @@
  * @file iot_demo_coap.c
  * @brief Demonstrates usage of lobaro COAP library.
  */
-
+#include "nce_demo_config.h"
+#if defined(CONFIG_COAP_DEMO_ENABLED)
 /* The config header is always included first. */
 #include "iot_config.h"
 
@@ -30,8 +31,9 @@
 
 /* COAP include. */
 #include "coap_main.h"
-#include "nce_onboarding.h"
-#include "nce_demo_config.h"
+#include "transport_secure_sockets.h"
+#include "udp_impl.h"
+
 
 /*-----------------------------------------------------------*/
 
@@ -65,13 +67,9 @@ int RuncoapDemo( bool awsIotMode,
 {
     /* Return value of this function and the exit status of this program. */
     int status = EXIT_FAILURE;
-
     SocketsSockaddr_t ServerAddress;
     NetPacket_t pPacket;
-
-    #ifdef ENABLE_DTLS
-        Onboarding_Status_t onboarding_status = nce_onboard_device();
-    #endif
+    NetworkContext_t xNetworkContext = { 0 };
     IotLogInfo( "Connecting to CoAP server\r\n" );
     ServerAddress.usPort = SOCKETS_htons( configCOAP_PORT );
     ServerAddress.ulAddress = SOCKETS_GetHostByName( COAP_ENDPOINT );
@@ -117,9 +115,22 @@ int RuncoapDemo( bool awsIotMode,
                 /* Add payload */
                 nce_troubleshooting( &pcTransmittedString );
             #else
+				#ifndef CONFIG_NCE_ENERGY_SAVER
+                	/* Add payload */
+                	char pcTransmittedString[]=PUBLISH_PAYLOAD_FORMAT;
+				#else
                 /* Add payload */
-                char pcTransmittedString[] = PUBLISH_PAYLOAD_FORMAT;
-            #endif
+                char pcTransmittedString[500];
+                (void) memset(&pcTransmittedString, (uint8_t) '\0', sizeof(pcTransmittedString));
+                uint8_t selector = 4;
+
+            	Element2byte_gen_t battery_level = {.type= E_INTEGER,.value.i=99,.template_length=1};
+                Element2byte_gen_t signal_strength = {.type= E_INTEGER,.value.i=84,.template_length=1};
+                Element2byte_gen_t software_version = {.type= E_STRING,.value.s="2.2.1",.template_length=5};
+                os_energy_save(pcTransmittedString,selector, 3,battery_level,signal_strength,software_version);
+
+                #endif
+			#endif
             /* Add socket and Network Interface configuration */
             socket->Handle = udp;
             socket->Tx = CoAP_Send_Wifi;
@@ -130,7 +141,7 @@ int RuncoapDemo( bool awsIotMode,
 
             CoAP_addNewPayloadToMessage( pReqMsg, pcTransmittedString,
                                          strlen( pcTransmittedString ) );
-            CoAP_AddOption( pReqMsg, OPT_NUM_URI_QUERY, configCOAP_URI_QUERY, strlen( configCOAP_URI_QUERY ) );
+            CoAP_AddOption( pReqMsg, OPT_NUM_URI_QUERY, democonfigCLIENT_IDENTIFIER, strlen( democonfigCLIENT_IDENTIFIER ) );
 
 
             /* Create CoAP Client Interaction to send a confirmable POST Request  */
@@ -141,7 +152,7 @@ int RuncoapDemo( bool awsIotMode,
             /* Execute the Interaction list  */
             CoAP_Message_t * pMsg = NULL;
 
-            while( pIA != NULL )
+            while( pIA != NULL || pIA->State == COAP_STATE_FINISHED)
             {
                 CoAP_doWork();
 
@@ -149,12 +160,13 @@ int RuncoapDemo( bool awsIotMode,
                 {
                     CoAP_Recv_Wifi( socket->Handle, &pPacket, ServerEp );
                 }
-
-                pIA = CoAP_GetLongestPendingInteraction();
-
-                if( pIA->State == COAP_STATE_FINISHED )
-                {
-                    status = EXIT_SUCCESS;
+                if(pIA->next != NULL){
+                	pIA = CoAP_GetLongestPendingInteraction();
+                }else{
+                	if(pIA->State == COAP_STATE_FINISHED){
+                		pIA= pIA->next;
+                		status = EXIT_SUCCESS;
+                	}
                 }
 
                 if( troubleshooting.Code != RESP_SUCCESS_CHANGED_2_04 )
@@ -183,3 +195,4 @@ int RuncoapDemo( bool awsIotMode,
 }
 
 /*-----------------------------------------------------------*/
+#endif
