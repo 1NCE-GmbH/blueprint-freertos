@@ -10,6 +10,11 @@
 
 #define PUBLISH_PAYLOAD_FORMAT                   "Welcome to 1NCE's Solution"
 #define democonfigCLIENT_ICCID "<ICCID>"
+
+/* C2D Parameters */
+#define NCE_RECV_PORT 3000
+#define NCE_RECEIVE_BUFFER_SIZE 200
+
 /* UDP Configuration */
 #if defined(CONFIG_UDP_DEMO_ENABLED)
 #define UDP_ENDPOINT "udp.os.1nce.com"

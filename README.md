@@ -203,6 +203,89 @@ for more information on the troubleshooting
 |9|CELLULAR NETWORK REGISTRATION STATUS MAX|
 <p>Table 2. Network Registration Status </p>
 
+## Device Controller
+The Device Controller is an API that allows you to interact with devices integrated into the 1NCE API. You can use this API to send requests to devices, and the devices will respond accordingly. For more details you can visit our [DevHub](https://help.1nce.com/dev-hub/docs/1nce-os-device-controller)
+### Sending a Request
+To send a request to a specific device, you can use the following `curl` command:
+#### UDP
+
+```
+curl -X 'POST' 'https://api.1nce.com/management-api/v1/integrate/devices/<ICCID>/actions/UDP' \
+-H 'accept: application/json' \
+-H 'Authorization: Bearer <your Access Token >' \
+-H 'Content-Type: application/json' \
+-d '{
+  "payload": "enable_sensor",
+  "payloadType": "STRING",
+  "port": 3000,
+  "requestMode": "SEND_WHEN_ACTIVE"
+}'
+```
+Replace `<ICCID>` with the ICCID (International Mobile Subscriber Identity) of the target device and `<your Access Token>` with the authentication token from [Obtain Access Token](https://help.1nce.com/dev-hub/reference/postaccesstokenpost).
+#### COAP
+
+```
+curl -X 'POST' 'https://api.1nce.com/management-api/v1/integrate/devices/<ICCID>/actions/COAP' \
+-H 'accept: application/json' \
+-H 'Authorization: Bearer <your Access Token >' \
+-H 'Content-Type: application/json' \
+-d '{
+  "payload": "Data to send to the device",
+  "payloadType": "STRING",
+  "port": <NCE_RECV_PORT>,
+  "path": "/example?param1=query_example1",
+  "requestType": "POST",
+  "requestMode": "SEND_NOW"
+}'
+```
+Replace `<ICCID>` with the ICCID (International Mobile Subscriber Identity) of the target device and `<your Access Token>` with the authentication token from [Obtain Access Token](https://help.1nce.com/dev-hub/reference/postaccesstokenpost).
+
+##### Requested Parameters
+* `payload`: The data you want to send to the device. This should be provided as a string.
+* `payloadType`: The type of the payload. In this example, it is set to "STRING".
+* `port`: The port number on which the device will receive the request. In the code, this is defined as NCE_RECV_PORT.
+* `path`: The path of the request. It can include query parameters as well. In this example, it is set to "/example?param1=query_example1".
+* `requestType`: The type of request, such as "POST", "GET", etc.
+* `requestMode`: The mode of the request. In this example, it is set to "SEND_NOW". There are other possible value like SEND_WHEN_ACTIVE.
+
+#### FreeRTOS Configuration 
+To handle the incoming request from the 1NCE API, the configuration of certain parameters needed
+
+##### nce_demo_config.h
+```
+/* C2D Parameters */
+#define NCE_RECV_PORT 3000
+#define NCE_RECEIVE_BUFFER_SIZE 200
+
+```
+* `NCE_RECV_PORT`: This is the port number where your device will listen for incoming requests. It should match the port parameter used in the request.
+* `NCE_RECEIVE_BUFFER_SIZE` : This is the size of the buffer that will be used to receive the incoming data from the 1NCE API.
+
+#### FreeRTOS Output
+
+##### COAP
+
+When the FreeRTOS application receives a request from the 1NCE API, it will produce output similar to the following:
+
+```
+[ListeningTask] [INFO ][LwM2M][9777] Token (len 8) [0xDCB86446841F78AC]
+[ListeningTask] [INFO ][LwM2M][9785] OPTION 11 (delta 11, len 7): 
+[ListeningTask] [INFO ][LwM2M][9792] Uri-Path [example]
+[ListeningTask] [INFO ][LwM2M][9798] OPTION 12 (delta 1, len 0): 
+[ListeningTask] [INFO ][LwM2M][9805] Content-Format [0]
+[ListeningTask] [INFO ][LwM2M][9811] OPTION 15 (delta 3, len 21): 
+[ListeningTask] [INFO ][LwM2M][9818] Uri-Query [param1=query_example1]
+[ListeningTask] [INFO ][LwM2M][9825] Payload [Data to send to the device]
+[ListeningTask] [INFO ][LwM2M][9833] -Done parsing-------
+```
+
+##### UDP 
+
+```
+ [ListeningTask] [INFO ][DEMO][8652] Listening on UDP port 3000...
+ [ListeningTask] [INFO ][DEMO][9520] Received 13 bytes:
+                                                               enable_sensor
+```
 ## Asking for Help
 
 The most effective communication with our team is through GitHub. Simply create a [new issue](https://github.com/1NCE-GmbH/blueprint-freertos/issues/new/choose) and select from a range of templates covering bug reports, feature requests, documentation issue, or Gerneral Question.

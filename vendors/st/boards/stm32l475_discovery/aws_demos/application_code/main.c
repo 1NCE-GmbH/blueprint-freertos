@@ -122,7 +122,7 @@ int main( void )
      * including the WiFi initialization, is performed in the RTOS daemon task
      * startup hook. */
     vTaskStartScheduler();
-
+    IotLogInfo( "-------DEMO FINISHED-------\n" );
     return 0;
 }
 
