@@ -1,0 +1,50 @@
+{
+    "sense": [
+        {
+            "switch": {
+                "byte": 0,
+                "bytelength": 1,
+                "type": "int"
+            },
+            "on": [
+                {
+                    "case": 1,
+                    "comment": "Energy_saver",
+                    "do": [
+                        {
+                            "asset": "data_type",
+                            "value": "Energy_Saver"
+                        },
+                        {
+                            "asset": "battery_level",
+                            "value": {
+                                "byte": 1,
+                                "bytelength": 1,
+                                "type": "uint",
+                                "byteorder": "little"
+                            }
+                        },
+                        {
+                            "asset": "signal_strength",
+                            "value": {
+                                "byte": 2,
+                                "bytelength": 1,
+                                "type": "uint",
+                                "byteorder": "little"
+                            }
+                        },
+                        {
+                            "asset": "software_version",
+                            "value": {
+                                "byte": 3,
+                                "bytelength": 5,
+                                "type": "string",
+                                "byteorder": "little"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
