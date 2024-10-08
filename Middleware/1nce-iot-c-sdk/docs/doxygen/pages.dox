@@ -1,0 +1,27 @@
+/**
+@mainpage Overview
+@brief The 1NCE IoT SDK for Embedded C provides demonstration code for different functionality of 1NCE OS.
+
+> 1NCE IoT SDK allow customers a seamless setup and use of all features as part of 1NCE OS.
+
+@section features Features
+The following services are part of this SDK:
+- [Device Integrator] - [Device Integrator](https://help.1nce.com/dev-hub/docs/1nce-os-device-integrator)
+- [Device Authenticator] - [Device Authenticator](https://help.1nce.com/dev-hub/docs/1nce-os-device-authenticator)
+- [Energy Saver] - [Energy saver](https://help.1nce.com/dev-hub/docs/1nce-os-energy-saver)
+
+@image html overview.png 1NCE IoT C SDK Overview width=50%
+
+
+@section coap_Device_Authenticator CoAP device Authenticator
+The 1NCE IoT c SDK provides onboarding credentials for IoT devices communicating
+through DTLS. In this case the device receives a DTLS Identity and a Pre-Shared Key (PSK) that can be used to establish secure connection
+to the CoAP endpoint of 1NCE Data Broker
+@image html coap_device_authenticator.png CoAP DTLS Authentication Flow width=50%
+@section Energy_saver Energy Saver (Binary conversion language)
+The Energy Saver aims to minimize the payload size sent from the device to a simple byte array that can be converted to JSON Format.
+The resulting message is then sent using MQTT via the Data broker.
+Translating the byte array is done using Binary Conversion language which splits the array into a sequence of values defined in a translation template.
+@image html energy_saver.png Energy Saver width=50%
+
+*/

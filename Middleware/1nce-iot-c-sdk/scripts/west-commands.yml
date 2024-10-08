@@ -1,0 +1,6 @@
+west-commands:
+  - file: scripts/west_commands/quickstart.py
+    commands:
+      - name: quickstart
+        class: QuickStart
+        help: Build a 1NCE OS Demo and flash it to a connected nrf9160 DK

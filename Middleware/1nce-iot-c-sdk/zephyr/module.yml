@@ -1,0 +1,12 @@
+#
+# Copyright (c) 2022 1NCE
+# 1NCE IoT C SDK (ZEPHYR OS Module)
+#
+
+name: nce-sdk
+
+build:
+    cmake: ports/zephyr
+    kconfig: ports/zephyr/Kconfig
+    depends:
+    - nrfxlib

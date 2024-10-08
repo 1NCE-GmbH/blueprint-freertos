@@ -1,0 +1,26 @@
+# Copyright (c) 2021 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+manifest:
+  self:
+    path: modules/lib/nce-sdk
+    west-commands: scripts/west-commands.yml
+
+  remotes:
+    - name: ncs
+      url-base: https://github.com/nrfconnect
+    - name: nce
+      url-base: https://github.com/1NCE-GmbH
+
+  projects:
+    - name: nrf
+      remote: ncs
+      repo-path: sdk-nrf
+      revision: v2.2.0
+      import: true
+    - name: nce-blueprint
+      remote: nce
+      repo-path: blueprint-zephyr
+      revision: main
+
+
