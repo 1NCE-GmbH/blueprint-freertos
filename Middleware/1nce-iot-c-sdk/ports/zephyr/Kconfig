@@ -1,0 +1,43 @@
+#
+# Copyright (c) 2022 1NCE
+# 1NCE IoT C SDK (ZEPHYR OS Module)
+#
+
+config ZEPHYR_NCE_SDK_MODULE
+	bool "1NCE IoT C SDK"
+
+
+if ZEPHYR_NCE_SDK_MODULE
+
+config NCE_DEVICE_AUTHENTICATOR
+	bool "Enable 1NCE Device Authenticator"
+	default y
+	help 
+		use 1nce device authenticator to retrieve DTLS Security credentials.
+
+config NCE_SDK_UDP_INTERFACE
+	bool "Define a UDP interface for communication with 1NCE Endpoint"
+	default y if NCE_DEVICE_AUTHENTICATOR
+	help
+	  Build and link common code that is shared across Golioth samples.
+
+config NCE_ENERGY_SAVER
+	bool "Enable 1NCE Energy Saver"
+	default n
+	help 
+		use 1nce energy saver to optimize payload size.
+
+config NCE_SDK_ATTEMPTS
+	int "Max Onboarding attempts"
+	default 5
+
+config NCE_SDK_MAX_STRING_SIZE
+	int "Max string size in the payload before conversion"
+	default 50
+	
+
+module = NCE_SDK
+module-str = NCE_SDK
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+endif # ZEPHYR_NCE_SDK_MODULE

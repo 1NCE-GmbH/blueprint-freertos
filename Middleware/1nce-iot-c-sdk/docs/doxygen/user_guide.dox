@@ -1,0 +1,106 @@
+/**
+ * @page Integration_Guide Integration Guide
+ * @brief Guide for integration 1NCE IoT C SDK to a new platform.
+ * <p>
+ * You can also develop C Application using the SDK to connect with AWS with zero touch provisioning, use Energy Saver and other features offered by 1NCE OS.
+ * @section Getting_started Getting started
+ * @brief This page shows you:
+ * <ul>
+ * <li>How to get the identity and pre-shared key using 1NCE OS Authentication Service. (for CoAP application).</li>
+ * <li>How to use 1NCE OS energy saver to save the energy.</li>
+ * </ul>  
+ *
+ *
+ * @section scenario The scenario
+ * @brief The Example sows how to set up and integrate 1NCE SDK in Embedded Application written in C.
+ *
+ * The Examples used FreeRTOS in the first version.
+ * </p>
+ *
+ *
+ * @section Prerequisite Prerequisite Tasks
+ * @brief To set up and run the SDK you must first complete these tasks:
+ *
+ * <p>
+ * <ul>
+ * <li>Install gcc to compile the project. For more information, see the <a href="https://gcc.gnu.org/install/index.html">link</a> </li>
+ * </ul>
+ * </p>
+ *
+ * @section Contents
+ * @brief The steps is follow:
+ *
+ * <p>
+ * <ul>
+ * <li>Step1: Clone Repository.</li>
+ * <li>Step2: Implement abstract functions</li>
+ * <li>Step3: Integrate SDK in your Application</li>
+ * <li>Step4: Run your Application</li>
+ * </ul>  
+ * </p>
+ *
+ * @section Step1 Step1: Clone Repository
+ * @brief you clone the SDK for Embedded C in your project using git clone To clone using HTTPS
+ * @code{command}
+    git clone https://github.com/1NCE-GmbH/1nce-iot-c-sdk.git
+ * @endcode 
+ * 
+ * 
+ * <p>
+ * with SSH
+ * </p>
+ * @code{command}
+    git clone git@github.com:1NCE-GmbH/1nce-iot-c-sdk.git 
+ * @endcode 
+ * 
+ *
+ * @section step2 Step2: Implement abstract functions
+ * @brief You need to implement your four transport functions how you want to access our endpoint. 
+ * 
+ * <p>
+ * <ul>
+ * <li>nce_os_udp_connect</li>
+ * <li>nce_os_udp_send</li>
+ * <li>nce_os_udp_recv</li>
+ * <li>nce_os_udp_disconnect</li>
+ * </ul>  
+ * To implement your functions, we recommend to see our Blueprints.
+ * </p>
+ * 
+ * <a href="https://github.com/1NCE-GmbH/blueprint-freertos" > FreeRTOS BluePrint </a>
+ * <a href="https://github.com/1NCE-GmbH/blueprint-zephyr" > Zephyr BluePrint </a>
+ *
+ * @section step3 Step3: Integrate SDK in your Application
+ * @brief 1NCE SDK is simple to integrate in every Embedded App written with C, To begin, you need to define an object type OSNetwork_t and the affect to their variable the network socket and implemented functions as shown in the example bellow.
+ * @code{c}
+   OSNetwork_t xOSNetwork= { 0 };
+   os_network_ops_t osNetwork={
+      .os_socket=&xOSNetwork,
+		.nce_os_udp_connect = nce_os_udp_connect_impl,
+		.nce_os_udp_send = nce_os_udp_send_impl,
+		.nce_os_udp_recv = nce_os_udp_recv_impl,
+		.nce_os_udp_disconnect = nce_os_udp_disconnect_impl};
+ * @endcode
+ * to have PSK you can call os_auth and you have an object DtlsKey_t which store the PSK and pskIdentity
+ * </p>
+ * @code{c}
+    DtlsKey_t nceKey={0};
+    int result =	os_auth(&osNetwork,&nceKey);
+ * @endcode
+ * <p>Complete the following  macros  in log_interface.h </p> 
+ * @code{c}
+  #define NceOSLogInfo( format, ... ) 
+  #define NceOSLogDebug( format, ... ) 
+  #define NceOSLogError( format, ... ) 
+  #define NceOSLogWarn( format, ... )
+ *
+ * @endcode
+ * <p>If you are using FreeRTOS you can just use the macro  </p>
+ * @code{c}
+  #define FREERTOS
+ * @endcode
+ * @section step4 Step4: Run your Application
+ *
+ * Run your code in ISO C90
+ *
+ */
