@@ -1,3 +1,0 @@
-[submodule "libraries/3rdparty/1nce_sdk"]
-	path = libraries/3rdparty/1nce_sdk
-	url = https://github.com/1NCE-GmbH/1nce-iot-c-sdk.git
